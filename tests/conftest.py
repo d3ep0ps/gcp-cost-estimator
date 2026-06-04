@@ -42,9 +42,7 @@ def temp_db_path() -> Any:
     """Create a temporary database path inside the workspace for SQLite testing."""
     from pathlib import Path
 
-    path = Path(
-        "/Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/tests/temp_test_db.sqlite"
-    )
+    path = Path(__file__).parent / "temp_test_db.sqlite"
     if path.exists():
         path.unlink()
     yield str(path)

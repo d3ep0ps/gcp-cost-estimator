@@ -394,7 +394,7 @@ MCP exposes three primitive types. We use all three deliberately.
 
 ## 10. Repo layout
 ```
-gcp-billing-mcp/
+gcp-cost-estimator/
 ├─ pyproject.toml                    # uv-managed, py3.13+
 ├─ CLAUDE.md / GEMINI.md             # agent instructions (keep in sync)
 ├─ plan.md                           # v1 milestone plan (Milestones 0–8, done)

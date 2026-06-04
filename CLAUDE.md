@@ -13,7 +13,7 @@ All pricing data and SKU semantics derive from these. When in doubt about pricin
 ## What this project is
 A **GCP Billing MCP server**: a deterministic server that exposes GCP cost-estimation capabilities (IaC parsing, SKU pricing, cost calculation, comparison, reporting) as **MCP tools, resources, and prompts**. The connecting MCP host (Claude Code, Gemini CLI, Antigravity, Cursor) supplies all natural-language intelligence. **There is no LLM inside this server.**
 
-Authoritative design: `gcp-billing-mcp-server-architecture.md`. If code and that doc disagree, stop and reconcile before proceeding.
+Authoritative design: `gcp-cost-estimator-server-architecture.md`. If code and that doc disagree, stop and reconcile before proceeding.
 
 **Active extension plans:**
 - `plan.md` — original v1 milestone plan (Milestones 0–8, all substantially complete).
@@ -81,7 +81,7 @@ tests/         # mirrors src/; known-answer fixtures under tests/fixtures/
 - Conventional commits; small, behavior-scoped commits that pair a test with its implementation.
 
 ## Architecture decisions (ADRs)
-Key decisions recorded here for quick reference. Full rationale in `gcp-billing-mcp-server-architecture.md` §7.
+Key decisions recorded here for quick reference. Full rationale in `gcp-cost-estimator-server-architecture.md` §7.
 
 - **ADR-009 — Rule-based machine type resolver.** `resolve_machine_type_specs()` derives `(vcpu, ram_gb)` from GCP naming conventions (`{family}-{subtype}-{N}`) rather than a static lookup table. Three-layer chain: rule engine → shared-core overrides → custom machine type pattern. This means new GCP machine families are supported automatically with zero code change. Cloud SQL has an analogous `resolve_sql_tier_specs()` that strips the `db-` prefix and delegates to the same rule engine for standard tiers, plus a `db-custom-{N}-{M}` fast path.
 

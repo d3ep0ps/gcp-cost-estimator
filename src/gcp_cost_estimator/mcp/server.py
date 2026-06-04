@@ -72,7 +72,7 @@ def get_default_db_path() -> str:
     env_path = os.environ.get("GCP_BILLING_DB_PATH")
     if env_path:
         return env_path
-    home_dir = Path.home() / ".gcp-billing-mcp"
+    home_dir = Path.home() / ".gcp-cost-estimator"
     home_dir.mkdir(parents=True, exist_ok=True)
     return str(home_dir / "pricing.sqlite")
 

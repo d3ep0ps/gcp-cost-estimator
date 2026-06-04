@@ -54,7 +54,7 @@ def test_configure_logging_defaults(monkeypatch, tmp_path) -> None:
     # Check default file handler
     file_handlers = [h for h in handlers if isinstance(h, logging.FileHandler)]
     assert len(file_handlers) == 1
-    expected_path = fake_home / ".gcp-billing-mcp" / "mcp.log"
+    expected_path = fake_home / ".gcp-cost-estimator" / "mcp.log"
     assert Path(file_handlers[0].baseFilename) == expected_path.resolve()
     assert expected_path.exists()
 

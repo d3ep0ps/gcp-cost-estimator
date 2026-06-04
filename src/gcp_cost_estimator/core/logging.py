@@ -12,7 +12,7 @@ def configure_logging() -> None:
     Reads configuration from environment variables:
     - GCP_BILLING_LOG_LEVEL: default to 'INFO'
     - GCP_BILLING_LOG_FILE: path to log file. If set to 'none' or empty, file logging is disabled.
-      If unset, defaults to '~/.gcp-billing-mcp/mcp.log'.
+      If unset, defaults to '~/.gcp-cost-estimator/mcp.log'.
     """
     level_str = os.environ.get("GCP_BILLING_LOG_LEVEL", "INFO").upper()
     level = getattr(logging, level_str, logging.INFO)
@@ -40,7 +40,7 @@ def configure_logging() -> None:
     if log_file_env:
         log_file_path = Path(log_file_env)
     else:
-        home_dir = Path.home() / ".gcp-billing-mcp"
+        home_dir = Path.home() / ".gcp-cost-estimator"
         log_file_path = home_dir / "mcp.log"
 
     try:
