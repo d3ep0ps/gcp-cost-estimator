@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 import sqlite3
 from datetime import UTC
 

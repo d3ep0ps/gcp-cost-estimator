@@ -3,6 +3,7 @@ name = "gcp-billing-mcp"
 version = "0.1.0"
 description = "GCP Billing MCP Server"
 readme = "README.md"
+license = {text = "Apache-2.0"}
 requires-python = ">=3.14"
 dependencies = [
     "mcp[cli]>=0.1.0",

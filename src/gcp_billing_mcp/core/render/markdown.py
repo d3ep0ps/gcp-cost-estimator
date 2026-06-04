@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 from gcp_billing_mcp.core.estimate import Estimate
 from gcp_billing_mcp.core.registries import OutputRenderer, register_output_renderer
 

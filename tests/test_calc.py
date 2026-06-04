@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 from gcp_billing_mcp.core.calc import calculate_line_items, calculate_totals
 
 

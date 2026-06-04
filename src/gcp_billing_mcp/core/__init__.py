@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 # GCP Billing MCP core library
 
 # Import concrete implementations to trigger their registry registration

@@ -1,0 +1,13 @@
+GCP Billing MCP Server
+Copyright 2026 zhhuta and contributors
+
+This product includes software developed by zhhuta, Antigravity, and other contributors to the GCP Billing MCP Server project.
+
+Description:
+A deterministic Model Context Protocol (MCP) server that exposes Google Cloud Platform (GCP) cost-estimation capabilities (including HCL/Plan JSON IaC parsing, regional SKU mapping, and comparative calculations) to LLM hosts.
+
+Third-Party Software:
+This product uses the following third-party libraries:
+- python-hcl2 (MIT License)
+- mcp (MIT License)
+- pydantic (MIT License)

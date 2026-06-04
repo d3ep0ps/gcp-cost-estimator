@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 from gcp_billing_mcp.core.pricing.gcp import resolve_sql_tier_specs
 
 

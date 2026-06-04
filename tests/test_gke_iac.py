@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 from gcp_billing_mcp.core.iac.terraform_hcl import TerraformHclParser
 from gcp_billing_mcp.core.iac.terraform_plan import TerraformPlanParser, parse_terraform
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests for resolve_machine_type_specs — Phase 0.5.
 
 TDD-as-BDD: every test was written BEFORE the implementation.

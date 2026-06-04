@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 from gcp_billing_mcp.core.model import Resource, ResourceModel
 from gcp_billing_mcp.core.validate import validate_resource_model
 

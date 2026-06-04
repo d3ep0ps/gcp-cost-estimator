@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 import json
 
 from gcp_billing_mcp.core.iac.base import get_iac_parser

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 from typing import Any
 
 CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
