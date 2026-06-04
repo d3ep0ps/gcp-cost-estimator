@@ -1,0 +1,92 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/bigquery/pricing Verified: 2026-06-04",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "BQ-ACTIVE-STORAGE-US",
+    "service": "bigquery",
+    "region": "us",
+    "description": "Active Storage in US multi-region",
+    "unit": "GiBy.mo",
+    "unit_price": 0.020,
+    "sku_group": "BigQueryStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "BQ-ACTIVE-STORAGE-US-CENTRAL1",
+    "service": "bigquery",
+    "region": "us-central1",
+    "description": "Active Storage in us-central1",
+    "unit": "GiBy.mo",
+    "unit_price": 0.020,
+    "sku_group": "BigQueryStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "BQ-LONG-TERM-STORAGE-US",
+    "service": "bigquery",
+    "region": "us",
+    "description": "Long Term Storage in US multi-region",
+    "unit": "GiBy.mo",
+    "unit_price": 0.010,
+    "sku_group": "BigQueryStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "BQ-LONG-TERM-STORAGE-US-CENTRAL1",
+    "service": "bigquery",
+    "region": "us-central1",
+    "description": "Long Term Storage in us-central1",
+    "unit": "GiBy.mo",
+    "unit_price": 0.010,
+    "sku_group": "BigQueryStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "BQ-ANALYSIS-US",
+    "service": "bigquery",
+    "region": "us",
+    "description": "Analysis (Query) in US multi-region",
+    "unit": "TiB",
+    "unit_price": 6.25,
+    "sku_group": "BigQueryAnalysis"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "BQ-ANALYSIS-US-CENTRAL1",
+    "service": "bigquery",
+    "region": "us-central1",
+    "description": "Analysis (Query) in us-central1",
+    "unit": "TiB",
+    "unit_price": 6.25,
+    "sku_group": "BigQueryAnalysis"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "BQ-STREAMING-US",
+    "service": "bigquery",
+    "region": "us",
+    "description": "Streaming Insert in US multi-region",
+    "unit": "GiBy",
+    "unit_price": 0.05,
+    "sku_group": "BigQueryStreaming"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "BQ-STREAMING-US-CENTRAL1",
+    "service": "bigquery",
+    "region": "us-central1",
+    "description": "Streaming Insert in us-central1",
+    "unit": "GiBy",
+    "unit_price": 0.05,
+    "sku_group": "BigQueryStreaming"
+  }
+]

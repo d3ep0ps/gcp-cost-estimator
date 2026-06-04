@@ -1,0 +1,29 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_bigquery_dataset.with_location",
+          "type": "google_bigquery_dataset",
+          "name": "with_location",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "dataset_id": "bq_with_location",
+            "location": "US"
+          }
+        },
+        {
+          "address": "google_bigquery_table.table_in_dataset",
+          "type": "google_bigquery_table",
+          "name": "table_in_dataset",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "dataset_id": "bq_with_location",
+            "table_id": "my_table"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "pricing_snapshot": "2026-06-03T12:00:00Z",
+  "line_items": [
+    {
+      "resource_id": "dataset-golden",
+      "sku_id": "BQ-ACTIVE-STORAGE-US",
+      "component": "active_storage",
+      "unit_price": 0.02,
+      "unit": "GiBy.mo",
+      "qty": 1000.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 20.0
+    },
+    {
+      "resource_id": "dataset-golden",
+      "sku_id": "BQ-ANALYSIS-US",
+      "component": "query_scan",
+      "unit_price": 6.25,
+      "unit": "TiB",
+      "qty": 10.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 62.5
+    }
+  ],
+  "monthly_total": 82.5,
+  "unpriced": [],
+  "assumptions": [
+    "List price only. SUD/CUD/negotiated discounts NOT applied.",
+    "Pricing snapshot timestamp: 2026-06-03T12:00:00Z."
+  ]
+}

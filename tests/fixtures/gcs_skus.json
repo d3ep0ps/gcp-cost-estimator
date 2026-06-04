@@ -1,0 +1,102 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/storage/pricing Verified: 2026-06-04",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-STANDARD-STORAGE-US-CENTRAL1",
+    "service": "cloud storage",
+    "region": "us-central1",
+    "description": "Standard Storage in us-central1",
+    "unit": "GiBy.mo",
+    "unit_price": 0.020,
+    "sku_group": "StandardStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-STANDARD-STORAGE-US",
+    "service": "cloud storage",
+    "region": "us",
+    "description": "Standard Storage in US multi-region",
+    "unit": "GiBy.mo",
+    "unit_price": 0.026,
+    "sku_group": "StandardStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-NEARLINE-STORAGE-US-CENTRAL1",
+    "service": "cloud storage",
+    "region": "us-central1",
+    "description": "Nearline Storage in us-central1",
+    "unit": "GiBy.mo",
+    "unit_price": 0.010,
+    "sku_group": "NearlineStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-COLDLINE-STORAGE-US-CENTRAL1",
+    "service": "cloud storage",
+    "region": "us-central1",
+    "description": "Coldline Storage in us-central1",
+    "unit": "GiBy.mo",
+    "unit_price": 0.004,
+    "sku_group": "ColdlineStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-ARCHIVE-STORAGE-US-CENTRAL1",
+    "service": "cloud storage",
+    "region": "us-central1",
+    "description": "Archive Storage in us-central1",
+    "unit": "GiBy.mo",
+    "unit_price": 0.0012,
+    "sku_group": "ArchiveStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-CLASS-A-OPS-STANDARD",
+    "service": "cloud storage",
+    "region": "us-central1",
+    "description": "Class A Operations in us-central1",
+    "unit": "10k",
+    "unit_price": 0.050,
+    "sku_group": "StorageOperations"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-CLASS-B-OPS-STANDARD",
+    "service": "cloud storage",
+    "region": "us-central1",
+    "description": "Class B Operations in us-central1",
+    "unit": "10k",
+    "unit_price": 0.004,
+    "sku_group": "StorageOperations"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-INTERNET-EGRESS-STANDARD",
+    "service": "cloud storage",
+    "region": "us-central1",
+    "description": "Internet Egress from us-central1",
+    "unit": "GiBy",
+    "unit_price": 0.120,
+    "sku_group": "Egress"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "GCS-RETRIEVAL-NEARLINE",
+    "service": "cloud storage",
+    "region": "us-central1",
+    "description": "Nearline Data Retrieval in us-central1",
+    "unit": "GiBy",
+    "unit_price": 0.010,
+    "sku_group": "StorageRetrieval"
+  }
+]

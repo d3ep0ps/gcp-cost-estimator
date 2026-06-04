@@ -1,0 +1,20 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_storage_bucket.standard",
+          "type": "google_storage_bucket",
+          "name": "standard",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-standard-bucket",
+            "location": "US",
+            "storage_class": "STANDARD"
+          }
+        }
+      ]
+    }
+  }
+}

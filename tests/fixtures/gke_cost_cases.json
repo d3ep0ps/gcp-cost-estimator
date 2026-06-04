@@ -1,0 +1,36 @@
+[
+  {
+    "metadata": {
+      "citation_url": "https://cloud.google.com/kubernetes-engine/pricing",
+      "verification_date": "2026-06-04"
+    }
+  },
+  {
+    "label": "3-node e2-standard-4 cluster, us-central1, 730h",
+    "node_count": 3,
+    "machine_type": "e2-standard-4",
+    "disk_size_gb": 100,
+    "disk_type": "pd-standard",
+    "region": "us-central1",
+    "runtime_hours_per_month": 730.0,
+    "expected_mgmt_cost": 73.00,
+    "expected_vcpu_cost": 191.06436,
+    "expected_ram_cost": 102.42192,
+    "expected_disk_cost": 12.00,
+    "expected_total": 378.48628
+  },
+  {
+    "label": "0-node e2-standard-4 cluster, us-central1, 730h",
+    "node_count": 0,
+    "machine_type": "e2-standard-4",
+    "disk_size_gb": 0,
+    "disk_type": "pd-standard",
+    "region": "us-central1",
+    "runtime_hours_per_month": 730.0,
+    "expected_mgmt_cost": 73.00,
+    "expected_vcpu_cost": 0.0,
+    "expected_ram_cost": 0.0,
+    "expected_disk_cost": 0.0,
+    "expected_total": 73.00
+  }
+]
