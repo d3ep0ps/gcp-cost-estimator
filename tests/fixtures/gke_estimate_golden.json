@@ -1,0 +1,47 @@
+{
+  "monthly_total": 378.48628,
+  "pricing_snapshot": "2026-06-03T12:00:00Z",
+  "line_items": [
+    {
+      "resource_id": "gke-golden",
+      "sku_id": "SKU-GKE-MGMT-USC1",
+      "component": "management_fee",
+      "unit_price": 0.10,
+      "unit": "h",
+      "qty": 730.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 73.00
+    },
+    {
+      "resource_id": "gke-golden",
+      "sku_id": "SKU-E2-CPU-USC1",
+      "component": "vcpu",
+      "unit_price": 0.021811,
+      "unit": "h",
+      "qty": 12.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 191.06436
+    },
+    {
+      "resource_id": "gke-golden",
+      "sku_id": "SKU-E2-RAM-USC1",
+      "component": "ram",
+      "unit_price": 0.002923,
+      "unit": "GiBy.h",
+      "qty": 48.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 102.42192
+    },
+    {
+      "resource_id": "gke-golden",
+      "sku_id": "SKU-PD-USC1",
+      "component": "storage",
+      "unit_price": 0.0400,
+      "unit": "GiBy.mo",
+      "qty": 300.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 12.00
+    }
+  ],
+  "unpriced": []
+}

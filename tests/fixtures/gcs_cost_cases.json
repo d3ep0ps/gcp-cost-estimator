@@ -1,0 +1,40 @@
+[
+  {
+    "metadata": {
+      "citation_url": "https://cloud.google.com/storage/pricing",
+      "verification_date": "2026-06-04"
+    }
+  },
+  {
+    "label": "Standard, us-central1, 100 GB, 1M Class A ops, 5M Class B ops",
+    "storage_class": "STANDARD",
+    "region": "us-central1",
+    "size_gb": 100.0,
+    "monthly_class_a_ops": 1000000.0,
+    "monthly_class_b_ops": 5000000.0,
+    "monthly_egress_gb": 0.0,
+    "monthly_retrieval_gb": 0.0,
+    "expected_storage_cost": 2.00,
+    "expected_class_a_ops_cost": 5.00,
+    "expected_class_b_ops_cost": 2.00,
+    "expected_egress_cost": 0.0,
+    "expected_retrieval_cost": 0.0,
+    "expected_total": 9.00
+  },
+  {
+    "label": "Nearline, us-central1, 500 GB, 50 GB retrieval, 10 GB egress",
+    "storage_class": "NEARLINE",
+    "region": "us-central1",
+    "size_gb": 500.0,
+    "monthly_class_a_ops": 0.0,
+    "monthly_class_b_ops": 0.0,
+    "monthly_egress_gb": 10.0,
+    "monthly_retrieval_gb": 50.0,
+    "expected_storage_cost": 5.00,
+    "expected_class_a_ops_cost": 0.0,
+    "expected_class_b_ops_cost": 0.0,
+    "expected_egress_cost": 1.20,
+    "expected_retrieval_cost": 0.50,
+    "expected_total": 6.70
+  }
+]
