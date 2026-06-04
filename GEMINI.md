@@ -14,12 +14,12 @@ All pricing data and SKU semantics derive from these. When in doubt about pricin
 This project is a **GCP Cost Estimator MCP server**: a deterministic server that exposes GCP cost-estimation capabilities (IaC parsing, SKU pricing, cost calculation, comparison, reporting) as **MCP tools, resources, and prompts**.
 - The connecting MCP host (Claude Code, Gemini CLI, Antigravity, Cursor) supplies all natural-language intelligence.
 - **There is no LLM inside this server.**
-- Authoritative design: [gcp-cost-estimator-server-architecture.md](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/gcp-cost-estimator-server-architecture.md). If code and that doc disagree, stop and reconcile before proceeding.
+- Authoritative design: [gcp-cost-estimator-server-architecture.md](gcp-cost-estimator-server-architecture.md). If code and that doc disagree, stop and reconcile before proceeding.
 
 **Active extension plans:**
-- [`plan.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/plan.md) — original v1 milestone plan (Milestones 0–8, all substantially complete).
-- [`plan1.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/plan1.md) — Cloud SQL full coverage extension (Steps CS-1 through CS-10). **Current active work.**
-- [`services.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/services.md) — target services list for 90% GCP spend coverage; implementation order and per-service documentation links.
+- [`plan.md`](plan.md) — original v1 milestone plan (Milestones 0–8, all substantially complete).
+- [`plan1.md`](plan1.md) — Cloud SQL full coverage extension (Steps CS-1 through CS-10). **Current active work.**
+- [`services.md`](services.md) — target services list for 90% GCP spend coverage; implementation order and per-service documentation links.
 
 ## Non-Negotiable Principles
 1. **Deterministic Core:** No randomness, no network, no LLM on the hot path. Same input + same cache snapshot ⇒ identical output. If a function cannot be made deterministic, it does not belong in `core/`.
@@ -69,12 +69,12 @@ Always use `uv` for package management and script execution.
 > Always run lint, type-check, and the full test suite before declaring a task complete.
 
 ## Repository Layout
-- [src/gcp_cost_estimator/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/)
-  - [core/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/core/) — Transport-agnostic logic (model, registries, iac, pricing, calc, render)
-  - [mcp/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/mcp/) — MCP adapter: tools/resources/prompts (thin)
-  - [http/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/http/) — Optional bearer-auth HTTP/SSE adapter (thin)
-  - [cli.py](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/cli.py) — Optional CLI adapter (thin)
-- [tests/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/tests/) — Mirrors `src/`; known-answer fixtures under `tests/fixtures/`
+- [src/gcp_cost_estimator/](src/gcp_cost_estimator/)
+  - [core/](src/gcp_cost_estimator/core/) — Transport-agnostic logic (model, registries, iac, pricing, calc, render)
+  - [mcp/](src/gcp_cost_estimator/mcp/) — MCP adapter: tools/resources/prompts (thin)
+  - [http/](src/gcp_cost_estimator/http/) — Optional bearer-auth HTTP/SSE adapter (thin)
+  - [cli.py](src/gcp_cost_estimator/cli.py) — Optional CLI adapter (thin)
+- [tests/](tests/) — Mirrors `src/`; known-answer fixtures under `tests/fixtures/`
 
 ## Coding Conventions
 - **Data Models:** Use Pydantic (or dataclasses) for the resource model + estimate model; validation is centralized in `core/model.py`.

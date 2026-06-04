@@ -45,7 +45,7 @@ Verify it is active:
 ## Scenario 1 — Single GCE VM with SSD Boot Disk
 
 **Path:** `scenarios/scenario_1_single_vm/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_1_single_vm/main.tf)  
+**File:** [main.tf](scenarios/scenario_1_single_vm/main.tf)  
 **Goal:** Verify parsing and cost calculation of a basic GCE VM with a custom SSD boot disk.
 
 ### LLM prompt
@@ -66,7 +66,7 @@ Verify it is active:
 ## Scenario 2 — Multiple GCE VMs (`count = 3`)
 
 **Path:** `scenarios/scenario_2_multiple_vms/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_2_multiple_vms/main.tf)  
+**File:** [main.tf](scenarios/scenario_2_multiple_vms/main.tf)  
 **Goal:** Verify that a static `count` attribute is resolved and the quantity multiplies both compute and disk costs.
 
 ### LLM prompt
@@ -85,7 +85,7 @@ Verify it is active:
 ## Scenario 3 — Mixed Resources with Unpriced Items
 
 **Path:** `scenarios/scenario_3_unpriced_resources/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_3_unpriced_resources/main.tf)  
+**File:** [main.tf](scenarios/scenario_3_unpriced_resources/main.tf)  
 **Goal:** Confirm the server never silently ignores unsupported resource types — they must appear in the `unpriced[]` list.
 
 ### LLM prompt
@@ -104,7 +104,7 @@ Verify it is active:
 ## Scenario 4 — Unresolved Variables & Assumptions
 
 **Path:** `scenarios/scenario_4_unresolved_vars/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_4_unresolved_vars/main.tf)  
+**File:** [main.tf](scenarios/scenario_4_unresolved_vars/main.tf)  
 **Goal:** Verify that the HCL parser falls back to defaults for unresolved `var.*` references and records every assumption.
 
 ### LLM prompt
@@ -122,7 +122,7 @@ Verify it is active:
 ## Scenario 5 — Multi-VM, Mixed Machine Families
 
 **Path:** `scenarios/scenario_5_multi_vm_mixed_families/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_5_multi_vm_mixed_families/main.tf)  
+**File:** [main.tf](scenarios/scenario_5_multi_vm_mixed_families/main.tf)  
 **Goal:** Verify that three different machine families in the same region each receive the correct family-specific SKU from the cache (family-prefix matching: N1, E2, N2).
 
 ### LLM prompt
@@ -139,7 +139,7 @@ Verify it is active:
 ## Scenario 6 — Preemptible (Spot) VM
 
 **Path:** `scenarios/scenario_6_preemptible_vm/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_6_preemptible_vm/main.tf)  
+**File:** [main.tf](scenarios/scenario_6_preemptible_vm/main.tf)  
 **Goal:** Verify that the parser picks up the `scheduling { preemptible = true }` block and that the LLM notes this as a pricing caveat.
 
 ### LLM prompt
@@ -157,7 +157,7 @@ Verify it is active:
 ## Scenario 7 — Custom Machine Type
 
 **Path:** `scenarios/scenario_7_custom_machine_type/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_7_custom_machine_type/main.tf)  
+**File:** [main.tf](scenarios/scenario_7_custom_machine_type/main.tf)  
 **Goal:** Verify that the rule-engine Layer 3 correctly interprets `custom-6-20480` as 6 vCPUs and 20.0 GB RAM (20480 MB ÷ 1024).
 
 ### LLM prompt
@@ -174,7 +174,7 @@ Verify it is active:
 ## Scenario 8 — Region Comparison Baseline
 
 **Path:** `scenarios/scenario_8_region_comparison/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_8_region_comparison/main.tf)  
+**File:** [main.tf](scenarios/scenario_8_region_comparison/main.tf)  
 **Goal:** Price an identical `n2-standard-4` + 100 GB SSD workload across five regions and identify the cheapest.
 
 ### LLM prompt
@@ -191,7 +191,7 @@ Verify it is active:
 ## Scenario 9 — Shared-Core VMs (e2-micro / e2-small / e2-medium)
 
 **Path:** `scenarios/scenario_9_shared_core_vms/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_9_shared_core_vms/main.tf)  
+**File:** [main.tf](scenarios/scenario_9_shared_core_vms/main.tf)  
 **Goal:** Verify that shared-core machine types resolve via the Layer-2 static overrides and that billing quantities are correct.
 
 ### LLM prompt
@@ -211,7 +211,7 @@ Verify it is active:
 ## Scenario 10 — Realistic Web-App Stack
 
 **Path:** `scenarios/scenario_10_webapp_stack/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_10_webapp_stack/main.tf)  
+**File:** [main.tf](scenarios/scenario_10_webapp_stack/main.tf)  
 **Goal:** Price a multi-tier production architecture: 10 web servers + 1 primary DB + 2 read replicas.
 
 ### LLM prompt
@@ -233,7 +233,7 @@ Verify it is active:
 ## Scenario 11 — ML Workload (N1 Highmem Trainer + N1 Standard Inference)
 
 **Path:** `scenarios/scenario_11_ml_workload/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_11_ml_workload/main.tf)  
+**File:** [main.tf](scenarios/scenario_11_ml_workload/main.tf)  
 **Goal:** Validate the N1-specific per-family highmem ratio override (6.5 GB/vCPU, not 8.0 GB).
 
 ### LLM prompt
@@ -249,7 +249,7 @@ Verify it is active:
 ## Scenario 12 — What-If Upgrade Baseline
 
 **Path:** `scenarios/scenario_12_what_if_upgrade/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_12_what_if_upgrade/main.tf)  
+**File:** [main.tf](scenarios/scenario_12_what_if_upgrade/main.tf)  
 **Goal:** Provide a baseline for `what_if` and `suggest_cheaper_machine_types` exercises.
 
 ### LLM prompt A — What-if machine type change
@@ -273,7 +273,7 @@ Verify it is active:
 ## Scenario 13 — Highcpu Batch Fleet (20 nodes)
 
 **Path:** `scenarios/scenario_13_highcpu_batch_fleet/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_13_highcpu_batch_fleet/main.tf)  
+**File:** [main.tf](scenarios/scenario_13_highcpu_batch_fleet/main.tf)  
 **Goal:** Verify the `highcpu` subtype ratio (1.0 GB RAM per vCPU) and correct multiplication for a large `count`.
 
 ### LLM prompt
@@ -290,7 +290,7 @@ Verify it is active:
 ## Scenario 14 — Partial Failure (Unknown Machine Type)
 
 **Path:** `scenarios/scenario_14_partial_failure/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_14_partial_failure/main.tf)  
+**File:** [main.tf](scenarios/scenario_14_partial_failure/main.tf)  
 **Goal:** Verify the **fail-loud** guarantee: an unknown machine type must appear in `unpriced[]` with a clear reason, while the other VM's cost is still computed and reported.
 
 ### LLM prompt
@@ -306,7 +306,7 @@ Verify it is active:
 ## Scenario 15 — GKE Cluster & Node Pool
 
 **Path:** `scenarios/scenario_15_gke_cluster/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_15_gke_cluster/main.tf)  
+**File:** [main.tf](scenarios/scenario_15_gke_cluster/main.tf)  
 **Goal:** Verify pricing of GKE Clusters with management fees and node pools decomposed into GCE instances and boot disks.
 
 ### LLM prompt
@@ -322,7 +322,7 @@ Verify it is active:
 ## Scenario 16 — BigQuery Dataset and Tables
 
 **Path:** `scenarios/scenario_16_bigquery_dataset/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_16_bigquery_dataset/main.tf)  
+**File:** [main.tf](scenarios/scenario_16_bigquery_dataset/main.tf)  
 **Goal:** Verify parsing of BigQuery datasets and handling/warnings for tables.
 
 ### LLM prompt
@@ -338,7 +338,7 @@ Verify it is active:
 ## Scenario 17 — Combined Tier 1 Stack
 
 **Path:** `scenarios/scenario_17_combined_tier1/`  
-**File:** [main.tf](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_17_combined_tier1/main.tf)  
+**File:** [main.tf](scenarios/scenario_17_combined_tier1/main.tf)  
 **Goal:** Run a complete integration test of the MCP server across all 5 Tier 1 services.
 
 ### LLM prompt
@@ -358,7 +358,7 @@ Verify it is active:
 ## Scenario 18 — Natural Language Description
 
 **Path:** `scenarios/scenario_18_nl_description/`  
-**File:** [README.md](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/scenarios/scenario_18_nl_description/README.md)  
+**File:** [README.md](scenarios/scenario_18_nl_description/README.md)  
 **Goal:** Test natural language infrastructure parsing, defaults application, validation, and cost calculation.
 
 ### LLM prompt
