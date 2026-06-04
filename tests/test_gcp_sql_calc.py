@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from gcp_billing_mcp.core.calc import calculate_line_items, calculate_totals
+from gcp_cost_estimator.core.calc import calculate_line_items, calculate_totals
 
 
 def test_cloud_sql_cost_cases_match_known_answers() -> None:

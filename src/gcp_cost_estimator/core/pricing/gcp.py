@@ -4,8 +4,8 @@ import re
 import sqlite3
 from typing import Any
 
-from gcp_billing_mcp.core.model import Resource
-from gcp_billing_mcp.core.registries import SkuMapper, register_sku_mapper
+from gcp_cost_estimator.core.model import Resource
+from gcp_cost_estimator.core.registries import SkuMapper, register_sku_mapper
 
 # ---------------------------------------------------------------------------
 # ADR-009: Replace static MACHINE_SPECS with a rule-based resolver.

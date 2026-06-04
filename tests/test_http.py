@@ -9,7 +9,7 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.testclient import TestClient
 
-from gcp_billing_mcp.http.app import create_app
+from gcp_cost_estimator.http.app import create_app
 
 
 @pytest.fixture

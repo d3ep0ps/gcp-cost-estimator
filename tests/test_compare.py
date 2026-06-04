@@ -4,16 +4,16 @@ import sqlite3
 
 import pytest
 
-from gcp_billing_mcp.core.compare import (
+from gcp_cost_estimator.core.compare import (
     compare_estimates,
     compare_regions,
     find_unpriced,
     suggest_cheaper_machine_types,
     what_if,
 )
-from gcp_billing_mcp.core.estimate import Estimate
-from gcp_billing_mcp.core.model import Resource, ResourceModel
-from gcp_billing_mcp.core.pricing.cache import init_db, update_cache
+from gcp_cost_estimator.core.estimate import Estimate
+from gcp_cost_estimator.core.model import Resource, ResourceModel
+from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 
 
 @pytest.fixture
@@ -99,7 +99,7 @@ def test_compare_regions_marks_cheapest(populated_db: str) -> None:
 
 def test_compare_estimates_diffs_line_items() -> None:
     """Verify that compare_estimates calculates totals and line item diffs correctly."""
-    from gcp_billing_mcp.core.estimate import PricedLineItem
+    from gcp_cost_estimator.core.estimate import PricedLineItem
 
     est_a = Estimate(
         pricing_snapshot="2026-06-03T12:00:00Z",
@@ -295,7 +295,7 @@ def test_suggest_sql_tier_returns_cheaper_custom(temp_db_path: str) -> None:
     from pathlib import Path
     from unittest.mock import patch
 
-    from gcp_billing_mcp.core.estimate import Estimate
+    from gcp_cost_estimator.core.estimate import Estimate
 
     conn = sqlite3.connect(temp_db_path)
     init_db(conn)
@@ -348,7 +348,7 @@ def test_suggest_sql_tier_returns_cheaper_custom(temp_db_path: str) -> None:
         )
 
     with patch(
-        "gcp_billing_mcp.core.compare.estimate_infrastructure", side_effect=mock_estimate_infra
+        "gcp_cost_estimator.core.compare.estimate_infrastructure", side_effect=mock_estimate_infra
     ):
         suggestions = suggest_cheaper_machine_types(temp_db_path, resource)
 

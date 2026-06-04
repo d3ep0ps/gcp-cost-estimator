@@ -5,12 +5,12 @@ import sys
 
 import pytest
 
-import gcp_billing_mcp
+import gcp_cost_estimator
 
 
 def test_package_imports() -> None:
     """Verify that importing the package works and version is correct."""
-    assert gcp_billing_mcp.__version__ == "0.1.0"
+    assert gcp_cost_estimator.__version__ == "0.1.0"
 
 
 def test_python_version_supported() -> None:

@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from gcp_billing_mcp.core.calc import calculate_line_items, calculate_totals
-from gcp_billing_mcp.core.model import Resource
-from gcp_billing_mcp.core.pricing.cache import init_db, update_cache
-from gcp_billing_mcp.core.pricing.gcp import GcpSkuMapper
+from gcp_cost_estimator.core.calc import calculate_line_items, calculate_totals
+from gcp_cost_estimator.core.model import Resource
+from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
+from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
 
 
 @pytest.fixture

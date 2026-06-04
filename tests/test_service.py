@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 import pytest
 
-from gcp_billing_mcp.core.model import ResourceModel
-from gcp_billing_mcp.core.pricing.cache import init_db, update_cache
-from gcp_billing_mcp.core.service import estimate_infrastructure
+from gcp_cost_estimator.core.model import ResourceModel
+from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
+from gcp_cost_estimator.core.service import estimate_infrastructure
 
 
 @pytest.fixture
@@ -149,7 +149,7 @@ def test_estimate_validation_errors(populated_db: str) -> None:
     assert "no valid machine_type" in est.unpriced[0].reason.lower()
 
 
-@patch("gcp_billing_mcp.core.service.get_cache_status")
+@patch("gcp_cost_estimator.core.service.get_cache_status")
 def test_estimate_cache_status_error(mock_get_status, populated_db: str) -> None:
     """Verify that errors while fetching cache status are gracefully handled."""
     mock_get_status.side_effect = Exception("DB Connection failed")
@@ -170,7 +170,7 @@ def test_estimate_cache_status_error(mock_get_status, populated_db: str) -> None
     assert est.pricing_snapshot == "unknown"
 
 
-@patch("gcp_billing_mcp.core.service.get_sku_mapper")
+@patch("gcp_cost_estimator.core.service.get_sku_mapper")
 def test_estimate_mapper_error(mock_get_mapper, populated_db: str) -> None:
     """Verify that errors while resolving SKU mapper are gracefully captured as unpriced."""
     mock_get_mapper.side_effect = Exception("Mapper registry error")

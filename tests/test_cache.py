@@ -5,7 +5,7 @@ from datetime import UTC
 
 import pytest
 
-from gcp_billing_mcp.core.pricing.cache import (
+from gcp_cost_estimator.core.pricing.cache import (
     get_cache_status,
     get_cached_price,
     init_db,

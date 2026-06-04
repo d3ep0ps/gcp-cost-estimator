@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from gcp_billing_mcp.core.estimate import Estimate, PricedLineItem, UnpricedItem
-from gcp_billing_mcp.core.registries import get_output_renderer
+from gcp_cost_estimator.core.estimate import Estimate, PricedLineItem, UnpricedItem
+from gcp_cost_estimator.core.registries import get_output_renderer
 
 
 @pytest.fixture

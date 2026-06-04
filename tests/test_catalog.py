@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from gcp_billing_mcp.mcp.server import mcp
+from gcp_cost_estimator.mcp.server import mcp
 
 pytestmark = pytest.mark.anyio
 

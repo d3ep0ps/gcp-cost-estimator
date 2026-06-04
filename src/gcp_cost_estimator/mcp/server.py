@@ -11,38 +11,38 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from gcp_billing_mcp.core.catalog import CATALOG_COVERAGE, CATALOG_DEFAULTS
-from gcp_billing_mcp.core.compare import (
+from gcp_cost_estimator.core.catalog import CATALOG_COVERAGE, CATALOG_DEFAULTS
+from gcp_cost_estimator.core.compare import (
     compare_estimates as compare_estimates_core,
 )
-from gcp_billing_mcp.core.compare import (
+from gcp_cost_estimator.core.compare import (
     compare_regions as compare_regions_core,
 )
-from gcp_billing_mcp.core.compare import (
+from gcp_cost_estimator.core.compare import (
     find_unpriced as find_unpriced_core,
 )
-from gcp_billing_mcp.core.compare import (
+from gcp_cost_estimator.core.compare import (
     suggest_cheaper_machine_types as suggest_cheaper_machine_types_core,
 )
-from gcp_billing_mcp.core.compare import (
+from gcp_cost_estimator.core.compare import (
     what_if as what_if_core,
 )
-from gcp_billing_mcp.core.estimate import Estimate
-from gcp_billing_mcp.core.iac.terraform_plan import parse_terraform as parse_terraform_core
-from gcp_billing_mcp.core.logging import configure_logging
-from gcp_billing_mcp.core.model import Resource, ResourceModel, get_resource_model_schema
-from gcp_billing_mcp.core.pricing.cache import get_cache_status as get_cache_status_core
-from gcp_billing_mcp.core.pricing.gcp_fetch import (
+from gcp_cost_estimator.core.estimate import Estimate
+from gcp_cost_estimator.core.iac.terraform_plan import parse_terraform as parse_terraform_core
+from gcp_cost_estimator.core.logging import configure_logging
+from gcp_cost_estimator.core.model import Resource, ResourceModel, get_resource_model_schema
+from gcp_cost_estimator.core.pricing.cache import get_cache_status as get_cache_status_core
+from gcp_cost_estimator.core.pricing.gcp_fetch import (
     refresh_pricing_cache as refresh_pricing_cache_core,
 )
-from gcp_billing_mcp.core.registries import get_output_renderer
-from gcp_billing_mcp.core.service import estimate_infrastructure as estimate_infrastructure_core
-from gcp_billing_mcp.core.validate import validate_resource_model as validate_resource_model_core
+from gcp_cost_estimator.core.registries import get_output_renderer
+from gcp_cost_estimator.core.service import estimate_infrastructure as estimate_infrastructure_core
+from gcp_cost_estimator.core.validate import validate_resource_model as validate_resource_model_core
 
 mcp = FastMCP("GCP Billing")
 
 
-logger = logging.getLogger("gcp_billing_mcp")
+logger = logging.getLogger("gcp_cost_estimator")
 
 
 def timed_tool[F: Callable[..., Any]](func: F) -> F:

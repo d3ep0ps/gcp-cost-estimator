@@ -2,9 +2,9 @@
 
 import json
 
-from gcp_billing_mcp.core.iac.base import get_iac_parser
-from gcp_billing_mcp.core.iac.terraform_plan import parse_terraform
-from gcp_billing_mcp.core.model import ResourceModel
+from gcp_cost_estimator.core.iac.base import get_iac_parser
+from gcp_cost_estimator.core.iac.terraform_plan import parse_terraform
+from gcp_cost_estimator.core.model import ResourceModel
 
 # ---------------------------------------------------------------------------
 # 1. HCL Parser Tests

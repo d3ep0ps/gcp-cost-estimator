@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-from gcp_billing_mcp.core.model import Resource, ResourceModel
-from gcp_billing_mcp.core.validate import validate_resource_model
+from gcp_cost_estimator.core.model import Resource, ResourceModel
+from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 def test_bigquery_dataset_valid_minimal() -> None:

@@ -69,8 +69,8 @@ class BearerAuthMiddleware:
 
 def create_app() -> ASGIApp:
     """Create the Starlette application with Bearer Authentication wrapping the MCP app."""
-    from gcp_billing_mcp.core.logging import configure_logging
-    from gcp_billing_mcp.mcp.server import mcp
+    from gcp_cost_estimator.core.logging import configure_logging
+    from gcp_cost_estimator.mcp.server import mcp
 
     # Initialize logging configuration
     configure_logging()

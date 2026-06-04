@@ -3,7 +3,7 @@
 import re
 from typing import Any
 
-from gcp_billing_mcp.core.model import ResourceModel
+from gcp_cost_estimator.core.model import ResourceModel
 
 
 def validate_resource_model(model: ResourceModel) -> dict[str, Any]:

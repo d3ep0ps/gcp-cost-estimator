@@ -7,8 +7,8 @@ from unittest.mock import patch
 
 import pytest
 
-from gcp_billing_mcp.core.pricing.cache import init_db, update_cache
-from gcp_billing_mcp.mcp.server import mcp
+from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
+from gcp_cost_estimator.mcp.server import mcp
 
 pytestmark = pytest.mark.anyio
 
@@ -89,7 +89,7 @@ async def test_mcp_estimate_infrastructure_gke_e2e(populated_combined_db: str) -
         ]
     }
     with patch(
-        "gcp_billing_mcp.mcp.server.get_default_db_path", return_value=populated_combined_db
+        "gcp_cost_estimator.mcp.server.get_default_db_path", return_value=populated_combined_db
     ):
         content, val = await mcp.call_tool("estimate_infrastructure", {"model": model_dict})
         assert content is not None

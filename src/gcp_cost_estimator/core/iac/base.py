@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from gcp_billing_mcp.core.model import ResourceModel
+from gcp_cost_estimator.core.model import ResourceModel
 
 
 class IaCParser(ABC):

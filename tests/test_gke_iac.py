@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-from gcp_billing_mcp.core.iac.terraform_hcl import TerraformHclParser
-from gcp_billing_mcp.core.iac.terraform_plan import TerraformPlanParser, parse_terraform
+from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser, parse_terraform
 
 
 def test_hcl_parses_google_container_cluster_minimal() -> None:

@@ -39,7 +39,7 @@ This server does not contain an internal LLM or orchestrator agent. Instead, it 
 ## ⚡ Core Principles
 
 - **Deterministic Core:** No randomness, no live network dependencies on estimation paths. Same input + same database snapshot = identical output.
-- **Library-First Design:** All estimation, pricing, HCL parsing, and rendering logic lives in the transport-agnostic `src/gcp_billing_mcp/core` library. MCP and HTTP layers are thin adapters.
+- **Library-First Design:** All estimation, pricing, HCL parsing, and rendering logic lives in the transport-agnostic `src/gcp_cost_estimator/core` library. MCP and HTTP layers are thin adapters.
 - **List Price Only:** Prices represent official list prices. Disclaimers are attached explaining that SUD/CUD/EDP or negotiated discounts are not applied.
 - **Fail Loud, Never Under-Report:** Unmappable, unsupported, or unpriced resources are surfaced in a top-level `unpriced[]` block instead of silently returning $0.00.
 - **Extensible Registries:** Plug-and-play interfaces for cloud providers (`PricingProvider`), IaC formats (`IaCParser`), and report exporters (`OutputRenderer`).
@@ -116,8 +116,8 @@ Clone the repository and install all dependencies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/gcp-billing-mcp.git
-cd gcp-billing-mcp
+git clone https://github.com/your-org/gcp-cost-estimator.git
+cd gcp-cost-estimator
 
 # Sync dependencies and build virtual environment
 uv sync
@@ -138,8 +138,8 @@ Execute the cache refresh:
 ```bash
 # Run cache refresh tool manually through Python module
 GCP_API_KEY="your-key-here" uv run python -c "
-from gcp_billing_mcp.core.pricing.gcp_fetch import refresh_pricing_cache
-from gcp_billing_mcp.mcp.server import get_default_db_path
+from gcp_cost_estimator.core.pricing.gcp_fetch import refresh_pricing_cache
+from gcp_cost_estimator.mcp.server import get_default_db_path
 print(refresh_pricing_cache(get_default_db_path(), force=True))
 "
 ```
@@ -153,7 +153,7 @@ print(refresh_pricing_cache(get_default_db_path(), force=True))
 To launch the MCP server over stdio for local hosts (like Claude Code or Claude Desktop):
 
 ```bash
-uv run python -m gcp_billing_mcp.mcp.server
+uv run python -m gcp_cost_estimator.mcp.server
 ```
 
 ### Running HTTP/SSE Server
@@ -163,7 +163,7 @@ To run a high-performance SSE (Server-Sent Events) HTTP server wrapping the MCP 
 ```bash
 # Set your token and launch via uvicorn
 export GCP_BILLING_BEARER_TOKEN="your-secure-token"
-uv run uvicorn gcp_billing_mcp.http.app:create_app --factory --port 8000
+uv run uvicorn gcp_cost_estimator.http.app:create_app --factory --port 8000
 ```
 
 ---
@@ -175,15 +175,15 @@ Add the server to your Claude Desktop configuration file (typically `~/Library/A
 ```json
 {
   "mcpServers": {
-    "gcp-billing-mcp": {
+    "gcp-cost-estimator": {
       "command": "uv",
       "args": [
         "--directory",
-        "/absolute/path/to/gcp-billing-mcp",
+        "/absolute/path/to/gcp-cost-estimator",
         "run",
         "python",
         "-m",
-        "gcp_billing_mcp.mcp.server"
+        "gcp_cost_estimator.mcp.server"
       ],
       "env": {
         "GCP_API_KEY": "your-optional-api-key"
@@ -200,9 +200,9 @@ Add the server to your Claude Desktop configuration file (typically `~/Library/A
 1. Open Cursor Settings -> **Features** -> **MCP**.
 2. Click **+ Add New MCP Server**.
 3. Fill in the fields:
-   - **Name:** `gcp-billing-mcp`
+   - **Name:** `gcp-cost-estimator`
    - **Type:** `command`
-   - **Command:** `uv --directory /absolute/path/to/gcp-billing-mcp run python -m gcp_billing_mcp.mcp.server`
+   - **Command:** `uv --directory /absolute/path/to/gcp-cost-estimator run python -m gcp_cost_estimator.mcp.server`
 
 ---
 
@@ -216,11 +216,11 @@ mcpServers:
     command: "uv"
     args:
       - "--directory"
-      - "/absolute/path/to/gcp-billing-mcp"
+      - "/absolute/path/to/gcp-cost-estimator"
       - "run"
       - "python"
       - "-m"
-      - "gcp_billing_mcp.mcp.server"
+      - "gcp_cost_estimator.mcp.server"
 ```
 
 ---
@@ -283,7 +283,7 @@ Always run these checks before proposing any modifications:
 uv run pytest
 
 # Run tests with coverage reporting (Target: >=90% branch coverage on core/)
-uv run pytest --cov=gcp_billing_mcp --cov-branch
+uv run pytest --cov=gcp_cost_estimator --cov-branch
 
 # Run type checker (strict mode enabled)
 uv run mypy src

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-from gcp_billing_mcp.core.calc import calculate_line_items, calculate_totals
+from gcp_cost_estimator.core.calc import calculate_line_items, calculate_totals
 
 
 def test_hourly_sku_times_730h_equals_expected_monthly() -> None:
@@ -81,7 +81,7 @@ def test_quantity_multiplies_correctly() -> None:
 
 def test_total_equals_sum_of_line_items() -> None:
     """Verify that calculate_totals sums up all monthly costs correctly."""
-    from gcp_billing_mcp.core.estimate import PricedLineItem
+    from gcp_cost_estimator.core.estimate import PricedLineItem
 
     items = [
         PricedLineItem(

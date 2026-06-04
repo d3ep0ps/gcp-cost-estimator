@@ -6,13 +6,13 @@ from pathlib import Path
 
 import pytest
 
-from gcp_billing_mcp.core.logging import configure_logging
+from gcp_cost_estimator.core.logging import configure_logging
 
 
 @pytest.fixture(autouse=True)
 def reset_logger() -> None:
     """Ensure the logger is clean before and after each test."""
-    logger = logging.getLogger("gcp_billing_mcp")
+    logger = logging.getLogger("gcp_cost_estimator")
     logger.handlers.clear()
     logger.setLevel(logging.NOTSET)
     logger.propagate = True
@@ -34,7 +34,7 @@ def test_configure_logging_defaults(monkeypatch, tmp_path) -> None:
 
     configure_logging()
 
-    logger = logging.getLogger("gcp_billing_mcp")
+    logger = logging.getLogger("gcp_cost_estimator")
     assert logger.level == logging.INFO
     assert not logger.propagate
 
@@ -66,7 +66,7 @@ def test_configure_logging_custom_level(monkeypatch) -> None:
 
     configure_logging()
 
-    logger = logging.getLogger("gcp_billing_mcp")
+    logger = logging.getLogger("gcp_cost_estimator")
     assert logger.level == logging.DEBUG
 
 
@@ -79,7 +79,7 @@ def test_configure_logging_custom_file(monkeypatch, tmp_path) -> None:
 
     configure_logging()
 
-    logger = logging.getLogger("gcp_billing_mcp")
+    logger = logging.getLogger("gcp_cost_estimator")
     file_handlers = [h for h in logger.handlers if isinstance(h, logging.FileHandler)]
     assert len(file_handlers) == 1
     assert Path(file_handlers[0].baseFilename) == custom_log_file.resolve()
@@ -92,7 +92,7 @@ def test_configure_logging_file_disabled(monkeypatch) -> None:
 
     configure_logging()
 
-    logger = logging.getLogger("gcp_billing_mcp")
+    logger = logging.getLogger("gcp_cost_estimator")
     file_handlers = [h for h in logger.handlers if isinstance(h, logging.FileHandler)]
     assert len(file_handlers) == 0
 

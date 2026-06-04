@@ -14,16 +14,16 @@ All pricing data and SKU semantics derive from these. When in doubt about pricin
 This project is a **GCP Billing MCP server**: a deterministic server that exposes GCP cost-estimation capabilities (IaC parsing, SKU pricing, cost calculation, comparison, reporting) as **MCP tools, resources, and prompts**.
 - The connecting MCP host (Claude Code, Gemini CLI, Antigravity, Cursor) supplies all natural-language intelligence.
 - **There is no LLM inside this server.**
-- Authoritative design: [gcp-billing-mcp-server-architecture.md](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/gcp-billing-mcp-server-architecture.md). If code and that doc disagree, stop and reconcile before proceeding.
+- Authoritative design: [gcp-cost-estimator-server-architecture.md](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/gcp-cost-estimator-server-architecture.md). If code and that doc disagree, stop and reconcile before proceeding.
 
 **Active extension plans:**
-- [`plan.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/plan.md) — original v1 milestone plan (Milestones 0–8, all substantially complete).
-- [`plan1.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/plan1.md) — Cloud SQL full coverage extension (Steps CS-1 through CS-10). **Current active work.**
-- [`services.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/services.md) — target services list for 90% GCP spend coverage; implementation order and per-service documentation links.
+- [`plan.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/plan.md) — original v1 milestone plan (Milestones 0–8, all substantially complete).
+- [`plan1.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/plan1.md) — Cloud SQL full coverage extension (Steps CS-1 through CS-10). **Current active work.**
+- [`services.md`](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/services.md) — target services list for 90% GCP spend coverage; implementation order and per-service documentation links.
 
 ## Non-Negotiable Principles
 1. **Deterministic Core:** No randomness, no network, no LLM on the hot path. Same input + same cache snapshot ⇒ identical output. If a function cannot be made deterministic, it does not belong in `core/`.
-2. **Library-First:** All logic lives in `src/gcp_billing_mcp/core/`. The MCP, HTTP, and CLI layers are *thin adapters* that call core — they contain no business logic.
+2. **Library-First:** All logic lives in `src/gcp_cost_estimator/core/`. The MCP, HTTP, and CLI layers are *thin adapters* that call core — they contain no business logic.
 3. **List Price Only:** Never invent prices. Every priced line item must carry a real `sku_id` and the cache `snapshot_ts`. No SUD/CUD/negotiated discounts in v1. Always attach the disclaimer.
 4. **Fail Loud, Never Under-Report:** Unmappable/unpriced resources are returned in an explicit `unpriced[]` list — never silently dropped or zero-filled.
 5. **Extensible by Registry:** Cloud providers, IaC formats, and output formats are plugins behind interfaces (`IaCParser`, `PricingProvider`/`SkuMapper`, `CostCalculator`, `OutputRenderer`). v1 implements GCP / Terraform / JSON+CSV+markdown only. No GCP/Terraform/format assumptions may leak into shared code.
@@ -59,22 +59,22 @@ Always use `uv` for package management and script execution.
 | :--- | :--- |
 | Install dependencies | `uv sync` |
 | Run all tests | `uv run pytest` |
-| Run tests with coverage | `uv run pytest --cov=gcp_billing_mcp --cov-branch` |
+| Run tests with coverage | `uv run pytest --cov=gcp_cost_estimator --cov-branch` |
 | Run a specific test | `uv run pytest tests/path/to/test.py::test_name -x` |
 | Lint & format checks | `uv run ruff check .` |
 | Auto-format code | `uv run ruff format .` |
 | Type checking | `uv run mypy src` |
-| Run MCP server (stdio) | `uv run python -m gcp_billing_mcp.mcp.server` |
+| Run MCP server (stdio) | `uv run python -m gcp_cost_estimator.mcp.server` |
 
 > Always run lint, type-check, and the full test suite before declaring a task complete.
 
 ## Repository Layout
-- [src/gcp_billing_mcp/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/src/gcp_billing_mcp/)
-  - [core/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/src/gcp_billing_mcp/core/) — Transport-agnostic logic (model, registries, iac, pricing, calc, render)
-  - [mcp/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/src/gcp_billing_mcp/mcp/) — MCP adapter: tools/resources/prompts (thin)
-  - [http/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/src/gcp_billing_mcp/http/) — Optional bearer-auth HTTP/SSE adapter (thin)
-  - [cli.py](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/src/gcp_billing_mcp/cli.py) — Optional CLI adapter (thin)
-- [tests/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-billing-mcp/tests/) — Mirrors `src/`; known-answer fixtures under `tests/fixtures/`
+- [src/gcp_cost_estimator/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/)
+  - [core/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/core/) — Transport-agnostic logic (model, registries, iac, pricing, calc, render)
+  - [mcp/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/mcp/) — MCP adapter: tools/resources/prompts (thin)
+  - [http/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/http/) — Optional bearer-auth HTTP/SSE adapter (thin)
+  - [cli.py](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/src/gcp_cost_estimator/cli.py) — Optional CLI adapter (thin)
+- [tests/](file:///Users/zhhuta/Projects/Development/LLM_and_AI/gcp-cost-estimator/tests/) — Mirrors `src/`; known-answer fixtures under `tests/fixtures/`
 
 ## Coding Conventions
 - **Data Models:** Use Pydantic (or dataclasses) for the resource model + estimate model; validation is centralized in `core/model.py`.
@@ -85,7 +85,7 @@ Always use `uv` for package management and script execution.
 - **Commits:** Conventional commits; small, behavior-scoped commits that pair a test with its implementation.
 
 ## Architecture Decisions (ADRs)
-Key decisions recorded here for quick reference. Full rationale in `gcp-billing-mcp-server-architecture.md` §7.
+Key decisions recorded here for quick reference. Full rationale in `gcp-cost-estimator-server-architecture.md` §7.
 
 - **ADR-009 — Rule-based machine type resolver.** `resolve_machine_type_specs()` derives `(vcpu, ram_gb)` from GCP naming conventions (`{family}-{subtype}-{N}`) rather than a static lookup table. Three-layer chain: rule engine → shared-core overrides → custom machine type pattern. New GCP machine families are handled automatically with zero code change. Cloud SQL has an analogous `resolve_sql_tier_specs()` that strips the `db-` prefix and delegates to the same rule engine for standard tiers, plus a `db-custom-{N}-{M}` fast path.
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-from gcp_billing_mcp.core.pricing.gcp import resolve_sql_tier_specs
+from gcp_cost_estimator.core.pricing.gcp import resolve_sql_tier_specs
 
 
 def test_resolve_db_custom_2_7680_returns_2_vcpu_7_5_gb() -> None:

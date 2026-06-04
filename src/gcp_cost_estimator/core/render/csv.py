@@ -3,8 +3,8 @@
 import csv
 import io
 
-from gcp_billing_mcp.core.estimate import Estimate
-from gcp_billing_mcp.core.registries import OutputRenderer, register_output_renderer
+from gcp_cost_estimator.core.estimate import Estimate
+from gcp_cost_estimator.core.registries import OutputRenderer, register_output_renderer
 
 
 class CsvRenderer(OutputRenderer):

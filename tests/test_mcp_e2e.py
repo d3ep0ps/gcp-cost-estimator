@@ -18,7 +18,7 @@ async def test_mcp_server_e2e() -> None:
     """
     server_params = StdioServerParameters(
         command="uv",
-        args=["run", "python", "-m", "gcp_billing_mcp.mcp.server"],
+        args=["run", "python", "-m", "gcp_cost_estimator.mcp.server"],
     )
 
     async with (
@@ -130,7 +130,7 @@ async def run_standalone_e2e() -> None:
 
     server_params = StdioServerParameters(
         command="uv",
-        args=["run", "python", "-m", "gcp_billing_mcp.mcp.server"],
+        args=["run", "python", "-m", "gcp_cost_estimator.mcp.server"],
     )
 
     async with (

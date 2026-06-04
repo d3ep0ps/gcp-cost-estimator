@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 def configure_logging() -> None:
-    """Configures the 'gcp_billing_mcp' logger.
+    """Configures the 'gcp_cost_estimator' logger.
 
     Reads configuration from environment variables:
     - GCP_BILLING_LOG_LEVEL: default to 'INFO'
@@ -17,7 +17,7 @@ def configure_logging() -> None:
     level_str = os.environ.get("GCP_BILLING_LOG_LEVEL", "INFO").upper()
     level = getattr(logging, level_str, logging.INFO)
 
-    logger = logging.getLogger("gcp_billing_mcp")
+    logger = logging.getLogger("gcp_cost_estimator")
     logger.setLevel(level)
     logger.propagate = False
 

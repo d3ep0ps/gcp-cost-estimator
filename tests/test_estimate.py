@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from gcp_billing_mcp.core.estimate import Estimate, PricedLineItem
+from gcp_cost_estimator.core.estimate import Estimate, PricedLineItem
 
 
 def test_estimate_serializes_with_required_fields() -> None:

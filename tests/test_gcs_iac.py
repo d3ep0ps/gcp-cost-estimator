@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-from gcp_billing_mcp.core.iac.terraform_hcl import TerraformHclParser
-from gcp_billing_mcp.core.iac.terraform_plan import TerraformPlanParser
+from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
 
 
 def test_hcl_parses_google_storage_bucket_standard() -> None:

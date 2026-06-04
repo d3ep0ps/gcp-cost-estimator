@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from gcp_billing_mcp.core.estimate import PricedLineItem
+from gcp_cost_estimator.core.estimate import PricedLineItem
 
 
 def calculate_line_items(

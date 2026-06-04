@@ -7,8 +7,8 @@ from typing import Any
 
 import hcl2  # type: ignore[import-untyped]
 
-from gcp_billing_mcp.core.iac.base import IaCParser, register_iac_parser
-from gcp_billing_mcp.core.model import AttachedResource, Resource, ResourceModel
+from gcp_cost_estimator.core.iac.base import IaCParser, register_iac_parser
+from gcp_cost_estimator.core.model import AttachedResource, Resource, ResourceModel
 
 
 def _extract_scalar(val: Any) -> Any:
@@ -102,7 +102,7 @@ class TerraformHclParser(IaCParser):
                         if not has_dataset:
                             import logging
 
-                            logging.getLogger("gcp_billing_mcp").warning(
+                            logging.getLogger("gcp_cost_estimator").warning(
                                 "Orphan BigQuery table '%s' found. "
                                 "BigQuery pricing requires parent dataset location.",
                                 res_name_clean,

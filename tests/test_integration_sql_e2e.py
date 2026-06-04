@@ -33,7 +33,7 @@ async def test_mcp_sql_integration_e2e(temp_db_path: str) -> None:
 
     server_params = StdioServerParameters(
         command="uv",
-        args=["run", "python", "-m", "gcp_billing_mcp.mcp.server"],
+        args=["run", "python", "-m", "gcp_cost_estimator.mcp.server"],
         env=env,
     )
 

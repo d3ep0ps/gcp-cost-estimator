@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 # We expect this import to fail initially (Red step)
-from gcp_billing_mcp.core.model import (
+from gcp_cost_estimator.core.model import (
     ResourceModel,
     get_resource_model_schema,
 )

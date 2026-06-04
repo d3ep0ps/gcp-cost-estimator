@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-from gcp_billing_mcp.core.model import ResourceModel
-from gcp_billing_mcp.core.validate import normalize_resource_model, validate_resource_model
+from gcp_cost_estimator.core.model import ResourceModel
+from gcp_cost_estimator.core.validate import normalize_resource_model, validate_resource_model
 
 
 def test_missing_region_produces_warning_not_error() -> None:

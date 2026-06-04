@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from gcp_billing_mcp.core.model import ResourceModel
-from gcp_billing_mcp.core.pricing.cache import init_db, update_cache
-from gcp_billing_mcp.core.service import estimate_infrastructure
-from gcp_billing_mcp.core.validate import validate_resource_model
+from gcp_cost_estimator.core.model import ResourceModel
+from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
+from gcp_cost_estimator.core.service import estimate_infrastructure
+from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 @pytest.fixture

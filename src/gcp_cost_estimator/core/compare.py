@@ -4,11 +4,11 @@ import re
 import sqlite3
 from typing import Any
 
-from gcp_billing_mcp.core.estimate import Estimate
-from gcp_billing_mcp.core.model import Resource, ResourceModel
-from gcp_billing_mcp.core.pricing.gcp import resolve_machine_type_specs, resolve_sql_tier_specs
-from gcp_billing_mcp.core.registries import get_sku_mapper
-from gcp_billing_mcp.core.service import estimate_infrastructure
+from gcp_cost_estimator.core.estimate import Estimate
+from gcp_cost_estimator.core.model import Resource, ResourceModel
+from gcp_cost_estimator.core.pricing.gcp import resolve_machine_type_specs, resolve_sql_tier_specs
+from gcp_cost_estimator.core.registries import get_sku_mapper
+from gcp_cost_estimator.core.service import estimate_infrastructure
 
 # Standard vCPU counts to probe for suggestions (covers the vast majority of real workloads).
 _CANDIDATE_VCPU_COUNTS = [1, 2, 4, 8, 16, 32, 48, 64, 96]

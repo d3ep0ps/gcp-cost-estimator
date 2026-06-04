@@ -6,13 +6,13 @@ from typing import Any
 
 import pytest
 
-from gcp_billing_mcp.core.pricing.cache import (
+from gcp_cost_estimator.core.pricing.cache import (
     get_cache_status,
     get_cached_price,
     init_db,
     update_cache,
 )
-from gcp_billing_mcp.core.pricing.gcp_fetch import refresh_pricing_cache
+from gcp_cost_estimator.core.pricing.gcp_fetch import refresh_pricing_cache
 
 
 class MockResponse:

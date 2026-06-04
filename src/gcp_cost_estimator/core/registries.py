@@ -3,8 +3,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from gcp_billing_mcp.core.estimate import Estimate
-from gcp_billing_mcp.core.model import Resource
+from gcp_cost_estimator.core.estimate import Estimate
+from gcp_cost_estimator.core.model import Resource
 
 
 class SkuMapper(ABC):

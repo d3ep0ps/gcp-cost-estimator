@@ -3,13 +3,13 @@
 import logging
 from unittest.mock import patch
 
-from gcp_billing_mcp.core.estimate import Estimate
-from gcp_billing_mcp.core.model import ResourceModel
-from gcp_billing_mcp.core.service import estimate_infrastructure
-from gcp_billing_mcp.mcp.server import validate_resource_model
+from gcp_cost_estimator.core.estimate import Estimate
+from gcp_cost_estimator.core.model import ResourceModel
+from gcp_cost_estimator.core.service import estimate_infrastructure
+from gcp_cost_estimator.mcp.server import validate_resource_model
 
 
-@patch("gcp_billing_mcp.core.service.get_cache_status")
+@patch("gcp_cost_estimator.core.service.get_cache_status")
 def test_stale_cache_adds_warning_to_estimate(mock_get_status) -> None:
     """Verify that a stale cache (older than 72 hours) adds a warning to assumptions."""
     mock_get_status.return_value = {
@@ -34,7 +34,7 @@ def test_stale_cache_adds_warning_to_estimate(mock_get_status) -> None:
 
 def test_per_tool_timing_logged_structured(caplog) -> None:
     """Verify that calling an MCP tool logs execution status and duration in a structured way."""
-    caplog.set_level(logging.INFO, logger="gcp_billing_mcp")
+    caplog.set_level(logging.INFO, logger="gcp_cost_estimator")
 
     # Call a decorated tool from server
     model = ResourceModel(resources=[])

@@ -7,15 +7,15 @@ from typing import Any
 
 import httpx
 
-from gcp_billing_mcp.core.pricing.cache import (
+from gcp_cost_estimator.core.pricing.cache import (
     get_cache_status,
     resolve_service_ids_from_catalog,
     update_cache,
     update_services_catalog,
 )
-from gcp_billing_mcp.core.registries import get_sku_mapper_class
+from gcp_cost_estimator.core.registries import get_sku_mapper_class
 
-logger = logging.getLogger("gcp_billing_mcp")
+logger = logging.getLogger("gcp_cost_estimator")
 
 # Last-resort fallback if Google services catalog cannot be fetched/resolved.
 FALLBACK_GCP_SERVICES = {

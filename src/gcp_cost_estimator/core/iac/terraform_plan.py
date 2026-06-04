@@ -5,8 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from gcp_billing_mcp.core.iac.base import IaCParser, get_iac_parser, register_iac_parser
-from gcp_billing_mcp.core.model import AttachedResource, Resource, ResourceModel
+from gcp_cost_estimator.core.iac.base import IaCParser, get_iac_parser, register_iac_parser
+from gcp_cost_estimator.core.model import AttachedResource, Resource, ResourceModel
 
 
 class TerraformPlanParser(IaCParser):
@@ -48,7 +48,7 @@ class TerraformPlanParser(IaCParser):
                 if not has_dataset:
                     import logging
 
-                    logging.getLogger("gcp_billing_mcp").warning(
+                    logging.getLogger("gcp_cost_estimator").warning(
                         "Orphan BigQuery table '%s' found. "
                         "BigQuery pricing requires parent dataset location.",
                         address,

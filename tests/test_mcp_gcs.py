@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from gcp_billing_mcp.mcp.server import mcp
+from gcp_cost_estimator.mcp.server import mcp
 
 pytestmark = pytest.mark.anyio
 
@@ -46,10 +46,10 @@ async def test_mcp_validate_resource_model_gcs_defaults_applied() -> None:
     assert norm_res["usage"]["size_gb"] == 100.0
 
 
-@patch("gcp_billing_mcp.mcp.server.estimate_infrastructure_core")
+@patch("gcp_cost_estimator.mcp.server.estimate_infrastructure_core")
 async def test_mcp_estimate_infrastructure_gcs_returns_valid_payload(mock_estimate) -> None:
     """Verify that calling estimate_infrastructure with GCS resource returns valid payload."""
-    from gcp_billing_mcp.core.estimate import Estimate
+    from gcp_cost_estimator.core.estimate import Estimate
 
     expected_est = Estimate(
         pricing_snapshot="2026-06-03T12:00:00Z",

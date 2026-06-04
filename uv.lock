@@ -241,7 +241,7 @@ wheels = [
 ]
 
 [[package]]
-name = "gcp-billing-mcp"
+name = "gcp-cost-estimator"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

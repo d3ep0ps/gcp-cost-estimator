@@ -4,9 +4,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from gcp_billing_mcp.core.estimate import Estimate
-from gcp_billing_mcp.core.model import ResourceModel
-from gcp_billing_mcp.mcp.server import get_default_db_path, mcp
+from gcp_cost_estimator.core.estimate import Estimate
+from gcp_cost_estimator.core.model import ResourceModel
+from gcp_cost_estimator.mcp.server import get_default_db_path, mcp
 
 pytestmark = pytest.mark.anyio
 
@@ -77,7 +77,7 @@ async def test_mcp_prompts_are_registered() -> None:
     assert expected_prompts.issubset(prompt_names)
 
 
-@patch("gcp_billing_mcp.mcp.server.parse_terraform_core")
+@patch("gcp_cost_estimator.mcp.server.parse_terraform_core")
 async def test_tool_parse_terraform(mock_parse) -> None:
     """Verifies that the parse_terraform tool delegates correctly to core."""
     mock_model = ResourceModel(resources=[])
@@ -92,7 +92,7 @@ async def test_tool_parse_terraform(mock_parse) -> None:
     assert any("resources" in getattr(c, "text", "") for c in content)
 
 
-@patch("gcp_billing_mcp.mcp.server.validate_resource_model_core")
+@patch("gcp_cost_estimator.mcp.server.validate_resource_model_core")
 async def test_tool_validate_resource_model(mock_validate) -> None:
     """Verifies that the validate_resource_model tool delegates to core."""
     expected_val = {"valid": True, "errors": [], "warnings": []}
@@ -105,7 +105,7 @@ async def test_tool_validate_resource_model(mock_validate) -> None:
     assert any("valid" in getattr(c, "text", "") for c in content)
 
 
-@patch("gcp_billing_mcp.mcp.server.estimate_infrastructure_core")
+@patch("gcp_cost_estimator.mcp.server.estimate_infrastructure_core")
 async def test_tool_estimate_infrastructure(mock_estimate) -> None:
     """Verifies that the estimate_infrastructure tool delegates to core."""
     expected_val = Estimate(
@@ -124,7 +124,7 @@ async def test_tool_estimate_infrastructure(mock_estimate) -> None:
     assert val == expected_val.model_dump()
 
 
-@patch("gcp_billing_mcp.mcp.server.get_output_renderer")
+@patch("gcp_cost_estimator.mcp.server.get_output_renderer")
 async def test_tool_render_estimate(mock_get_renderer) -> None:
     """Verifies that the render_estimate tool delegates to registries."""
     mock_renderer = MagicMock()
@@ -148,7 +148,7 @@ async def test_tool_render_estimate(mock_get_renderer) -> None:
     assert any("rendered_markdown_output" in getattr(c, "text", "") for c in content)
 
 
-@patch("gcp_billing_mcp.mcp.server.get_cache_status_core")
+@patch("gcp_cost_estimator.mcp.server.get_cache_status_core")
 async def test_tool_get_cache_status(mock_get_status) -> None:
     """Verifies that the get_cache_status tool delegates to core."""
     expected_val = {"sku_count": 42}
@@ -161,7 +161,7 @@ async def test_tool_get_cache_status(mock_get_status) -> None:
     assert any("42" in getattr(c, "text", "") for c in content)
 
 
-@patch("gcp_billing_mcp.mcp.server.refresh_pricing_cache_core")
+@patch("gcp_cost_estimator.mcp.server.refresh_pricing_cache_core")
 async def test_tool_refresh_pricing_cache(mock_refresh) -> None:
     """Verifies that the refresh_pricing_cache tool delegates to core."""
     expected_val = {"status": "success"}
@@ -211,7 +211,7 @@ async def test_stdio_smoke_test() -> None:
 
     server_params = StdioServerParameters(
         command="uv",
-        args=["run", "python", "-m", "gcp_billing_mcp.mcp.server"],
+        args=["run", "python", "-m", "gcp_cost_estimator.mcp.server"],
     )
     async with (
         stdio_client(server_params) as (read_stream, write_stream),
@@ -233,7 +233,7 @@ async def test_stdio_smoke_test() -> None:
         assert "docs://disclaimer" in resource_uris
 
 
-@patch("gcp_billing_mcp.mcp.server.compare_regions_core")
+@patch("gcp_cost_estimator.mcp.server.compare_regions_core")
 async def test_tool_compare_regions(mock_compare) -> None:
     """Verifies that the compare_regions tool delegates correctly to core."""
     expected_val = {"cheapest_region": "us-central1", "estimates": {}}
@@ -246,7 +246,7 @@ async def test_tool_compare_regions(mock_compare) -> None:
     assert val == expected_val
 
 
-@patch("gcp_billing_mcp.mcp.server.compare_estimates_core")
+@patch("gcp_cost_estimator.mcp.server.compare_estimates_core")
 async def test_tool_compare_estimates(mock_compare) -> None:
     """Verifies that the compare_estimates tool delegates correctly to core."""
     expected_val = {"monthly_total_diff": 10.0}
@@ -266,7 +266,7 @@ async def test_tool_compare_estimates(mock_compare) -> None:
     assert val == expected_val
 
 
-@patch("gcp_billing_mcp.mcp.server.what_if_core")
+@patch("gcp_cost_estimator.mcp.server.what_if_core")
 async def test_tool_what_if(mock_what_if) -> None:
     """Verifies that the what_if tool delegates correctly to core."""
     expected_val = {"comparison": {}}
@@ -277,7 +277,7 @@ async def test_tool_what_if(mock_what_if) -> None:
     assert val == expected_val
 
 
-@patch("gcp_billing_mcp.mcp.server.suggest_cheaper_machine_types_core")
+@patch("gcp_cost_estimator.mcp.server.suggest_cheaper_machine_types_core")
 async def test_tool_suggest_cheaper_machine_types(mock_suggest) -> None:
     """Verifies that the suggest_cheaper_machine_types tool delegates correctly to core."""
     expected_val = [{"machine_type": "e2-standard-4"}]
@@ -298,7 +298,7 @@ async def test_tool_suggest_cheaper_machine_types(mock_suggest) -> None:
     assert val == {"result": expected_val}
 
 
-@patch("gcp_billing_mcp.mcp.server.find_unpriced_core")
+@patch("gcp_cost_estimator.mcp.server.find_unpriced_core")
 async def test_tool_find_unpriced(mock_find) -> None:
     """Verifies that the find_unpriced tool delegates correctly to core."""
     expected_val = [{"resource_id": "vm-1", "reason": "unmapped"}]
