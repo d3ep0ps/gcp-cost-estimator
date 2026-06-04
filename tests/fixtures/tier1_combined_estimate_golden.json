@@ -1,0 +1,141 @@
+{
+  "pricing_snapshot": "2026-06-03T12:00:00Z",
+  "line_items": [
+    {
+      "resource_id": "vm-1",
+      "sku_id": "SKU-E2-CPU",
+      "component": "vcpu",
+      "unit_price": 0.021811,
+      "unit": "h",
+      "qty": 4.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 63.68812
+    },
+    {
+      "resource_id": "vm-1",
+      "sku_id": "SKU-E2-RAM",
+      "component": "ram",
+      "unit_price": 0.002923,
+      "unit": "GiBy.h",
+      "qty": 16.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 34.14064
+    },
+    {
+      "resource_id": "bucket-1",
+      "sku_id": "GCS-STANDARD-STORAGE-US-CENTRAL1",
+      "component": "storage",
+      "unit_price": 0.02,
+      "unit": "GiBy.mo",
+      "qty": 100.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 2.0
+    },
+    {
+      "resource_id": "bucket-1",
+      "sku_id": "GCS-CLASS-A-OPS-STANDARD",
+      "component": "class_a_ops",
+      "unit_price": 0.05,
+      "unit": "10k",
+      "qty": 100.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 5.0
+    },
+    {
+      "resource_id": "gke-1",
+      "sku_id": "GKE-MGMT-FEE",
+      "component": "management_fee",
+      "unit_price": 0.1,
+      "unit": "h",
+      "qty": 1.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 73.0
+    },
+    {
+      "resource_id": "gke-1",
+      "sku_id": "SKU-E2-CPU",
+      "component": "vcpu",
+      "unit_price": 0.021811,
+      "unit": "h",
+      "qty": 12.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 191.06436
+    },
+    {
+      "resource_id": "gke-1",
+      "sku_id": "SKU-E2-RAM",
+      "component": "ram",
+      "unit_price": 0.002923,
+      "unit": "GiBy.h",
+      "qty": 48.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 102.42192
+    },
+    {
+      "resource_id": "gke-1",
+      "sku_id": "GCS-STANDARD-STORAGE-US-CENTRAL1",
+      "component": "storage",
+      "unit_price": 0.04,
+      "unit": "GiBy.mo",
+      "qty": 300.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 12.0
+    },
+    {
+      "resource_id": "sql-1",
+      "sku_id": "SQL-ENTERPRISE-MYSQL-CPU",
+      "component": "vcpu",
+      "unit_price": 0.0413,
+      "unit": "h",
+      "qty": 2.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 60.298
+    },
+    {
+      "resource_id": "sql-1",
+      "sku_id": "SQL-ENTERPRISE-MYSQL-RAM",
+      "component": "ram",
+      "unit_price": 0.007,
+      "unit": "GiBy.h",
+      "qty": 7.5,
+      "usage_hours": 730.0,
+      "monthly_cost": 38.325
+    },
+    {
+      "resource_id": "sql-1",
+      "sku_id": "SQL-ENTERPRISE-MYSQL-SSD",
+      "component": "storage",
+      "unit_price": 0.17,
+      "unit": "GiBy.mo",
+      "qty": 100.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 17.0
+    },
+    {
+      "resource_id": "dataset-1",
+      "sku_id": "BQ-ACTIVE-STORAGE-US",
+      "component": "active_storage",
+      "unit_price": 0.02,
+      "unit": "GiBy.mo",
+      "qty": 1000.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 20.0
+    },
+    {
+      "resource_id": "dataset-1",
+      "sku_id": "BQ-ANALYSIS-US",
+      "component": "query_scan",
+      "unit_price": 6.25,
+      "unit": "TiB",
+      "qty": 10.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 62.5
+    }
+  ],
+  "monthly_total": 681.43804,
+  "unpriced": [],
+  "assumptions": [
+    "List price only. SUD/CUD/negotiated discounts NOT applied.",
+    "Pricing snapshot timestamp: 2026-06-03T12:00:00Z."
+  ]
+}

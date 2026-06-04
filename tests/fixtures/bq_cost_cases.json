@@ -1,0 +1,62 @@
+[
+  {
+    "label": "100 GB active storage, US",
+    "active_storage_gb": 100.0,
+    "long_term_storage_gb": 0.0,
+    "monthly_query_tb": 0.0,
+    "monthly_streaming_gb": 0.0,
+    "expected_active_cost": 2.00,
+    "expected_long_term_cost": 0.00,
+    "expected_query_cost": 0.00,
+    "expected_streaming_cost": 0.00,
+    "expected_total": 2.00
+  },
+  {
+    "label": "200 GB long-term storage, US",
+    "active_storage_gb": 0.0,
+    "long_term_storage_gb": 200.0,
+    "monthly_query_tb": 0.0,
+    "monthly_streaming_gb": 0.0,
+    "expected_active_cost": 0.00,
+    "expected_long_term_cost": 2.00,
+    "expected_query_cost": 0.00,
+    "expected_streaming_cost": 0.00,
+    "expected_total": 2.00
+  },
+  {
+    "label": "10 TB on-demand queries, US",
+    "active_storage_gb": 0.0,
+    "long_term_storage_gb": 0.0,
+    "monthly_query_tb": 10.0,
+    "monthly_streaming_gb": 0.0,
+    "expected_active_cost": 0.00,
+    "expected_long_term_cost": 0.00,
+    "expected_query_cost": 62.50,
+    "expected_streaming_cost": 0.00,
+    "expected_total": 62.50
+  },
+  {
+    "label": "50 GB streaming inserts, US",
+    "active_storage_gb": 0.0,
+    "long_term_storage_gb": 0.0,
+    "monthly_query_tb": 0.0,
+    "monthly_streaming_gb": 50.0,
+    "expected_active_cost": 0.00,
+    "expected_long_term_cost": 0.00,
+    "expected_query_cost": 0.00,
+    "expected_streaming_cost": 2.50,
+    "expected_total": 2.50
+  },
+  {
+    "label": "Combined scenario: 500GB active, 300GB long-term, 8TB query, 10GB streaming, US",
+    "active_storage_gb": 500.0,
+    "long_term_storage_gb": 300.0,
+    "monthly_query_tb": 8.0,
+    "monthly_streaming_gb": 10.0,
+    "expected_active_cost": 10.00,
+    "expected_long_term_cost": 3.00,
+    "expected_query_cost": 50.00,
+    "expected_streaming_cost": 0.50,
+    "expected_total": 63.50
+  }
+]

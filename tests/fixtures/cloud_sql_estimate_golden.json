@@ -1,0 +1,42 @@
+{
+  "currency": "USD",
+  "pricing_snapshot": "2026-06-03T12:00:00Z",
+  "disclaimer": "List price only. SUD/CUD/negotiated discounts NOT applied.",
+  "line_items": [
+    {
+      "resource_id": "db-1",
+      "sku_id": "SQL-MYSQL-ENT-ZONAL-CPU",
+      "component": "vcpu",
+      "unit_price": 0.0413,
+      "unit": "h",
+      "qty": 2.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 60.298
+    },
+    {
+      "resource_id": "db-1",
+      "sku_id": "SQL-MYSQL-ENT-ZONAL-RAM",
+      "component": "ram",
+      "unit_price": 0.007,
+      "unit": "GiBy.h",
+      "qty": 7.5,
+      "usage_hours": 730.0,
+      "monthly_cost": 38.325
+    },
+    {
+      "resource_id": "db-1",
+      "sku_id": "SQL-MYSQL-SSD-ZONAL",
+      "component": "storage",
+      "unit_price": 0.17,
+      "unit": "GiBy.mo",
+      "qty": 100.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 17.0
+    }
+  ],
+  "monthly_total": 115.623,
+  "unpriced": [],
+  "assumptions": [
+    "Defaulted runtime to 730 hours/month."
+  ]
+}

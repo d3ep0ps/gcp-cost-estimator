@@ -1,0 +1,162 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-ENT-ZONAL-CPU",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for MySQL: Zonal - vCPU in Americas",
+    "unit": "h",
+    "unit_price": 0.0413,
+    "sku_group": "SQLGen2InstancesCPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-ENT-ZONAL-RAM",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for MySQL: Zonal- Enterprise N4 RAM in Iowa",
+    "unit": "GiBy.h",
+    "unit_price": 0.007,
+    "sku_group": "SQLGen2InstancesRAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-ENT-REGIONAL-CPU",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for MySQL: Regional - vCPU in Americas",
+    "unit": "h",
+    "unit_price": 0.0826,
+    "sku_group": "SQLGen2InstancesCPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-ENT-REGIONAL-RAM",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for MySQL: Regional - RAM in Americas",
+    "unit": "GiBy.h",
+    "unit_price": 0.014,
+    "sku_group": "SQLGen2InstancesRAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-POSTGRES-ENTPLUS-ZONAL-CPU",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for PostgreSQL: Zonal - Enterprise Plus Extended support vCPU in Iowa",
+    "unit": "h",
+    "unit_price": 0.054,
+    "sku_group": "SQLGen2InstancesCPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-POSTGRES-ENTPLUS-ZONAL-RAM",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for PostgreSQL: Zonal - Enterprise Plus RAM in Iowa",
+    "unit": "GiBy.h",
+    "unit_price": 0.009,
+    "sku_group": "SQLGen2InstancesRAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-POSTGRES-ENTPLUS-REGIONAL-CPU",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for PostgreSQL: Regional - Enterprise Plus Extended support vCPU in Iowa",
+    "unit": "h",
+    "unit_price": 0.108,
+    "sku_group": "SQLGen2InstancesCPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-POSTGRES-ENTPLUS-REGIONAL-RAM",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for PostgreSQL: Regional - Enterprise Plus RAM in Iowa",
+    "unit": "GiBy.h",
+    "unit_price": 0.018,
+    "sku_group": "SQLGen2InstancesRAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-SSD-ZONAL",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for MySQL: Zonal - Standard storage in Iowa",
+    "unit": "GiBy.mo",
+    "unit_price": 0.17,
+    "sku_group": "SSD"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-HDD-ZONAL",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for MySQL: Zonal - Standard HDD storage in Iowa",
+    "unit": "GiBy.mo",
+    "unit_price": 0.09,
+    "sku_group": "PDStandard"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-BACKUP-ZONAL",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for MySQL: Zonal - Backup storage in Iowa",
+    "unit": "GiBy.mo",
+    "unit_price": 0.08,
+    "sku_group": "Backup"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-SQLSERVER-ENT-ZONAL-CPU",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Cloud SQL for SQL Server: Zonal - Enterprise N4 vCPU in Iowa",
+    "unit": "h",
+    "unit_price": 0.0413,
+    "sku_group": "SQLInstancesCPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-SQLSERVER-LICENSE-ENTERPRISE",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Licensing Fee for SQL Server: Zonal - Enterprise license",
+    "unit": "h",
+    "unit_price": 0.1644,
+    "sku_group": "SQLInstancesLicense"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-SQLSERVER-LICENSE-STANDARD",
+    "service": "cloud sql",
+    "region": "us-central1",
+    "description": "Licensing Fee for SQL Server: Zonal - Standard license",
+    "unit": "h",
+    "unit_price": 0.0467,
+    "sku_group": "SQLInstancesLicense"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-ENT-ZONAL-CPU-EU",
+    "service": "cloud sql",
+    "region": "europe-west1",
+    "description": "Cloud SQL for MySQL: Zonal - vCPU in Europe",
+    "unit": "h",
+    "unit_price": 0.045,
+    "sku_group": "SQLGen2InstancesCPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SQL-MYSQL-ENT-ZONAL-RAM-EU",
+    "service": "cloud sql",
+    "region": "europe-west1",
+    "description": "Cloud SQL for MySQL: Zonal- Enterprise N4 RAM in Europe",
+    "unit": "GiBy.h",
+    "unit_price": 0.008,
+    "sku_group": "SQLGen2InstancesRAM"
+  }
+]

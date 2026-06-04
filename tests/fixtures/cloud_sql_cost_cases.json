@@ -1,0 +1,30 @@
+[
+  {
+    "label": "Enterprise MySQL, 2 vCPU, 7.5 GB RAM, 100 GB SSD, ZONAL, us-central1, 730h",
+    "vcpu": 2,
+    "ram_gb": 7.5,
+    "disk_gb": 100,
+    "ha_mult": 1,
+    "vcpu_price_per_hour": 0.0413,
+    "ram_price_per_gib_hour": 0.0070,
+    "ssd_price_per_gb_month": 0.170,
+    "expected_vcpu_cost": 60.298,
+    "expected_ram_cost": 38.325,
+    "expected_storage_cost": 17.0,
+    "expected_monthly_total": 115.623
+  },
+  {
+    "label": "Enterprise MySQL, 2 vCPU, REGIONAL (HA) — compute doubled, storage not",
+    "vcpu": 2,
+    "ram_gb": 7.5,
+    "disk_gb": 100,
+    "ha_mult": 2,
+    "vcpu_price_per_hour": 0.0413,
+    "ram_price_per_gib_hour": 0.0070,
+    "ssd_price_per_gb_month": 0.170,
+    "expected_vcpu_cost": 120.596,
+    "expected_ram_cost": 76.650,
+    "expected_storage_cost": 17.0,
+    "expected_monthly_total": 214.246
+  }
+]

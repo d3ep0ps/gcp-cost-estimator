@@ -1,0 +1,31 @@
+{
+  "pricing_snapshot": "2026-06-03T12:00:00Z",
+  "line_items": [
+    {
+      "resource_id": "bucket-golden",
+      "sku_id": "GCS-STANDARD-STORAGE-US-CENTRAL1",
+      "component": "storage",
+      "unit_price": 0.02,
+      "unit": "GiBy.mo",
+      "qty": 100.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 2.0
+    },
+    {
+      "resource_id": "bucket-golden",
+      "sku_id": "GCS-CLASS-A-OPS-STANDARD",
+      "component": "class_a_ops",
+      "unit_price": 0.05,
+      "unit": "10k",
+      "qty": 100.0,
+      "usage_hours": 730.0,
+      "monthly_cost": 5.0
+    }
+  ],
+  "monthly_total": 7.0,
+  "unpriced": [],
+  "assumptions": [
+    "List price only. SUD/CUD/negotiated discounts NOT applied.",
+    "Pricing snapshot timestamp: 2026-06-03T12:00:00Z."
+  ]
+}

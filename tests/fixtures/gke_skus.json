@@ -1,0 +1,62 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/kubernetes-engine/pricing Verified: 2026-06-04",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-GKE-MGMT-USC1",
+    "service": "kubernetes engine",
+    "region": "us-central1",
+    "description": "Google Kubernetes Engine Cluster Management Fee",
+    "unit": "h",
+    "unit_price": 0.10,
+    "sku_group": "GkeManagementFee"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-E2-CPU-USC1",
+    "service": "compute engine",
+    "region": "us-central1",
+    "description": "E2 Instance Core running in Americas",
+    "unit": "h",
+    "unit_price": 0.021811,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-E2-RAM-USC1",
+    "service": "compute engine",
+    "region": "us-central1",
+    "description": "E2 Instance Ram running in Americas",
+    "unit": "GiBy.h",
+    "unit_price": 0.002923,
+    "sku_group": "RAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SSD-USC1",
+    "service": "compute engine",
+    "region": "us-central1",
+    "description": "SSDBacked PD Capacity",
+    "unit": "GiBy.mo",
+    "unit_price": 0.1700,
+    "sku_group": "SSD"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-PD-USC1",
+    "service": "compute engine",
+    "region": "us-central1",
+    "description": "Storage PD Capacity",
+    "unit": "GiBy.mo",
+    "unit_price": 0.0400,
+    "sku_group": "PDStandard"
+  }
+]
