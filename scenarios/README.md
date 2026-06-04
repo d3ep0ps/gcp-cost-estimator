@@ -1,6 +1,6 @@
-# GCP Billing MCP Server — Test Scenarios
+# GCP Cost Estimator MCP Server — Test Scenarios
 
-This directory contains Terraform configurations designed to verify every major capability of the **GCP Billing MCP Server** when connected to your LLM host (Antigravity, Claude Code, Cursor, Gemini CLI, or any other MCP-capable host).
+This directory contains Terraform configurations designed to verify every major capability of the **GCP Cost Estimator MCP Server** when connected to your LLM host (Antigravity, Claude Code, Cursor, Gemini CLI, or any other MCP-capable host).
 
 Each scenario targets a specific behaviour: correct parsing, rule-engine resolution, edge-case handling, unpriced reporting, and advanced tools (`compare_regions`, `what_if`, `suggest_cheaper_machine_types`).
 

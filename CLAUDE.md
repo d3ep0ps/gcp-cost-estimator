@@ -1,8 +1,8 @@
-# CLAUDE.md — GCP Billing MCP Server
+# CLAUDE.md — GCP Cost Estimator MCP Server
 
 Guidance for any AI agent (or human) working in this repository. Read this first.
 
-## GCP Billing references (authoritative pricing sources)
+## GCP Cost Estimator references (authoritative pricing sources)
 All pricing data and SKU semantics derive from these. When in doubt about pricing behavior, consult them — do not guess:
 - Cloud Billing Pricing API (REST): https://docs.cloud.google.com/billing/docs/reference/pricing-api/rest
 - GCP SKU groups: https://cloud.google.com/skus/sku-groups
@@ -11,7 +11,7 @@ All pricing data and SKU semantics derive from these. When in doubt about pricin
 **Documentation verification rule (mandatory):** Before committing any fixture price, SKU ID, billing unit, or service constraint, fetch the relevant official pricing page and verify the value. Never use training-data memory for prices or SKU semantics. Cite the source URL and verification date in a comment next to the fixture. See `services.md` for per-service documentation links.
 
 ## What this project is
-A **GCP Billing MCP server**: a deterministic server that exposes GCP cost-estimation capabilities (IaC parsing, SKU pricing, cost calculation, comparison, reporting) as **MCP tools, resources, and prompts**. The connecting MCP host (Claude Code, Gemini CLI, Antigravity, Cursor) supplies all natural-language intelligence. **There is no LLM inside this server.**
+A **GCP Cost Estimator MCP server**: a deterministic server that exposes GCP cost-estimation capabilities (IaC parsing, SKU pricing, cost calculation, comparison, reporting) as **MCP tools, resources, and prompts**. The connecting MCP host (Claude Code, Gemini CLI, Antigravity, Cursor) supplies all natural-language intelligence. **There is no LLM inside this server.**
 
 Authoritative design: `gcp-cost-estimator-server-architecture.md`. If code and that doc disagree, stop and reconcile before proceeding.
 

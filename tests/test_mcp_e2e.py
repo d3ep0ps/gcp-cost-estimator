@@ -11,7 +11,7 @@ pytestmark = pytest.mark.anyio
 
 @pytest.mark.integration
 async def test_mcp_server_e2e() -> None:
-    """End-to-End integration test for the GCP Billing MCP Server.
+    """End-to-End integration test for the GCP Cost Estimator MCP Server.
 
     Launches the server via stdio client, connects to it, and runs
     real pricing estimates and queries against the local database cache.
@@ -125,7 +125,7 @@ async def test_mcp_server_e2e() -> None:
 async def run_standalone_e2e() -> None:
     """Helper method to run the E2E E2E check outside pytest, producing a pretty output report."""
     print("==================================================")
-    print("Starting End-to-End GCP Billing MCP Server Test...")
+    print("Starting End-to-End GCP Cost Estimator MCP Server Test...")
     print("==================================================")
 
     server_params = StdioServerParameters(

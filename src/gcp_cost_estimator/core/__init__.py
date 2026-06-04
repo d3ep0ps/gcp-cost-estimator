@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# GCP Billing MCP core library
+# GCP Cost Estimator MCP core library
 
 # Import concrete implementations to trigger their registry registration
 from gcp_cost_estimator.core.iac import terraform_hcl, terraform_plan  # noqa: F401

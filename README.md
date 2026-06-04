@@ -1,4 +1,4 @@
-# GCP Billing Model Context Protocol (MCP) Server
+# GCP Cost Estimator Model Context Protocol (MCP) Server
 
 [![FastMCP](https://img.shields.io/badge/MCP-FastMCP-blue.svg)](https://modelcontextprotocol.io)
 [![Python](https://img.shields.io/badge/Python-3.14%2B-blue.svg)](https://www.python.org/)
@@ -74,7 +74,7 @@ This server does not contain an internal LLM or orchestrator agent. Instead, it 
                                        │ MCP (stdio / HTTP+SSE, Bearer)
                                        ▼
          ┌───────────────────────────────────────────────────────────┐
-         │                  GCP Billing MCP Server                   │  ◀── Thin Adapter
+         │                  GCP Cost Estimator MCP Server                   │  ◀── Thin Adapter
          │       Tools   ·   Resources   ·   Prompts Primitives      │
          └─────────────────────────────┬─────────────────────────────┘
                                        │

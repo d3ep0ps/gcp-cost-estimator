@@ -39,7 +39,7 @@ from gcp_cost_estimator.core.registries import get_output_renderer
 from gcp_cost_estimator.core.service import estimate_infrastructure as estimate_infrastructure_core
 from gcp_cost_estimator.core.validate import validate_resource_model as validate_resource_model_core
 
-mcp = FastMCP("GCP Billing")
+mcp = FastMCP("GCP Cost Estimator")
 
 
 logger = logging.getLogger("gcp_cost_estimator")

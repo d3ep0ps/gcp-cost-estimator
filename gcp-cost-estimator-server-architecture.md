@@ -1,10 +1,10 @@
-# GCP Billing MCP Server — Requirements & Architecture
+# GCP Cost Estimator MCP Server — Requirements & Architecture
 
 **Status:** v0.4 — multi-service extensibility revision
 **Date:** 2026-06-03
 **Owner:** Vitaliy
 
-> **What changed from v0.2.** The product is no longer an AI agent with an internal sub-agent fleet. It is a **GCP Billing MCP server**: a deterministic server that exposes pricing, IaC parsing, cost calculation, and reporting as **MCP tools, resources, and prompts**. The "intelligence" (natural-language understanding, planning, narration) is supplied by whatever MCP host connects — Claude Code, Gemini CLI, Antigravity / Antigravity CLI, Cursor, etc. There is **no Google ADK, no orchestrator agent, no LLM inside the server**. This makes the system smaller, fully deterministic/testable, host-agnostic, and cheaper to run.
+> **What changed from v0.2.** The product is no longer an AI agent with an internal sub-agent fleet. It is a **GCP Cost Estimator MCP server**: a deterministic server that exposes pricing, IaC parsing, cost calculation, and reporting as **MCP tools, resources, and prompts**. The "intelligence" (natural-language understanding, planning, narration) is supplied by whatever MCP host connects — Claude Code, Gemini CLI, Antigravity / Antigravity CLI, Cursor, etc. There is **no Google ADK, no orchestrator agent, no LLM inside the server**. This makes the system smaller, fully deterministic/testable, host-agnostic, and cheaper to run.
 
 ---
 
@@ -14,7 +14,7 @@
 Estimating GCP infrastructure cost before deployment is slow and requires manual SKU lookups. Developers increasingly work inside MCP-capable agent hosts. The fastest way to deliver value is to give those hosts a **tool** they can call — not to build yet another agent.
 
 ### 1.2 Goal
-Ship a GCP Billing MCP server that any MCP host can use to: parse infrastructure (Terraform or a host-extracted resource model), resolve live **list prices** from a cached GCP SKU catalog, compute an itemized estimate, compare options, and export results.
+Ship a GCP Cost Estimator MCP server that any MCP host can use to: parse infrastructure (Terraform or a host-extracted resource model), resolve live **list prices** from a cached GCP SKU catalog, compute an itemized estimate, compare options, and export results.
 
 ### 1.3 Design principles
 1. **Deterministic core.** Every tool is pure/deterministic given the cache snapshot. Same input → same output. No model calls inside the server.
@@ -70,7 +70,7 @@ Ship a GCP Billing MCP server that any MCP host can use to: parse infrastructure
                  │  MCP (stdio / HTTP+SSE, bearer)
                  ▼
  ┌───────────────────────────────────────────────┐
- │              GCP Billing MCP Server            │  ◀── thin adapter
+ │              GCP Cost Estimator MCP Server            │  ◀── thin adapter
  │   Tools  ·  Resources  ·  Prompts  (see §4)    │
  └───────────────┬───────────────────────────────┘
                  │  in-process calls
