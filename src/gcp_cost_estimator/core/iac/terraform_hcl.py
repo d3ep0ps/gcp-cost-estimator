@@ -139,6 +139,15 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_cloudfunctions2_function":
                         service = "functions"
                         kind = "cloud_function"
+                    elif res_type_clean == "google_app_engine_standard_app_version":
+                        service = "appengine"
+                        kind = "app_engine_standard_version"
+                    elif res_type_clean == "google_app_engine_flexible_app_version":
+                        service = "appengine"
+                        kind = "app_engine_flexible_version"
+                    elif res_type_clean == "google_app_engine_application":
+                        service = "appengine"
+                        kind = "google_app_engine_application"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -452,6 +461,42 @@ class TerraformHclParser(IaCParser):
                                     attributes[field] = val
                                     if _is_unresolved(val):
                                         assumptions.append(f"Unresolved attribute {field}: '{val}'")
+
+                    elif res_type_clean == "google_app_engine_standard_app_version":
+                        iclass = resolve_value(res_config.get("instance_class"))
+                        if iclass:
+                            attributes["instance_class"] = iclass
+                            if _is_unresolved(iclass):
+                                assumptions.append(f"Unresolved attribute instance_class: '{iclass}'")
+
+                        # Extract scaling block info
+                        for scaling_type in ("automatic_scaling", "basic_scaling", "manual_scaling"):
+                            scaling_list = res_config.get(scaling_type, [])
+                            if isinstance(scaling_list, list) and scaling_list:
+                                attributes["scaling_type"] = scaling_type
+                                scaling_blk = scaling_list[0]
+                                if isinstance(scaling_blk, dict):
+                                    for k, v in scaling_blk.items():
+                                        resolved_v = resolve_value(v)
+                                        if resolved_v is not None:
+                                            attributes[f"{scaling_type}_{k}"] = resolved_v
+                                            if _is_unresolved(resolved_v):
+                                                assumptions.append(f"Unresolved attribute {scaling_type}_{k}: '{resolved_v}'")
+
+                    elif res_type_clean == "google_app_engine_flexible_app_version":
+                        resources_blk = res_config.get("resources")
+                        if isinstance(resources_blk, list) and resources_blk:
+                            resources_blk = resources_blk[0]
+                        if isinstance(resources_blk, dict):
+                            for field in ("cpu", "memory_gb", "disk_gb"):
+                                val = resolve_value(resources_blk.get(field))
+                                if val is not None:
+                                    attributes[field] = val
+                                    if _is_unresolved(val):
+                                        assumptions.append(f"Unresolved attribute {field}: '{val}'")
+                        else:
+                            assumptions.append("No resources configuration found; using defaults.")
+
                     else:
                         for k, v in res_config.items():
                             resolved_v = resolve_value(v)
@@ -471,6 +516,24 @@ class TerraformHclParser(IaCParser):
                             assumptions=assumptions,
                         )
                     )
+
+        # Propagate App Engine application location to versions if missing
+        app_engine_region = None
+        for res in resources:
+            if res.kind in ("google_app_engine_application", "app_engine_application"):
+                loc = res.attributes.get("location_id") or res.region
+                if loc:
+                    if loc == "us-central":
+                        loc = "us-central1"
+                    elif loc == "europe-west":
+                        loc = "europe-west1"
+                    app_engine_region = loc
+                    res.region = loc
+
+        if app_engine_region:
+            for res in resources:
+                if res.service == "appengine" and not res.region:
+                    res.region = app_engine_region
 
         return ResourceModel(resources=resources)
 

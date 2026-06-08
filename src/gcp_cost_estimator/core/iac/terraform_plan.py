@@ -85,6 +85,15 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_cloudfunctions2_function":
                 service = "functions"
                 kind = "cloud_function"
+            elif res_type == "google_app_engine_standard_app_version":
+                service = "appengine"
+                kind = "app_engine_standard_version"
+            elif res_type == "google_app_engine_flexible_app_version":
+                service = "appengine"
+                kind = "app_engine_flexible_version"
+            elif res_type == "google_app_engine_application":
+                service = "appengine"
+                kind = "google_app_engine_application"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -271,6 +280,33 @@ class TerraformPlanParser(IaCParser):
                             val = sc.get(field)
                             if val is not None:
                                 attributes[field] = val
+
+            elif res_type == "google_app_engine_standard_app_version":
+                iclass = values.get("instance_class")
+                if iclass:
+                    attributes["instance_class"] = iclass
+
+                for scaling_type in ("automatic_scaling", "basic_scaling", "manual_scaling"):
+                    scaling_list = values.get(scaling_type, [])
+                    if isinstance(scaling_list, list) and scaling_list:
+                        attributes["scaling_type"] = scaling_type
+                        scaling_blk = scaling_list[0]
+                        if isinstance(scaling_blk, dict):
+                            for k, v in scaling_blk.items():
+                                attributes[f"{scaling_type}_{k}"] = v
+
+            elif res_type == "google_app_engine_flexible_app_version":
+                resources_blk = values.get("resources")
+                if isinstance(resources_blk, list) and resources_blk:
+                    resources_blk = resources_blk[0]
+                if isinstance(resources_blk, dict):
+                    for field in ("cpu", "memory_gb", "disk_gb"):
+                        val = resources_blk.get(field)
+                        if val is not None:
+                            attributes[field] = val
+                else:
+                    assumptions.append("No resources configuration found; using defaults.")
+
             else:
                 for k, v in values.items():
                     if v is not None:
@@ -289,6 +325,24 @@ class TerraformPlanParser(IaCParser):
                     assumptions=assumptions,
                 )
             )
+
+        # Propagate App Engine application location to versions if missing
+        app_engine_region = None
+        for res in resources:
+            if res.kind in ("google_app_engine_application", "app_engine_application"):
+                loc = res.attributes.get("location_id") or res.region
+                if loc:
+                    if loc == "us-central":
+                        loc = "us-central1"
+                    elif loc == "europe-west":
+                        loc = "europe-west1"
+                    app_engine_region = loc
+                    res.region = loc
+
+        if app_engine_region:
+            for res in resources:
+                if res.service == "appengine" and not res.region:
+                    res.region = app_engine_region
 
         return ResourceModel(resources=resources)
 
