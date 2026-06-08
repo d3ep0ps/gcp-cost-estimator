@@ -79,6 +79,12 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_cloud_run_v2_job":
                 service = "run"
                 kind = "cloud_run_job"
+            elif res_type == "google_cloudfunctions_function":
+                service = "functions"
+                kind = "cloud_function"
+            elif res_type == "google_cloudfunctions2_function":
+                service = "functions"
+                kind = "cloud_function"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -248,6 +254,23 @@ class TerraformPlanParser(IaCParser):
                                                         val = limits.get(limit_key)
                                                         if val is not None:
                                                             attributes[limit_key] = val
+            elif res_type == "google_cloudfunctions_function":
+                attributes["generation"] = "1st_gen"
+                for field in ("available_memory_mb", "min_instances"):
+                    val = values.get(field)
+                    if val is not None:
+                        attributes[field] = val
+
+            elif res_type == "google_cloudfunctions2_function":
+                attributes["generation"] = "2nd_gen"
+                sc_list = values.get("service_config", [])
+                if isinstance(sc_list, list) and sc_list:
+                    sc = sc_list[0]
+                    if isinstance(sc, dict):
+                        for field in ("available_memory", "available_cpu", "min_instance_count", "max_instance_count"):
+                            val = sc.get(field)
+                            if val is not None:
+                                attributes[field] = val
             else:
                 for k, v in values.items():
                     if v is not None:

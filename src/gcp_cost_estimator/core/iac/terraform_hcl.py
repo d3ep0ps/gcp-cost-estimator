@@ -133,6 +133,12 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_cloud_run_v2_job":
                         service = "run"
                         kind = "cloud_run_job"
+                    elif res_type_clean == "google_cloudfunctions_function":
+                        service = "functions"
+                        kind = "cloud_function"
+                    elif res_type_clean == "google_cloudfunctions2_function":
+                        service = "functions"
+                        kind = "cloud_function"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -423,6 +429,29 @@ class TerraformHclParser(IaCParser):
                                                     attributes[limit_key] = val
                                                     if _is_unresolved(val):
                                                         assumptions.append(f"Unresolved attribute {limit_key}: '{val}'")
+                    elif res_type_clean == "google_cloudfunctions_function":
+                        attributes["generation"] = "1st_gen"
+                        for field in ("available_memory_mb", "min_instances"):
+                            val = resolve_value(res_config.get(field))
+                            if val is not None:
+                                attributes[field] = val
+                                if _is_unresolved(val):
+                                    assumptions.append(f"Unresolved attribute {field}: '{val}'")
+
+                    elif res_type_clean == "google_cloudfunctions2_function":
+                        attributes["generation"] = "2nd_gen"
+                        sc_list = res_config.get("service_config", [])
+                        if not isinstance(sc_list, list):
+                            sc_list = [sc_list]
+                        for sc in sc_list:
+                            if not isinstance(sc, dict):
+                                continue
+                            for field in ("available_memory", "available_cpu", "min_instance_count", "max_instance_count"):
+                                val = resolve_value(sc.get(field))
+                                if val is not None:
+                                    attributes[field] = val
+                                    if _is_unresolved(val):
+                                        assumptions.append(f"Unresolved attribute {field}: '{val}'")
                     else:
                         for k, v in res_config.items():
                             resolved_v = resolve_value(v)
