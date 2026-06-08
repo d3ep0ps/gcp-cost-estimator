@@ -22,6 +22,9 @@ FALLBACK_GCP_SERVICES = {
     "Compute Engine": "6F81-5844-456A",
     "Cloud SQL": "9662-B51E-5089",
     "Cloud Storage": "95FF-2A5F-EC25",
+    "Cloud Run": "152E-C115-5142",
+    "Cloud Functions": "29E7-DA93-CA13",
+    "App Engine": "7AF5-250D-495A",
 }
 
 

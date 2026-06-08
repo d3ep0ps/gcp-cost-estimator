@@ -1,0 +1,122 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/appengine/pricing Verified: 2026-06-08",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-AE-STD-FRONTEND-US",
+    "service": "app engine",
+    "region": "us-central1",
+    "description": "Standard Frontend Instances us-central1",
+    "unit": "Instance-hour",
+    "unit_price": 0.05,
+    "sku_group": "Standard Frontend Instances"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-AE-STD-BACKEND-US",
+    "service": "app engine",
+    "region": "us-central1",
+    "description": "Standard Backend Instances us-central1",
+    "unit": "Instance-hour",
+    "unit_price": 0.05,
+    "sku_group": "Standard Backend Instances"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-AE-STD-FRONTEND-EU",
+    "service": "app engine",
+    "region": "europe-west1",
+    "description": "Standard Frontend Instances europe-west1",
+    "unit": "Instance-hour",
+    "unit_price": 0.06,
+    "sku_group": "Standard Frontend Instances"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-AE-STD-BACKEND-EU",
+    "service": "app engine",
+    "region": "europe-west1",
+    "description": "Standard Backend Instances europe-west1",
+    "unit": "Instance-hour",
+    "unit_price": 0.06,
+    "sku_group": "Standard Backend Instances"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-AE-FLEX-CPU-US",
+    "service": "app engine",
+    "region": "us-central1",
+    "description": "Flexible CPU us-central1",
+    "unit": "vCPU-hour",
+    "unit_price": 0.0526,
+    "sku_group": "Flexible CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-AE-FLEX-RAM-US",
+    "service": "app engine",
+    "region": "us-central1",
+    "description": "Flexible RAM us-central1",
+    "unit": "GiB-hour",
+    "unit_price": 0.0071,
+    "sku_group": "Flexible RAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-AE-FLEX-CPU-EU",
+    "service": "app engine",
+    "region": "europe-west1",
+    "description": "Flexible CPU europe-west1",
+    "unit": "vCPU-hour",
+    "unit_price": 0.0631,
+    "sku_group": "Flexible CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-AE-FLEX-RAM-EU",
+    "service": "app engine",
+    "region": "europe-west1",
+    "description": "Flexible RAM europe-west1",
+    "unit": "GiB-hour",
+    "unit_price": 0.0085,
+    "sku_group": "Flexible RAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-PD-USC1",
+    "service": "compute engine",
+    "region": "us-central1",
+    "description": "Storage PD Capacity",
+    "unit": "GiBy.mo",
+    "unit_price": 0.0400,
+    "sku_group": "PDStandard"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SSD-USC1",
+    "service": "compute engine",
+    "region": "us-central1",
+    "description": "SSDBacked PD Capacity",
+    "unit": "GiBy.mo",
+    "unit_price": 0.1700,
+    "sku_group": "SSD"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-EGRESS-USC1",
+    "service": "compute engine",
+    "region": "us-central1",
+    "description": "Internet Egress from us-central1",
+    "unit": "GiB",
+    "unit_price": 0.12,
+    "sku_group": "Egress"
+  }
+]
