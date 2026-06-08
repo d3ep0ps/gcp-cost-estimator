@@ -31,11 +31,13 @@ These five services dominate the bill for the vast majority of GCP customers.
 
 ## Tier 2 — Serverless & containers (~15% of typical spend)
 
+**Plan:** [`plan3.md`](plan3.md) — Tier 2 Serverless & Containers Coverage (steps `SVL-1`–`SVL-11`). Status: in-progress (plan drafted 2026-06-08, implementation not yet started).
+
 | Service | Status | Pricing page | Terraform resource(s) |
 |---|---|---|---|
-| Cloud Run | planned | [run/pricing](https://cloud.google.com/run/pricing) | `google_cloud_run_v2_service`, `google_cloud_run_v2_job` |
-| Cloud Functions | planned | [functions/pricing](https://cloud.google.com/functions/pricing) | `google_cloudfunctions_function`, `google_cloudfunctions2_function` |
-| App Engine | planned | [appengine/pricing](https://cloud.google.com/appengine/pricing) | `google_app_engine_standard_app_version`, `google_app_engine_flexible_app_version` |
+| Cloud Run | in-progress | [run/pricing](https://cloud.google.com/run/pricing) | `google_cloud_run_v2_service`, `google_cloud_run_v2_job` |
+| Cloud Functions | in-progress | [functions/pricing](https://cloud.google.com/functions/pricing) | `google_cloudfunctions_function`, `google_cloudfunctions2_function` |
+| App Engine | in-progress | [appengine/pricing](https://cloud.google.com/appengine/pricing) | `google_app_engine_standard_app_version`, `google_app_engine_flexible_app_version` |
 
 ---
 
@@ -115,7 +117,7 @@ These services have pricing but are below the threshold or require specialist bi
 | Tier | Estimated spend share | Status |
 |---|---|---|
 | Tier 1 — Core infrastructure | ~60% | 5/5 done ✅ |
-| Tier 2 — Serverless & containers | ~15% | 0/3 planned |
+| Tier 2 — Serverless & containers | ~15% | 0/3 in-progress (plan3.md drafted) |
 | Tier 3 — Databases | ~8% | 0/5 planned |
 | Tier 4 — Networking | ~5% | 2/7 done (partial); 5 planned |
 | Tier 5 — Data & analytics | ~5% | 0/3 planned |
@@ -129,10 +131,10 @@ These services have pricing but are below the threshold or require specialist bi
 
 Work Tier 1 → Tier 2 → Tier 3 in order. Within each tier, pick the highest-spend service first. Tiers 4–6 can be parallelised once Tiers 1–3 are complete.
 
-**Tier 1 complete. Immediate next (Tier 2):**
-1. Cloud Run — vCPU-seconds + memory-seconds + requests
-2. Cloud Functions — invocations + compute time (1st gen and 2nd gen)
-3. App Engine — standard instance-hours + flexible GCE-based billing
+**Tier 1 complete. Tier 2 plan drafted ([`plan3.md`](plan3.md)); implementation order:**
+1. Cloud Run — vCPU-seconds + memory-seconds + requests (steps SVL-1–SVL-4)
+2. Cloud Functions — invocations + compute time (1st gen and 2nd gen) (steps SVL-5–SVL-7)
+3. App Engine — standard instance-hours + flexible GCE-based billing (steps SVL-8–SVL-10)
 
 ---
 

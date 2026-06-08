@@ -1,0 +1,92 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/run/pricing Verified: 2026-06-08",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-RUN-CPU-ACTIVE",
+    "service": "cloud run",
+    "region": "us-central1",
+    "description": "Cloud Run CPU Active Allocation Time",
+    "unit": "vCPU-second",
+    "unit_price": 0.00002400,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-RUN-CPU-IDLE",
+    "service": "cloud run",
+    "region": "us-central1",
+    "description": "Cloud Run CPU Idle Allocation Time",
+    "unit": "vCPU-second",
+    "unit_price": 0.00000250,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-RUN-CPU-ALLOC",
+    "service": "cloud run",
+    "region": "us-central1",
+    "description": "Cloud Run CPU Allocation Time (Always On)",
+    "unit": "vCPU-second",
+    "unit_price": 0.00001800,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-RUN-RAM-ACTIVE",
+    "service": "cloud run",
+    "region": "us-central1",
+    "description": "Cloud Run Memory Active Allocation Time",
+    "unit": "GiB-second",
+    "unit_price": 0.00000250,
+    "sku_group": "RAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-RUN-RAM-IDLE",
+    "service": "cloud run",
+    "region": "us-central1",
+    "description": "Cloud Run Memory Idle Allocation Time",
+    "unit": "GiB-second",
+    "unit_price": 0.00000026,
+    "sku_group": "RAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-RUN-RAM-ALLOC",
+    "service": "cloud run",
+    "region": "us-central1",
+    "description": "Cloud Run Memory Allocation Time (Always On)",
+    "unit": "GiB-second",
+    "unit_price": 0.00000200,
+    "sku_group": "RAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-RUN-REQUESTS",
+    "service": "cloud run",
+    "region": "us-central1",
+    "description": "Cloud Run Requests",
+    "unit": "1",
+    "unit_price": 0.00000040,
+    "sku_group": "Requests"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-RUN-GPU",
+    "service": "cloud run",
+    "region": "us-central1",
+    "description": "Cloud Run NVIDIA L4 GPU Allocation Time",
+    "unit": "second",
+    "unit_price": 0.00035000,
+    "sku_group": "GPU"
+  }
+]

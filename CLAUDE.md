@@ -17,12 +17,15 @@ Authoritative design: `gcp-cost-estimator-server-architecture.md`. If code and t
 
 **Active extension plans:**
 - `plan.md` — original v1 milestone plan (Milestones 0–8, all substantially complete).
-- `plan1.md` — Cloud SQL full coverage extension (Steps CS-1 through CS-10). **Current active work.**
+- `plan1.md` — Cloud SQL full coverage extension (Steps CS-1 through CS-10).
+- `plan2.md` — Tier 1 remaining services: Cloud Storage, GKE, BigQuery (Steps GCS-*, GKE-*, BQ-*, T2-1).
+- `plan3.md` — Tier 2 Serverless & Containers: Cloud Run, Cloud Functions, App Engine (Steps SVL-1 through SVL-11). **Current active work.**
+- `plan4.md` — Tier 3 Databases: Spanner, Firestore, Memorystore, Bigtable, AlloyDB.
 - `services.md` — target services list for 90% GCP spend coverage; implementation order and per-service documentation links.
 
 ## Non-negotiable principles
 1. **Deterministic core.** No randomness, no network, no LLM on the hot path. Same input + same cache snapshot ⇒ identical output. If a function can't be made deterministic, it doesn't belong in `core/`.
-2. **Library-first.** All logic lives in `src/gcp_billing_mcp/core/`. The MCP, HTTP, and CLI layers are *thin adapters* that call core — they contain no business logic.
+2. **Library-first.** All logic lives in `src/gcp_cost_estimator/core/`. The MCP, HTTP, and CLI layers are *thin adapters* that call core — they contain no business logic.
 3. **List price only.** Never invent prices. Every priced line item must carry a real `sku_id` and the cache `snapshot_ts`. No SUD/CUD/negotiated discounts in v1. Always attach the disclaimer.
 4. **Fail loud, never under-report.** Unmappable/unpriced resources are returned in an explicit `unpriced[]` list — never silently dropped or zero-filled.
 5. **Extensible by registry.** Cloud providers, IaC formats, and output formats are plugins behind interfaces (`IaCParser`, `PricingProvider`/`SkuMapper`, `CostCalculator`, `OutputRenderer`). v1 implements GCP / Terraform / JSON+CSV+markdown only. No GCP/Terraform/format assumptions may leak into shared code.
@@ -54,17 +57,17 @@ We practice **Test-Driven Development driven by behavior** to avoid scope drift 
 - **Python:** 3.13+. **Package manager:** `uv` (never pip directly).
 - Install: `uv sync`
 - Run tests: `uv run pytest`
-- Coverage: `uv run pytest --cov=gcp_billing_mcp --cov-branch`
+- Coverage: `uv run pytest --cov=gcp_cost_estimator --cov-branch`
 - Lint/format: `uv run ruff check .` and `uv run ruff format .`
 - Type-check: `uv run mypy src`
-- Run MCP server (stdio): `uv run python -m gcp_billing_mcp.mcp.server`
+- Run MCP server (stdio): `uv run python -m gcp_cost_estimator.mcp.server`
 - Run a single test: `uv run pytest tests/path::test_name -x`
 
 > Always run lint, type-check, and the full suite before declaring a task complete.
 
 ## Repo layout
 ```
-src/gcp_billing_mcp/
+src/gcp_cost_estimator/
   core/        # transport-agnostic logic (model, registries, iac, pricing, calc, render)
   mcp/         # MCP adapter: tools/resources/prompts (thin)
   http/        # optional bearer-auth HTTP/SSE adapter (thin)
