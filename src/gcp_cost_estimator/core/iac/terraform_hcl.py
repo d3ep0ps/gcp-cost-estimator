@@ -127,6 +127,12 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_bigquery_dataset":
                         service = "bigquery"
                         kind = "bigquery_dataset"
+                    elif res_type_clean == "google_cloud_run_v2_service":
+                        service = "run"
+                        kind = "cloud_run_service"
+                    elif res_type_clean == "google_cloud_run_v2_job":
+                        service = "run"
+                        kind = "cloud_run_job"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -328,6 +334,95 @@ class TerraformHclParser(IaCParser):
                                         assumptions.append(
                                             f"Unresolved attribute disk_type: '{disk_type}'"
                                         )
+                    elif res_type_clean == "google_cloud_run_v2_service":
+                        template_list = res_config.get("template", [])
+                        if not isinstance(template_list, list):
+                            template_list = [template_list]
+                        for template in template_list:
+                            if not isinstance(template, dict):
+                                continue
+                            scaling_list = template.get("scaling", [])
+                            if not isinstance(scaling_list, list):
+                                scaling_list = [scaling_list]
+                            for scaling in scaling_list:
+                                if not isinstance(scaling, dict):
+                                    continue
+                                for field in ("min_instance_count", "max_instance_count"):
+                                    val = resolve_value(scaling.get(field))
+                                    if val is not None:
+                                        if _is_unresolved(val):
+                                            assumptions.append(f"Unresolved attribute {field}: '{val}'")
+                                        else:
+                                            with contextlib.suppress(ValueError, TypeError):
+                                                attributes[field] = int(val)
+                            containers_list = template.get("containers", [])
+                            if not isinstance(containers_list, list):
+                                containers_list = [containers_list]
+                            for container in containers_list:
+                                if not isinstance(container, dict):
+                                    continue
+                                resources_list = container.get("resources", [])
+                                if not isinstance(resources_list, list):
+                                    resources_list = [resources_list]
+                                for res_conf in resources_list:
+                                    if not isinstance(res_conf, dict):
+                                        continue
+                                    cpu_idle_val = resolve_value(res_conf.get("cpu_idle"))
+                                    if cpu_idle_val is not None:
+                                        if _is_unresolved(cpu_idle_val):
+                                            assumptions.append(f"Unresolved attribute cpu_idle: '{cpu_idle_val}'")
+                                        else:
+                                            attributes["cpu_idle"] = str(cpu_idle_val).lower() in {"true", "1", "yes"}
+                                    limits_list = res_conf.get("limits", [])
+                                    if not isinstance(limits_list, list):
+                                        limits_list = [limits_list]
+                                    for limits in limits_list:
+                                        if not isinstance(limits, dict):
+                                            continue
+                                        for limit_key in ("cpu", "memory"):
+                                            val = resolve_value(limits.get(limit_key))
+                                            if val is not None:
+                                                attributes[limit_key] = val
+                                                if _is_unresolved(val):
+                                                    assumptions.append(f"Unresolved attribute {limit_key}: '{val}'")
+
+                    elif res_type_clean == "google_cloud_run_v2_job":
+                        template_list = res_config.get("template", [])
+                        if not isinstance(template_list, list):
+                            template_list = [template_list]
+                        for template in template_list:
+                            if not isinstance(template, dict):
+                                continue
+                            sub_template_list = template.get("template", [])
+                            if not isinstance(sub_template_list, list):
+                                sub_template_list = [sub_template_list]
+                            for sub_template in sub_template_list:
+                                if not isinstance(sub_template, dict):
+                                    continue
+                                containers_list = sub_template.get("containers", [])
+                                if not isinstance(containers_list, list):
+                                    containers_list = [containers_list]
+                                for container in containers_list:
+                                    if not isinstance(container, dict):
+                                        continue
+                                    resources_list = container.get("resources", [])
+                                    if not isinstance(resources_list, list):
+                                        resources_list = [resources_list]
+                                    for res_conf in resources_list:
+                                        if not isinstance(res_conf, dict):
+                                            continue
+                                        limits_list = res_conf.get("limits", [])
+                                        if not isinstance(limits_list, list):
+                                            limits_list = [limits_list]
+                                        for limits in limits_list:
+                                            if not isinstance(limits, dict):
+                                                continue
+                                            for limit_key in ("cpu", "memory"):
+                                                val = resolve_value(limits.get(limit_key))
+                                                if val is not None:
+                                                    attributes[limit_key] = val
+                                                    if _is_unresolved(val):
+                                                        assumptions.append(f"Unresolved attribute {limit_key}: '{val}'")
                     else:
                         for k, v in res_config.items():
                             resolved_v = resolve_value(v)

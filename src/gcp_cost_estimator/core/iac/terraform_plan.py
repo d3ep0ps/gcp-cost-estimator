@@ -73,6 +73,12 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_bigquery_dataset":
                 service = "bigquery"
                 kind = "bigquery_dataset"
+            elif res_type == "google_cloud_run_v2_service":
+                service = "run"
+                kind = "cloud_run_service"
+            elif res_type == "google_cloud_run_v2_job":
+                service = "run"
+                kind = "cloud_run_job"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -187,6 +193,61 @@ class TerraformPlanParser(IaCParser):
                         disk_type = nc.get("disk_type")
                         if disk_type:
                             attributes["disk_type"] = disk_type
+            elif res_type == "google_cloud_run_v2_service":
+                template_list = values.get("template", [])
+                if isinstance(template_list, list) and template_list:
+                    template = template_list[0]
+                    if isinstance(template, dict):
+                        scaling_list = template.get("scaling", [])
+                        if isinstance(scaling_list, list) and scaling_list:
+                            scaling = scaling_list[0]
+                            if isinstance(scaling, dict):
+                                for field in ("min_instance_count", "max_instance_count"):
+                                    val = scaling.get(field)
+                                    if val is not None:
+                                        with contextlib.suppress(ValueError, TypeError):
+                                            attributes[field] = int(val)
+                        containers = template.get("containers", [])
+                        if isinstance(containers, list) and containers:
+                            container = containers[0]
+                            if isinstance(container, dict):
+                                resources_list = container.get("resources", [])
+                                if isinstance(resources_list, list) and resources_list:
+                                    res_conf = resources_list[0]
+                                    if isinstance(res_conf, dict):
+                                        cpu_idle_val = res_conf.get("cpu_idle")
+                                        if cpu_idle_val is not None:
+                                            attributes["cpu_idle"] = bool(cpu_idle_val)
+                                        limits = res_conf.get("limits")
+                                        if isinstance(limits, dict):
+                                            for limit_key in ("cpu", "memory"):
+                                                val = limits.get(limit_key)
+                                                if val is not None:
+                                                    attributes[limit_key] = val
+
+            elif res_type == "google_cloud_run_v2_job":
+                template_list = values.get("template", [])
+                if isinstance(template_list, list) and template_list:
+                    template = template_list[0]
+                    if isinstance(template, dict):
+                        sub_template_list = template.get("template", [])
+                        if isinstance(sub_template_list, list) and sub_template_list:
+                            sub_template = sub_template_list[0]
+                            if isinstance(sub_template, dict):
+                                containers = sub_template.get("containers", [])
+                                if isinstance(containers, list) and containers:
+                                    container = containers[0]
+                                    if isinstance(container, dict):
+                                        resources_list = container.get("resources", [])
+                                        if isinstance(resources_list, list) and resources_list:
+                                            res_conf = resources_list[0]
+                                            if isinstance(res_conf, dict):
+                                                limits = res_conf.get("limits")
+                                                if isinstance(limits, dict):
+                                                    for limit_key in ("cpu", "memory"):
+                                                        val = limits.get(limit_key)
+                                                        if val is not None:
+                                                            attributes[limit_key] = val
             else:
                 for k, v in values.items():
                     if v is not None:
