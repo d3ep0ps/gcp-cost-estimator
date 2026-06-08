@@ -73,6 +73,27 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_bigquery_dataset":
                 service = "bigquery"
                 kind = "bigquery_dataset"
+            elif res_type == "google_cloud_run_v2_service":
+                service = "run"
+                kind = "cloud_run_service"
+            elif res_type == "google_cloud_run_v2_job":
+                service = "run"
+                kind = "cloud_run_job"
+            elif res_type in (
+                "google_cloudfunctions_function",
+                "google_cloudfunctions2_function",
+            ):
+                service = "functions"
+                kind = "cloud_function"
+            elif res_type == "google_app_engine_standard_app_version":
+                service = "appengine"
+                kind = "app_engine_standard_version"
+            elif res_type == "google_app_engine_flexible_app_version":
+                service = "appengine"
+                kind = "app_engine_flexible_version"
+            elif res_type == "google_app_engine_application":
+                service = "appengine"
+                kind = "google_app_engine_application"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -187,6 +208,110 @@ class TerraformPlanParser(IaCParser):
                         disk_type = nc.get("disk_type")
                         if disk_type:
                             attributes["disk_type"] = disk_type
+            elif res_type == "google_cloud_run_v2_service":
+                template_list = values.get("template", [])
+                if isinstance(template_list, list) and template_list:
+                    template = template_list[0]
+                    if isinstance(template, dict):
+                        scaling_list = template.get("scaling", [])
+                        if isinstance(scaling_list, list) and scaling_list:
+                            scaling = scaling_list[0]
+                            if isinstance(scaling, dict):
+                                for field in ("min_instance_count", "max_instance_count"):
+                                    val = scaling.get(field)
+                                    if val is not None:
+                                        with contextlib.suppress(ValueError, TypeError):
+                                            attributes[field] = int(val)
+                        containers = template.get("containers", [])
+                        if isinstance(containers, list) and containers:
+                            container = containers[0]
+                            if isinstance(container, dict):
+                                resources_list = container.get("resources", [])
+                                if isinstance(resources_list, list) and resources_list:
+                                    res_conf = resources_list[0]
+                                    if isinstance(res_conf, dict):
+                                        cpu_idle_val = res_conf.get("cpu_idle")
+                                        if cpu_idle_val is not None:
+                                            attributes["cpu_idle"] = bool(cpu_idle_val)
+                                        limits = res_conf.get("limits")
+                                        if isinstance(limits, dict):
+                                            for limit_key in ("cpu", "memory"):
+                                                val = limits.get(limit_key)
+                                                if val is not None:
+                                                    attributes[limit_key] = val
+
+            elif res_type == "google_cloud_run_v2_job":
+                template_list = values.get("template", [])
+                if isinstance(template_list, list) and template_list:
+                    template = template_list[0]
+                    if isinstance(template, dict):
+                        sub_template_list = template.get("template", [])
+                        if isinstance(sub_template_list, list) and sub_template_list:
+                            sub_template = sub_template_list[0]
+                            if isinstance(sub_template, dict):
+                                containers = sub_template.get("containers", [])
+                                if isinstance(containers, list) and containers:
+                                    container = containers[0]
+                                    if isinstance(container, dict):
+                                        resources_list = container.get("resources", [])
+                                        if isinstance(resources_list, list) and resources_list:
+                                            res_conf = resources_list[0]
+                                            if isinstance(res_conf, dict):
+                                                limits = res_conf.get("limits")
+                                                if isinstance(limits, dict):
+                                                    for limit_key in ("cpu", "memory"):
+                                                        val = limits.get(limit_key)
+                                                        if val is not None:
+                                                            attributes[limit_key] = val
+            elif res_type == "google_cloudfunctions_function":
+                attributes["generation"] = "1st_gen"
+                for field in ("available_memory_mb", "min_instances"):
+                    val = values.get(field)
+                    if val is not None:
+                        attributes[field] = val
+
+            elif res_type == "google_cloudfunctions2_function":
+                attributes["generation"] = "2nd_gen"
+                sc_list = values.get("service_config", [])
+                if isinstance(sc_list, list) and sc_list:
+                    sc = sc_list[0]
+                    if isinstance(sc, dict):
+                        for field in (
+                            "available_memory",
+                            "available_cpu",
+                            "min_instance_count",
+                            "max_instance_count",
+                        ):
+                            val = sc.get(field)
+                            if val is not None:
+                                attributes[field] = val
+
+            elif res_type == "google_app_engine_standard_app_version":
+                iclass = values.get("instance_class")
+                if iclass:
+                    attributes["instance_class"] = iclass
+
+                for scaling_type in ("automatic_scaling", "basic_scaling", "manual_scaling"):
+                    scaling_list = values.get(scaling_type, [])
+                    if isinstance(scaling_list, list) and scaling_list:
+                        attributes["scaling_type"] = scaling_type
+                        scaling_blk = scaling_list[0]
+                        if isinstance(scaling_blk, dict):
+                            for k, v in scaling_blk.items():
+                                attributes[f"{scaling_type}_{k}"] = v
+
+            elif res_type == "google_app_engine_flexible_app_version":
+                resources_blk = values.get("resources")
+                if isinstance(resources_blk, list) and resources_blk:
+                    resources_blk = resources_blk[0]
+                if isinstance(resources_blk, dict):
+                    for field in ("cpu", "memory_gb", "disk_gb"):
+                        val = resources_blk.get(field)
+                        if val is not None:
+                            attributes[field] = val
+                else:
+                    assumptions.append("No resources configuration found; using defaults.")
+
             else:
                 for k, v in values.items():
                     if v is not None:
@@ -205,6 +330,24 @@ class TerraformPlanParser(IaCParser):
                     assumptions=assumptions,
                 )
             )
+
+        # Propagate App Engine application location to versions if missing
+        app_engine_region = None
+        for res in resources:
+            if res.kind in ("google_app_engine_application", "app_engine_application"):
+                loc = res.attributes.get("location_id") or res.region
+                if loc:
+                    if loc == "us-central":
+                        loc = "us-central1"
+                    elif loc == "europe-west":
+                        loc = "europe-west1"
+                    app_engine_region = loc
+                    res.region = loc
+
+        if app_engine_region:
+            for res in resources:
+                if res.service == "appengine" and not res.region:
+                    res.region = app_engine_region
 
         return ResourceModel(resources=resources)
 

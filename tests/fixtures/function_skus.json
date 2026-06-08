@@ -1,0 +1,112 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/functions/pricing Verified: 2026-06-08",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-INVOCATIONS",
+    "service": "cloud functions",
+    "region": "us-central1",
+    "description": "Cloud Functions Invocations",
+    "unit": "1",
+    "unit_price": 0.00000040,
+    "sku_group": "Invocations"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-CPU-ACTIVE-T1",
+    "service": "cloud functions",
+    "region": "us-central1",
+    "description": "Cloud Functions GHz Active Time us-central1",
+    "unit": "GHz-second",
+    "unit_price": 0.00001000,
+    "sku_group": "GHz-second"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-CPU-IDLE-T1",
+    "service": "cloud functions",
+    "region": "us-central1",
+    "description": "Cloud Functions GHz Idle Time us-central1",
+    "unit": "GHz-second",
+    "unit_price": 0.000001042,
+    "sku_group": "GHz-second"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-RAM-ACTIVE-T1",
+    "service": "cloud functions",
+    "region": "us-central1",
+    "description": "Cloud Functions GB Active Time us-central1",
+    "unit": "GB-second",
+    "unit_price": 0.00000250,
+    "sku_group": "GB-second"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-RAM-IDLE-T1",
+    "service": "cloud functions",
+    "region": "us-central1",
+    "description": "Cloud Functions GB Idle Time us-central1",
+    "unit": "GB-second",
+    "unit_price": 0.00000250,
+    "sku_group": "GB-second"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-INVOCATIONS-T2",
+    "service": "cloud functions",
+    "region": "europe-west4",
+    "description": "Cloud Functions Invocations europe-west4",
+    "unit": "1",
+    "unit_price": 0.00000040,
+    "sku_group": "Invocations"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-CPU-ACTIVE-T2",
+    "service": "cloud functions",
+    "region": "europe-west4",
+    "description": "Cloud Functions GHz Active Time europe-west4",
+    "unit": "GHz-second",
+    "unit_price": 0.00001400,
+    "sku_group": "GHz-second"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-CPU-IDLE-T2",
+    "service": "cloud functions",
+    "region": "europe-west4",
+    "description": "Cloud Functions GHz Idle Time europe-west4",
+    "unit": "GHz-second",
+    "unit_price": 0.000001460,
+    "sku_group": "GHz-second"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-RAM-ACTIVE-T2",
+    "service": "cloud functions",
+    "region": "europe-west4",
+    "description": "Cloud Functions GB Active Time europe-west4",
+    "unit": "GB-second",
+    "unit_price": 0.00000350,
+    "sku_group": "GB-second"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FN-RAM-IDLE-T2",
+    "service": "cloud functions",
+    "region": "europe-west4",
+    "description": "Cloud Functions GB Idle Time europe-west4",
+    "unit": "GB-second",
+    "unit_price": 0.00000350,
+    "sku_group": "GB-second"
+  }
+]

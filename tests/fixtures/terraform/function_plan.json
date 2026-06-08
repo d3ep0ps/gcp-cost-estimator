@@ -1,0 +1,37 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_cloudfunctions_function.example",
+          "type": "google_cloudfunctions_function",
+          "name": "example",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-function-1st",
+            "region": "us-central1",
+            "available_memory_mb": 256
+          }
+        },
+        {
+          "address": "google_cloudfunctions2_function.example",
+          "type": "google_cloudfunctions2_function",
+          "name": "example",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-function-2nd",
+            "location": "us-central1",
+            "service_config": [
+              {
+                "available_memory": "512Mi",
+                "available_cpu": "1",
+                "min_instance_count": 1
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

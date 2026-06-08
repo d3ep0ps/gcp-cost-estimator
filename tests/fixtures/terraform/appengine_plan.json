@@ -1,0 +1,63 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_app_engine_application.app",
+          "type": "google_app_engine_application",
+          "name": "app",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "project": "my-project",
+            "location_id": "us-central"
+          }
+        },
+        {
+          "address": "google_app_engine_standard_app_version.example",
+          "type": "google_app_engine_standard_app_version",
+          "name": "example",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "service": "default",
+            "version_id": "v1",
+            "instance_class": "F2",
+            "automatic_scaling": [
+              {
+                "min_idle_instances": 1,
+                "max_idle_instances": 3
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_app_engine_flexible_app_version.example",
+          "type": "google_app_engine_flexible_app_version",
+          "name": "example",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "service": "default",
+            "version_id": "v1",
+            "resources": [
+              {
+                "cpu": 1,
+                "memory_gb": 2,
+                "disk_gb": 10
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_app_engine_flexible_app_version.missing_resources",
+          "type": "google_app_engine_flexible_app_version",
+          "name": "missing_resources",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "service": "default",
+            "version_id": "v1"
+          }
+        }
+      ]
+    }
+  }
+}

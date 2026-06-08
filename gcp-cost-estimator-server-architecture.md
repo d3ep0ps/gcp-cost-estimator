@@ -400,7 +400,7 @@ gcp-cost-estimator/
 ├─ plan.md                           # v1 milestone plan (Milestones 0–8, done)
 ├─ plan1.md                          # Cloud SQL extension plan (CS-1–CS-10, active)
 ├─ services.md                       # 90% coverage service roadmap
-├─ src/gcp_billing_mcp/
+├─ src/gcp_cost_estimator/
 │  ├─ core/                          # ALL business logic lives here
 │  │  ├─ model.py                    # Resource / ResourceModel / AttachedResource
 │  │  ├─ registries.py               # IaCParser, SkuMapper, OutputRenderer registries

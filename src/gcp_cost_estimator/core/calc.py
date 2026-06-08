@@ -24,7 +24,10 @@ def calculate_line_items(
 
         # CPU, RAM, and license costs scale with active runtime hours
         if component in ("vcpu", "ram", "license"):
-            if "h" in unit.lower() or "hour" in unit.lower():
+            if "second" in unit.lower() or "sec" in unit.lower() or unit.lower() == "s":
+                monthly_cost = unit_price * qty
+                item_hours = 730.0
+            elif "h" in unit.lower() or "hour" in unit.lower():
                 monthly_cost = unit_price * qty * usage_hours
                 item_hours = usage_hours
             elif "mo" in unit.lower() or "month" in unit.lower():
