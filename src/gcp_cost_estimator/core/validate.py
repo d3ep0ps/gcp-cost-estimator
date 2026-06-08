@@ -6,6 +6,75 @@ from typing import Any
 from gcp_cost_estimator.core.model import ResourceModel
 
 
+def parse_k8s_quantity(val: Any, is_cpu: bool = False) -> str:
+    """Parse k8s quantity string to a standardized string representation.
+    
+    CPU: "1000m" -> "1", "1.5" -> "1.5"
+    Memory: "512Mi" -> "0.5", "1Gi" -> "1.0", "1024M" -> "1.024"
+    """
+    if val is None:
+        return ""
+    val_str = str(val).strip()
+    if not val_str:
+        return ""
+        
+    try:
+        float(val_str)
+        if not is_cpu:
+            # If it's memory and is a whole float (like 2 or 2.0), return "2.0"
+            f_val = float(val_str)
+            if f_val.is_integer():
+                return f"{int(f_val)}.0"
+            return f"{f_val:.4f}".rstrip('0').rstrip('.')
+        return val_str
+    except ValueError:
+        pass
+        
+    if is_cpu:
+        if val_str.endswith("m"):
+            try:
+                milli = float(val_str[:-1])
+                res = milli / 1000.0
+                return f"{res:g}"
+            except ValueError:
+                return val_str
+        return val_str
+    else:
+        m = re.match(r"^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$", val_str)
+        if not m:
+            return val_str
+        num_str, suffix = m.group(1), m.group(2)
+        try:
+            num = float(num_str)
+        except ValueError:
+            return val_str
+            
+        suffix_lower = suffix.lower()
+        if suffix_lower == "ki":
+            bytes_val = num * 1024
+        elif suffix_lower == "mi":
+            bytes_val = num * 1024 * 1024
+        elif suffix_lower == "gi":
+            bytes_val = num * 1024 * 1024 * 1024
+        elif suffix_lower == "ti":
+            bytes_val = num * 1024 * 1024 * 1024 * 1024
+        elif suffix_lower == "k":
+            bytes_val = num * 1000
+        elif suffix_lower == "m":
+            bytes_val = num * 1000 * 1000
+        elif suffix_lower == "g":
+            bytes_val = num * 1000 * 1000 * 1000
+        elif suffix_lower == "t":
+            bytes_val = num * 1000 * 1000 * 1000 * 1000
+        else:
+            return val_str
+            
+        gib = bytes_val / (1024 * 1024 * 1024)
+        if gib.is_integer():
+            return f"{int(gib)}.0"
+        return f"{gib:.4f}".rstrip('0').rstrip('.')
+
+
 def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
     """Validate the canonical resource model, checking for correctness.
 
@@ -123,6 +192,18 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                     warnings.append(
                         f"Resource '{r.resource_id}' is missing machine_type; "
                         "defaulting to 'e2-standard-4'."
+                    )
+
+        # GCP Cloud Run checks
+        if r.provider == "gcp" and r.service == "run":
+            if r.kind in {"cloud_run_service", "cloud_run_job"}:
+                if not r.attributes.get("cpu"):
+                    errors.append(
+                        f"Resource '{r.resource_id}' is a Cloud Run resource but has no CPU limit."
+                    )
+                if not r.attributes.get("memory"):
+                    errors.append(
+                        f"Resource '{r.resource_id}' is a Cloud Run resource but has no Memory limit."
                     )
 
         # GCP BigQuery dataset checks
@@ -354,5 +435,66 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
             )
             if free_tier_assumption not in r.assumptions:
                 r.assumptions.append(free_tier_assumption)
+
+        # Apply Cloud Run defaults & normalization
+        if r.provider == "gcp" and r.service == "run":
+            if r.kind == "cloud_run_service":
+                if "cpu" in r.attributes:
+                    r.attributes["cpu"] = parse_k8s_quantity(r.attributes["cpu"], is_cpu=True)
+                if "memory" in r.attributes:
+                    r.attributes["memory"] = parse_k8s_quantity(r.attributes["memory"], is_cpu=False)
+                
+                if "cpu_idle" not in r.attributes:
+                    r.attributes["cpu_idle"] = True
+                    r.assumptions.append("Defaulted cpu_idle to true.")
+                else:
+                    r.attributes["cpu_idle"] = str(r.attributes["cpu_idle"]).lower() in {"true", "1", "yes"}
+
+                if "min_instance_count" not in r.attributes:
+                    r.attributes["min_instance_count"] = 0
+                else:
+                    try:
+                        r.attributes["min_instance_count"] = int(r.attributes["min_instance_count"])
+                    except (ValueError, TypeError):
+                        r.attributes["min_instance_count"] = 0
+                
+                if r.attributes["min_instance_count"] > 0:
+                    r.assumptions.append("min_instance_count > 0 enables idle instance billing.")
+
+                if "runtime_seconds_per_invocation" not in r.usage:
+                    r.usage["runtime_seconds_per_invocation"] = 1.0
+                    r.assumptions.append("Defaulted runtime_seconds_per_invocation to 1.0s.")
+                else:
+                    r.usage["runtime_seconds_per_invocation"] = float(r.usage["runtime_seconds_per_invocation"])
+
+                if "invocations_per_month" not in r.usage:
+                    r.usage["invocations_per_month"] = 10_000
+                    r.assumptions.append("Defaulted invocations_per_month to 10000.")
+                else:
+                    r.usage["invocations_per_month"] = int(r.usage["invocations_per_month"])
+
+            elif r.kind == "cloud_run_job":
+                if "cpu" in r.attributes:
+                    r.attributes["cpu"] = parse_k8s_quantity(r.attributes["cpu"], is_cpu=True)
+                if "memory" in r.attributes:
+                    r.attributes["memory"] = parse_k8s_quantity(r.attributes["memory"], is_cpu=False)
+
+                if "task_count" not in r.usage:
+                    r.usage["task_count"] = 1
+                    r.assumptions.append("Defaulted task_count to 1.")
+                else:
+                    r.usage["task_count"] = int(r.usage["task_count"])
+
+                if "runtime_seconds_per_task" not in r.usage:
+                    r.usage["runtime_seconds_per_task"] = 60
+                    r.assumptions.append("Defaulted runtime_seconds_per_task to 60s.")
+                else:
+                    r.usage["runtime_seconds_per_task"] = int(r.usage["runtime_seconds_per_task"])
+
+                if "executions_per_month" not in r.usage:
+                    r.usage["executions_per_month"] = 100
+                    r.assumptions.append("Defaulted executions_per_month to 100.")
+                else:
+                    r.usage["executions_per_month"] = int(r.usage["executions_per_month"])
 
     return model_copy
