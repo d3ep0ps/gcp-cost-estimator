@@ -1235,15 +1235,17 @@ class GcpSkuMapper(SkuMapper):
             cpu = float(cpu_str)
             memory = float(memory_str)
         except ValueError:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"Invalid cpu '{cpu_str}' or memory '{memory_str}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"Invalid cpu '{cpu_str}' or memory '{memory_str}'",
+                }
+            )
             return mappings, unpriced
 
         cpu_idle = resource.attributes.get("cpu_idle", True)
         min_instances = int(resource.attributes.get("min_instance_count", 0))
-        
+
         invocations = int(resource.usage.get("invocations_per_month", 10000))
         sec_per_inv = float(resource.usage.get("runtime_seconds_per_invocation", 1.0))
         active_seconds = float(invocations) * sec_per_inv
@@ -1258,10 +1260,12 @@ class GcpSkuMapper(SkuMapper):
         )
         rows = cursor.fetchall()
         if not rows:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No pricing data for Cloud Run in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No pricing data for Cloud Run in region '{region}'",
+                }
+            )
             return mappings, unpriced
 
         cpu_active_sku = None
@@ -1274,21 +1278,25 @@ class GcpSkuMapper(SkuMapper):
         gpu_sku = None
 
         for row in rows:
-            sku_id, unit, unit_price, desc, sku_group = row
+            _sku_id, _unit, _unit_price, desc, sku_group = row
             desc_lower = desc.lower()
             if sku_group == "CPU":
                 if "active" in desc_lower:
                     cpu_active_sku = row
                 elif "idle" in desc_lower:
                     cpu_idle_sku = row
-                elif "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower:
+                elif (
+                    "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower
+                ):
                     cpu_alloc_sku = row
             elif sku_group == "RAM":
                 if "active" in desc_lower:
                     ram_active_sku = row
                 elif "idle" in desc_lower:
                     ram_idle_sku = row
-                elif "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower:
+                elif (
+                    "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower
+                ):
                     ram_alloc_sku = row
             elif sku_group == "Requests":
                 requests_sku = row
@@ -1298,105 +1306,131 @@ class GcpSkuMapper(SkuMapper):
         if not cpu_idle:
             target_cpu_sku = cpu_alloc_sku or cpu_active_sku
             if target_cpu_sku:
-                mappings.append({
-                    "sku_id": target_cpu_sku[0],
-                    "component": "vcpu",
-                    "unit": target_cpu_sku[1],
-                    "unit_price": target_cpu_sku[2],
-                    "qty": cpu * 730 * 3600 * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": target_cpu_sku[0],
+                        "component": "vcpu",
+                        "unit": target_cpu_sku[1],
+                        "unit_price": target_cpu_sku[2],
+                        "qty": cpu * 730 * 3600 * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No CPU allocation SKU found for Cloud Run in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No CPU allocation SKU found for Cloud Run in region '{region}'",
+                    }
+                )
 
             target_ram_sku = ram_alloc_sku or ram_active_sku
             if target_ram_sku:
-                mappings.append({
-                    "sku_id": target_ram_sku[0],
-                    "component": "ram",
-                    "unit": target_ram_sku[1],
-                    "unit_price": target_ram_sku[2],
-                    "qty": memory * 730 * 3600 * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": target_ram_sku[0],
+                        "component": "ram",
+                        "unit": target_ram_sku[1],
+                        "unit_price": target_ram_sku[2],
+                        "qty": memory * 730 * 3600 * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No RAM allocation SKU found for Cloud Run in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No RAM allocation SKU found for Cloud Run in region '{region}'",
+                    }
+                )
         else:
             if cpu_active_sku:
-                mappings.append({
-                    "sku_id": cpu_active_sku[0],
-                    "component": "vcpu",
-                    "unit": cpu_active_sku[1],
-                    "unit_price": cpu_active_sku[2],
-                    "qty": active_seconds * cpu * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": cpu_active_sku[0],
+                        "component": "vcpu",
+                        "unit": cpu_active_sku[1],
+                        "unit_price": cpu_active_sku[2],
+                        "qty": active_seconds * cpu * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No CPU active SKU found for Cloud Run in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No CPU active SKU found for Cloud Run in region '{region}'",
+                    }
+                )
 
             if ram_active_sku:
-                mappings.append({
-                    "sku_id": ram_active_sku[0],
-                    "component": "ram",
-                    "unit": ram_active_sku[1],
-                    "unit_price": ram_active_sku[2],
-                    "qty": active_seconds * memory * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": ram_active_sku[0],
+                        "component": "ram",
+                        "unit": ram_active_sku[1],
+                        "unit_price": ram_active_sku[2],
+                        "qty": active_seconds * memory * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No RAM active SKU found for Cloud Run in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No RAM active SKU found for Cloud Run in region '{region}'",
+                    }
+                )
 
             if min_instances > 0:
                 total_cpu_warm = float(min_instances) * cpu * 730 * 3600
                 total_ram_warm = float(min_instances) * memory * 730 * 3600
-                
+
                 cpu_idle_qty = max(0.0, total_cpu_warm - (active_seconds * cpu))
                 ram_idle_qty = max(0.0, total_ram_warm - (active_seconds * memory))
 
                 if cpu_idle_sku:
-                    mappings.append({
-                        "sku_id": cpu_idle_sku[0],
-                        "component": "vcpu_idle",
-                        "unit": cpu_idle_sku[1],
-                        "unit_price": cpu_idle_sku[2],
-                        "qty": cpu_idle_qty * resource.quantity,
-                    })
+                    mappings.append(
+                        {
+                            "sku_id": cpu_idle_sku[0],
+                            "component": "vcpu_idle",
+                            "unit": cpu_idle_sku[1],
+                            "unit_price": cpu_idle_sku[2],
+                            "qty": cpu_idle_qty * resource.quantity,
+                        }
+                    )
                 else:
-                    unpriced.append({
-                        "resource_id": resource.resource_id,
-                        "reason": f"No CPU idle SKU found for Cloud Run in region '{region}'",
-                    })
+                    unpriced.append(
+                        {
+                            "resource_id": resource.resource_id,
+                            "reason": f"No CPU idle SKU found for Cloud Run in region '{region}'",
+                        }
+                    )
 
                 if ram_idle_sku:
-                    mappings.append({
-                        "sku_id": ram_idle_sku[0],
-                        "component": "ram_idle",
-                        "unit": ram_idle_sku[1],
-                        "unit_price": ram_idle_sku[2],
-                        "qty": ram_idle_qty * resource.quantity,
-                    })
+                    mappings.append(
+                        {
+                            "sku_id": ram_idle_sku[0],
+                            "component": "ram_idle",
+                            "unit": ram_idle_sku[1],
+                            "unit_price": ram_idle_sku[2],
+                            "qty": ram_idle_qty * resource.quantity,
+                        }
+                    )
                 else:
-                    unpriced.append({
-                        "resource_id": resource.resource_id,
-                        "reason": f"No RAM idle SKU found for Cloud Run in region '{region}'",
-                    })
+                    unpriced.append(
+                        {
+                            "resource_id": resource.resource_id,
+                            "reason": f"No RAM idle SKU found for Cloud Run in region '{region}'",
+                        }
+                    )
 
         if requests_sku:
-            mappings.append({
-                "sku_id": requests_sku[0],
-                "component": "requests",
-                "unit": requests_sku[1],
-                "unit_price": requests_sku[2],
-                "qty": float(invocations) * resource.quantity,
-            })
+            mappings.append(
+                {
+                    "sku_id": requests_sku[0],
+                    "component": "requests",
+                    "unit": requests_sku[1],
+                    "unit_price": requests_sku[2],
+                    "qty": float(invocations) * resource.quantity,
+                }
+            )
 
         gpu_type = resource.attributes.get("gpu_type")
         gpu_count_str = resource.attributes.get("gpu_count", "0")
@@ -1408,18 +1442,22 @@ class GcpSkuMapper(SkuMapper):
         if gpu_type and gpu_count > 0:
             if gpu_sku:
                 gpu_seconds = (730 * 3600) if not cpu_idle else active_seconds
-                mappings.append({
-                    "sku_id": gpu_sku[0],
-                    "component": "gpu",
-                    "unit": gpu_sku[1],
-                    "unit_price": gpu_sku[2],
-                    "qty": float(gpu_count) * gpu_seconds * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": gpu_sku[0],
+                        "component": "gpu",
+                        "unit": gpu_sku[1],
+                        "unit_price": gpu_sku[2],
+                        "qty": float(gpu_count) * gpu_seconds * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No GPU SKU found for Cloud Run in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No GPU SKU found for Cloud Run in region '{region}'",
+                    }
+                )
 
         return mappings, unpriced
 
@@ -1439,10 +1477,12 @@ class GcpSkuMapper(SkuMapper):
             cpu = float(cpu_str)
             memory = float(memory_str)
         except ValueError:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"Invalid cpu '{cpu_str}' or memory '{memory_str}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"Invalid cpu '{cpu_str}' or memory '{memory_str}'",
+                }
+            )
             return mappings, unpriced
 
         task_count = int(resource.usage.get("task_count", 1))
@@ -1462,10 +1502,12 @@ class GcpSkuMapper(SkuMapper):
         )
         rows = cursor.fetchall()
         if not rows:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No pricing data for Cloud Run in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No pricing data for Cloud Run in region '{region}'",
+                }
+            )
             return mappings, unpriced
 
         cpu_alloc_sku = None
@@ -1475,54 +1517,66 @@ class GcpSkuMapper(SkuMapper):
         gpu_sku = None
 
         for row in rows:
-            sku_id, unit, unit_price, desc, sku_group = row
+            _sku_id, _unit, _unit_price, desc, sku_group = row
             desc_lower = desc.lower()
             if sku_group == "CPU":
                 if "active" in desc_lower:
                     cpu_active_sku = row
                 elif "idle" in desc_lower:
                     pass
-                elif "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower:
+                elif (
+                    "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower
+                ):
                     cpu_alloc_sku = row
             elif sku_group == "RAM":
                 if "active" in desc_lower:
                     ram_active_sku = row
                 elif "idle" in desc_lower:
                     pass
-                elif "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower:
+                elif (
+                    "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower
+                ):
                     ram_alloc_sku = row
             elif sku_group == "GPU":
                 gpu_sku = row
 
         target_cpu_sku = cpu_alloc_sku or cpu_active_sku
         if target_cpu_sku:
-            mappings.append({
-                "sku_id": target_cpu_sku[0],
-                "component": "vcpu",
-                "unit": target_cpu_sku[1],
-                "unit_price": target_cpu_sku[2],
-                "qty": total_seconds * cpu * resource.quantity,
-            })
+            mappings.append(
+                {
+                    "sku_id": target_cpu_sku[0],
+                    "component": "vcpu",
+                    "unit": target_cpu_sku[1],
+                    "unit_price": target_cpu_sku[2],
+                    "qty": total_seconds * cpu * resource.quantity,
+                }
+            )
         else:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No CPU allocation SKU found for Cloud Run in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No CPU allocation SKU found for Cloud Run in region '{region}'",
+                }
+            )
 
         target_ram_sku = ram_alloc_sku or ram_active_sku
         if target_ram_sku:
-            mappings.append({
-                "sku_id": target_ram_sku[0],
-                "component": "ram",
-                "unit": target_ram_sku[1],
-                "unit_price": target_ram_sku[2],
-                "qty": total_seconds * memory * resource.quantity,
-            })
+            mappings.append(
+                {
+                    "sku_id": target_ram_sku[0],
+                    "component": "ram",
+                    "unit": target_ram_sku[1],
+                    "unit_price": target_ram_sku[2],
+                    "qty": total_seconds * memory * resource.quantity,
+                }
+            )
         else:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No RAM allocation SKU found for Cloud Run in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No RAM allocation SKU found for Cloud Run in region '{region}'",
+                }
+            )
 
         gpu_type = resource.attributes.get("gpu_type")
         gpu_count_str = resource.attributes.get("gpu_count", "0")
@@ -1533,18 +1587,22 @@ class GcpSkuMapper(SkuMapper):
 
         if gpu_type and gpu_count > 0:
             if gpu_sku:
-                mappings.append({
-                    "sku_id": gpu_sku[0],
-                    "component": "gpu",
-                    "unit": gpu_sku[1],
-                    "unit_price": gpu_sku[2],
-                    "qty": float(gpu_count) * total_seconds * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": gpu_sku[0],
+                        "component": "gpu",
+                        "unit": gpu_sku[1],
+                        "unit_price": gpu_sku[2],
+                        "qty": float(gpu_count) * total_seconds * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No GPU SKU found for Cloud Run in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No GPU SKU found for Cloud Run in region '{region}'",
+                    }
+                )
 
         return mappings, unpriced
 
@@ -1566,17 +1624,20 @@ class GcpSkuMapper(SkuMapper):
         try:
             memory_gb = float(resource.attributes.get("memory_gb", float(memory_mb) / 1024.0))
             cpu_ghz = float(resource.attributes.get("cpu_ghz", 0.4))
-        except (ValueError, TypeError):
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": "Invalid memory/cpu attributes for function",
-            })
+        except ValueError, TypeError:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": "Invalid memory/cpu attributes for function",
+                }
+            )
             return mappings, unpriced
 
         invocations = int(resource.usage.get("invocations_per_month", 1_000_000))
         avg_execution_time_ms = float(resource.usage.get("avg_execution_time_ms", 100.0))
 
         import math
+
         rounded_duration_sec = math.ceil(avg_execution_time_ms / 100.0) * 0.1
         active_seconds = float(invocations) * rounded_duration_sec
 
@@ -1592,10 +1653,12 @@ class GcpSkuMapper(SkuMapper):
         )
         rows = cursor.fetchall()
         if not rows:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No pricing data for Cloud Functions in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No pricing data for Cloud Functions in region '{region}'",
+                }
+            )
             return mappings, unpriced
 
         invocations_sku = None
@@ -1605,7 +1668,7 @@ class GcpSkuMapper(SkuMapper):
         ram_idle_sku = None
 
         for row in rows:
-            sku_id, unit, unit_price, desc, sku_group = row
+            _sku_id, _unit, _unit_price, desc, sku_group = row
             desc_lower = desc.lower()
             if sku_group == "Invocations" or "invocation" in desc_lower:
                 invocations_sku = row
@@ -1621,79 +1684,111 @@ class GcpSkuMapper(SkuMapper):
                     ram_active_sku = row
 
         if invocations_sku:
-            mappings.append({
-                "sku_id": invocations_sku[0],
-                "component": "requests",
-                "unit": invocations_sku[1],
-                "unit_price": invocations_sku[2],
-                "qty": float(invocations) * resource.quantity,
-            })
+            mappings.append(
+                {
+                    "sku_id": invocations_sku[0],
+                    "component": "requests",
+                    "unit": invocations_sku[1],
+                    "unit_price": invocations_sku[2],
+                    "qty": float(invocations) * resource.quantity,
+                }
+            )
         else:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No Invocations SKU found for Cloud Functions in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No Invocations SKU found for Cloud Functions in region '{region}'",
+                }
+            )
 
         if cpu_active_sku:
-            mappings.append({
-                "sku_id": cpu_active_sku[0],
-                "component": "vcpu",
-                "unit": cpu_active_sku[1],
-                "unit_price": cpu_active_sku[2],
-                "qty": active_seconds * cpu_ghz * resource.quantity,
-            })
+            mappings.append(
+                {
+                    "sku_id": cpu_active_sku[0],
+                    "component": "vcpu",
+                    "unit": cpu_active_sku[1],
+                    "unit_price": cpu_active_sku[2],
+                    "qty": active_seconds * cpu_ghz * resource.quantity,
+                }
+            )
         else:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No active GHz-second CPU SKU found for Cloud Functions in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": (
+                        f"No active GHz-second CPU SKU found for "
+                        f"Cloud Functions in region '{region}'"
+                    ),
+                }
+            )
 
         if ram_active_sku:
-            mappings.append({
-                "sku_id": ram_active_sku[0],
-                "component": "ram",
-                "unit": ram_active_sku[1],
-                "unit_price": ram_active_sku[2],
-                "qty": active_seconds * memory_gb * resource.quantity,
-            })
+            mappings.append(
+                {
+                    "sku_id": ram_active_sku[0],
+                    "component": "ram",
+                    "unit": ram_active_sku[1],
+                    "unit_price": ram_active_sku[2],
+                    "qty": active_seconds * memory_gb * resource.quantity,
+                }
+            )
         else:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No active GB-second Memory SKU found for Cloud Functions in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": (
+                        f"No active GB-second Memory SKU found for "
+                        f"Cloud Functions in region '{region}'"
+                    ),
+                }
+            )
 
         if min_instances > 0:
             total_idle_seconds = max(0.0, float(min_instances) * 730.0 * 3600.0 - active_seconds)
-            
+
             target_cpu_idle_sku = cpu_idle_sku or cpu_active_sku
             if target_cpu_idle_sku:
-                mappings.append({
-                    "sku_id": target_cpu_idle_sku[0],
-                    "component": "vcpu_idle",
-                    "unit": target_cpu_idle_sku[1],
-                    "unit_price": target_cpu_idle_sku[2],
-                    "qty": total_idle_seconds * cpu_ghz * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": target_cpu_idle_sku[0],
+                        "component": "vcpu_idle",
+                        "unit": target_cpu_idle_sku[1],
+                        "unit_price": target_cpu_idle_sku[2],
+                        "qty": total_idle_seconds * cpu_ghz * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No GHz-second CPU idle SKU found for Cloud Functions in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": (
+                            f"No GHz-second CPU idle SKU found for "
+                            f"Cloud Functions in region '{region}'"
+                        ),
+                    }
+                )
 
             target_ram_idle_sku = ram_idle_sku or ram_active_sku
             if target_ram_idle_sku:
-                mappings.append({
-                    "sku_id": target_ram_idle_sku[0],
-                    "component": "ram_idle",
-                    "unit": target_ram_idle_sku[1],
-                    "unit_price": target_ram_idle_sku[2],
-                    "qty": total_idle_seconds * memory_gb * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": target_ram_idle_sku[0],
+                        "component": "ram_idle",
+                        "unit": target_ram_idle_sku[1],
+                        "unit_price": target_ram_idle_sku[2],
+                        "qty": total_idle_seconds * memory_gb * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No GB-second Memory idle SKU found for Cloud Functions in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": (
+                            f"No GB-second Memory idle SKU found for "
+                            f"Cloud Functions in region '{region}'"
+                        ),
+                    }
+                )
 
         return mappings, unpriced
 
@@ -1710,14 +1805,23 @@ class GcpSkuMapper(SkuMapper):
         iclass_upper = iclass.upper()
 
         multipliers = {
-            "F1": 1, "F2": 2, "F4": 4, "F4_1G": 6,
-            "B1": 1, "B2": 2, "B4": 4, "B4_1G": 6, "B8": 8
+            "F1": 1,
+            "F2": 2,
+            "F4": 4,
+            "F4_1G": 6,
+            "B1": 1,
+            "B2": 2,
+            "B4": 4,
+            "B4_1G": 6,
+            "B8": 8,
         }
         if iclass_upper not in multipliers:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"Unknown instance class '{iclass}' for App Engine standard",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"Unknown instance class '{iclass}' for App Engine standard",
+                }
+            )
             return mappings, unpriced
 
         multiplier = multipliers[iclass_upper]
@@ -1744,30 +1848,42 @@ class GcpSkuMapper(SkuMapper):
                 WHERE provider = 'gcp' AND region = ? AND service = 'app engine'
                   AND (description LIKE ? OR description LIKE ?)
                 """,
-                (region, f"%{sku_group}%", f"%{'Frontend' if iclass_upper.startswith('F') else 'Backend'}%"),
+                (
+                    region,
+                    f"%{sku_group}%",
+                    f"%{'Frontend' if iclass_upper.startswith('F') else 'Backend'}%",
+                ),
             )
             rows = cursor.fetchall()
 
         if not rows:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No pricing SKU found for App Engine standard {iclass_upper} in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": (
+                        f"No pricing SKU found for App Engine standard "
+                        f"{iclass_upper} in region '{region}'"
+                    ),
+                }
+            )
         else:
             row = rows[0]
-            # Accrual rule: instance-hours continue accruing for 15 minutes (+0.25h) tail per lifecycle event
+            # Accrual rule: instance-hours continue accruing for 15 minutes
+            # (+0.25h) tail per lifecycle event
             lifecycle_events = float(resource.usage.get("lifecycle_events_per_month", 0))
             hours = float(resource.usage.get("runtime_hours_per_month", 730.0))
             total_hours = hours + (lifecycle_events * 0.25)
             qty = total_hours * multiplier * resource.quantity
 
-            mappings.append({
-                "sku_id": row[0],
-                "component": "instances",
-                "unit": row[1],
-                "unit_price": row[2],
-                "qty": qty,
-            })
+            mappings.append(
+                {
+                    "sku_id": row[0],
+                    "component": "instances",
+                    "unit": row[1],
+                    "unit_price": row[2],
+                    "qty": qty,
+                }
+            )
 
         # Handle standard egress
         egress_gb = float(resource.usage.get("egress_gb", 0))
@@ -1783,18 +1899,25 @@ class GcpSkuMapper(SkuMapper):
             egress_rows = cursor.fetchall()
 
             if egress_rows:
-                mappings.append({
-                    "sku_id": egress_rows[0][0],
-                    "component": "egress",
-                    "unit": egress_rows[0][1],
-                    "unit_price": egress_rows[0][2],
-                    "qty": egress_gb * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": egress_rows[0][0],
+                        "component": "egress",
+                        "unit": egress_rows[0][1],
+                        "unit_price": egress_rows[0][2],
+                        "qty": egress_gb * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No egress SKU found for App Engine standard in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": (
+                            f"No egress SKU found for App Engine standard "
+                            f"in region '{region}'"
+                        ),
+                    }
+                )
 
         return mappings, unpriced
 
@@ -1809,14 +1932,14 @@ class GcpSkuMapper(SkuMapper):
 
         cpu = int(resource.attributes.get("cpu", 1))
         memory_gb = float(resource.attributes.get("memory_gb", 3.75))
-        hours = float(resource.usage.get("runtime_hours_per_month", 730.0))
 
         # vCPU
         cursor.execute(
             """
             SELECT sku_id, unit, unit_price, description
             FROM pricing_cache
-            WHERE provider = 'gcp' AND region = ? AND service = 'app engine' AND sku_group = 'Flexible CPU'
+            WHERE provider = 'gcp' AND region = ? AND service = 'app engine'
+              AND sku_group = 'Flexible CPU'
             """,
             (region,),
         )
@@ -1834,25 +1957,30 @@ class GcpSkuMapper(SkuMapper):
             cpu_rows = cursor.fetchall()
 
         if cpu_rows:
-            mappings.append({
-                "sku_id": cpu_rows[0][0],
-                "component": "vcpu",
-                "unit": cpu_rows[0][1],
-                "unit_price": cpu_rows[0][2],
-                "qty": float(cpu) * resource.quantity,
-            })
+            mappings.append(
+                {
+                    "sku_id": cpu_rows[0][0],
+                    "component": "vcpu",
+                    "unit": cpu_rows[0][1],
+                    "unit_price": cpu_rows[0][2],
+                    "qty": float(cpu) * resource.quantity,
+                }
+            )
         else:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No Flexible CPU SKU found for App Engine in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No Flexible CPU SKU found for App Engine in region '{region}'",
+                }
+            )
 
         # RAM
         cursor.execute(
             """
             SELECT sku_id, unit, unit_price, description
             FROM pricing_cache
-            WHERE provider = 'gcp' AND region = ? AND service = 'app engine' AND sku_group = 'Flexible RAM'
+            WHERE provider = 'gcp' AND region = ? AND service = 'app engine'
+              AND sku_group = 'Flexible RAM'
             """,
             (region,),
         )
@@ -1870,18 +1998,22 @@ class GcpSkuMapper(SkuMapper):
             ram_rows = cursor.fetchall()
 
         if ram_rows:
-            mappings.append({
-                "sku_id": ram_rows[0][0],
-                "component": "ram",
-                "unit": ram_rows[0][1],
-                "unit_price": ram_rows[0][2],
-                "qty": memory_gb * resource.quantity,
-            })
+            mappings.append(
+                {
+                    "sku_id": ram_rows[0][0],
+                    "component": "ram",
+                    "unit": ram_rows[0][1],
+                    "unit_price": ram_rows[0][2],
+                    "qty": memory_gb * resource.quantity,
+                }
+            )
         else:
-            unpriced.append({
-                "resource_id": resource.resource_id,
-                "reason": f"No Flexible RAM SKU found for App Engine in region '{region}'",
-            })
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No Flexible RAM SKU found for App Engine in region '{region}'",
+                }
+            )
 
         # Process attached resources (like disks)
         for attached in resource.attached:
@@ -1939,18 +2071,22 @@ class GcpSkuMapper(SkuMapper):
             )
             egress_rows = cursor.fetchall()
             if egress_rows:
-                mappings.append({
-                    "sku_id": egress_rows[0][0],
-                    "component": "egress",
-                    "unit": egress_rows[0][1],
-                    "unit_price": egress_rows[0][2],
-                    "qty": egress_gb * resource.quantity,
-                })
+                mappings.append(
+                    {
+                        "sku_id": egress_rows[0][0],
+                        "component": "egress",
+                        "unit": egress_rows[0][1],
+                        "unit_price": egress_rows[0][2],
+                        "qty": egress_gb * resource.quantity,
+                    }
+                )
             else:
-                unpriced.append({
-                    "resource_id": resource.resource_id,
-                    "reason": f"No egress SKU found in region '{region}'",
-                })
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No egress SKU found in region '{region}'",
+                    }
+                )
 
         return mappings, unpriced
 

@@ -28,7 +28,9 @@ def populated_run_db(temp_db_path: str) -> str:
     return temp_db_path
 
 
-def test_cloud_run_instance_based_service_cost_equals_hand_computed_value(populated_run_db: str) -> None:
+def test_cloud_run_instance_based_service_cost_equals_hand_computed_value(
+    populated_run_db: str,
+) -> None:
     """Verify that instance-based service cost equals hand-computed monthly value."""
     resource = Resource(
         provider="gcp",
@@ -44,7 +46,7 @@ def test_cloud_run_instance_based_service_cost_equals_hand_computed_value(popula
         usage={
             "runtime_seconds_per_invocation": "1.0",
             "invocations_per_month": "10000",
-        }
+        },
     )
     model = ResourceModel(resources=[resource])
     est = estimate_infrastructure(populated_run_db, model)
@@ -54,7 +56,7 @@ def test_cloud_run_instance_based_service_cost_equals_hand_computed_value(popula
     # CPU: 2 vCPUs * 730h * 3600s * $0.000018 = 94.608
     # RAM: 4.0 GiB * 730h * 3600s * $0.000002 = 21.024
     # Requests: 10000 * $0.00000040 = 0.004
-    # Total = 115.636
+    # Total cost: 115.636
     assert abs(est.monthly_total - 115.636) < 1e-4
 
     # Verify line items
@@ -71,7 +73,9 @@ def test_cloud_run_instance_based_service_cost_equals_hand_computed_value(popula
     assert abs(req_item.monthly_cost - 0.004) < 1e-4
 
 
-def test_cloud_run_request_based_service_cost_splits_active_and_idle_correctly(populated_run_db: str) -> None:
+def test_cloud_run_request_based_service_cost_splits_active_and_idle_correctly(
+    populated_run_db: str,
+) -> None:
     """Verify request-based service splits CPU/Memory into active and idle components if min_instances set."""
     resource = Resource(
         provider="gcp",
@@ -88,7 +92,7 @@ def test_cloud_run_request_based_service_cost_splits_active_and_idle_correctly(p
         usage={
             "runtime_seconds_per_invocation": "2.5",
             "invocations_per_month": "100000",
-        }
+        },
     )
     model = ResourceModel(resources=[resource])
     est = estimate_infrastructure(populated_run_db, model)
@@ -104,7 +108,9 @@ def test_cloud_run_request_based_service_cost_splits_active_and_idle_correctly(p
     assert abs(est.monthly_total - 14.47156) < 1e-4
 
 
-def test_cloud_run_job_cost_applies_one_minute_minimum_per_task_instance(populated_run_db: str) -> None:
+def test_cloud_run_job_cost_applies_one_minute_minimum_per_task_instance(
+    populated_run_db: str,
+) -> None:
     """Verify jobs use allocation SKUs with a 1-minute minimum execution time per task."""
     resource = Resource(
         provider="gcp",
@@ -120,7 +126,7 @@ def test_cloud_run_job_cost_applies_one_minute_minimum_per_task_instance(populat
             "task_count": "5",
             "runtime_seconds_per_task": "45",  # Billed as 60s
             "executions_per_month": "10",
-        }
+        },
     )
     model = ResourceModel(resources=[resource])
     est = estimate_infrastructure(populated_run_db, model)
@@ -130,7 +136,7 @@ def test_cloud_run_job_cost_applies_one_minute_minimum_per_task_instance(populat
     # Total seconds = max(45, 60) * 5 * 10 = 3000s
     # CPU: 1 * 3000s * $0.000018 = 0.054
     # RAM: 2.0 * 3000s * $0.000002 = 0.012
-    # Total = 0.066
+    # Total cost: 0.066
     assert abs(est.monthly_total - 0.066) < 1e-4
 
 
@@ -152,7 +158,7 @@ def test_cloud_run_gpu_cost_added_as_separate_line_item(populated_run_db: str) -
         usage={
             "runtime_seconds_per_invocation": "10.0",
             "invocations_per_month": "1000",
-        }
+        },
     )
     model = ResourceModel(resources=[resource])
     est = estimate_infrastructure(populated_run_db, model)
@@ -164,7 +170,9 @@ def test_cloud_run_gpu_cost_added_as_separate_line_item(populated_run_db: str) -
     assert abs(gpu_item.monthly_cost - 919.80) < 1e-4
 
 
-def test_cloud_run_estimate_includes_assumptions_for_invocation_volume(populated_run_db: str) -> None:
+def test_cloud_run_estimate_includes_assumptions_for_invocation_volume(
+    populated_run_db: str,
+) -> None:
     """Verify that Cloud Run estimates document default invocation assumptions when usage is omitted."""
     resource = Resource(
         provider="gcp",
@@ -175,7 +183,7 @@ def test_cloud_run_estimate_includes_assumptions_for_invocation_volume(populated
         attributes={
             "cpu": "1",
             "memory": "2.0",
-        }
+        },
     )
     model = ResourceModel(resources=[resource])
     est = estimate_infrastructure(populated_run_db, model)

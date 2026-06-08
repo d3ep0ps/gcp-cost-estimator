@@ -29,7 +29,9 @@ def populated_function_db(temp_db_path: str) -> str:
     return temp_db_path
 
 
-def test_cloud_function_1stgen_invocation_sku_resolved_and_priced(populated_function_db: str) -> None:
+def test_cloud_function_1stgen_invocation_sku_resolved_and_priced(
+    populated_function_db: str,
+) -> None:
     """Verify invocations SKU is resolved and priced for 1st-gen Cloud Functions."""
     r = Resource(
         provider="gcp",
@@ -44,7 +46,7 @@ def test_cloud_function_1stgen_invocation_sku_resolved_and_priced(populated_func
         usage={
             "invocations_per_month": 5000000,
             "avg_execution_time_ms": 200,
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_function_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
@@ -55,7 +57,9 @@ def test_cloud_function_1stgen_invocation_sku_resolved_and_priced(populated_func
     assert inv_map["qty"] == 5000000
 
 
-def test_cloud_function_1stgen_compute_time_uses_tier1_or_tier2_rate_by_region(populated_function_db: str) -> None:
+def test_cloud_function_1stgen_compute_time_uses_tier1_or_tier2_rate_by_region(
+    populated_function_db: str,
+) -> None:
     """Verify compute time uses appropriate pricing tiers depending on the region (Tier 1 vs Tier 2)."""
     # Tier 1 Region
     r_t1 = Resource(
@@ -71,7 +75,7 @@ def test_cloud_function_1stgen_compute_time_uses_tier1_or_tier2_rate_by_region(p
         usage={
             "invocations_per_month": 1000000,
             "avg_execution_time_ms": 100,
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_function_db)
     mappings_t1, _ = mapper.map_resource_to_skus(r_t1)
@@ -92,14 +96,16 @@ def test_cloud_function_1stgen_compute_time_uses_tier1_or_tier2_rate_by_region(p
         usage={
             "invocations_per_month": 1000000,
             "avg_execution_time_ms": 100,
-        }
+        },
     )
     mappings_t2, _ = mapper.map_resource_to_skus(r_t2)
     cpu_t2 = next(m for m in mappings_t2 if m["component"] == "vcpu")
     assert cpu_t2["sku_id"] == "SKU-FN-CPU-ACTIVE-T2"
 
 
-def test_cloud_function_1stgen_cost_equals_hand_computed_value_for_known_class(populated_function_db: str) -> None:
+def test_cloud_function_1stgen_cost_equals_hand_computed_value_for_known_class(
+    populated_function_db: str,
+) -> None:
     """Verify cost calculation against hand-computed expected value."""
     # 256 MB function has 0.4 GHz CPU and 0.25 GB memory.
     # us-central1 (Tier 1) active prices: GB-sec = 0.0000025, GHz-sec = 0.0000100, inv = 0.00000040
@@ -124,7 +130,7 @@ def test_cloud_function_1stgen_cost_equals_hand_computed_value_for_known_class(p
         usage={
             "invocations_per_month": 10000000,
             "avg_execution_time_ms": 200,
-        }
+        },
     )
     model = ResourceModel(resources=[r])
     est = estimate_infrastructure(populated_function_db, model)
@@ -133,7 +139,9 @@ def test_cloud_function_1stgen_cost_equals_hand_computed_value_for_known_class(p
     assert abs(est.monthly_total - 13.25) < 1e-4
 
 
-def test_cloud_function_1stgen_idle_rate_applied_when_min_instances_set(populated_function_db: str) -> None:
+def test_cloud_function_1stgen_idle_rate_applied_when_min_instances_set(
+    populated_function_db: str,
+) -> None:
     """Verify that idle rates and quantities are correctly computed for min_instances > 0."""
     # 256 MB (0.4 GHz / 0.25 GB) function with min_instances = 1
     # us-central1 (Tier 1)
@@ -164,7 +172,7 @@ def test_cloud_function_1stgen_idle_rate_applied_when_min_instances_set(populate
         usage={
             "invocations_per_month": 1000000,
             "avg_execution_time_ms": 250,
-        }
+        },
     )
     model = ResourceModel(resources=[r])
     est = estimate_infrastructure(populated_function_db, model)
@@ -173,7 +181,9 @@ def test_cloud_function_1stgen_idle_rate_applied_when_min_instances_set(populate
     assert abs(est.monthly_total - 4.2128104) < 1e-4
 
 
-def test_cloud_function_1stgen_unknown_region_surfaced_as_unpriced(populated_function_db: str) -> None:
+def test_cloud_function_1stgen_unknown_region_surfaced_as_unpriced(
+    populated_function_db: str,
+) -> None:
     """Verify that mapping for unknown region flags the resource as unpriced."""
     r = Resource(
         provider="gcp",

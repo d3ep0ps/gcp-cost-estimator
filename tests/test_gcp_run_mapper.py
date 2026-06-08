@@ -44,7 +44,7 @@ def test_cloud_run_instance_based_cpu_and_memory_skus_resolved(populated_run_db:
         usage={
             "runtime_seconds_per_invocation": 1.0,
             "invocations_per_month": 10000,
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_run_db)
     mappings, unpriced = mapper.map_resource_to_skus(resource)
@@ -67,7 +67,9 @@ def test_cloud_run_instance_based_cpu_and_memory_skus_resolved(populated_run_db:
     assert req_map["qty"] == 10000
 
 
-def test_cloud_run_request_based_active_and_idle_skus_resolved_separately(populated_run_db: str) -> None:
+def test_cloud_run_request_based_active_and_idle_skus_resolved_separately(
+    populated_run_db: str,
+) -> None:
     """Verify request-based service splits CPU/Memory into active and idle components if min_instances set."""
     resource = Resource(
         provider="gcp",
@@ -84,7 +86,7 @@ def test_cloud_run_request_based_active_and_idle_skus_resolved_separately(popula
         usage={
             "runtime_seconds_per_invocation": 2.5,
             "invocations_per_month": 100000,
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_run_db)
     mappings, unpriced = mapper.map_resource_to_skus(resource)
@@ -107,7 +109,9 @@ def test_cloud_run_request_based_active_and_idle_skus_resolved_separately(popula
     assert ram_idle_map["qty"] == 4756000
 
 
-def test_cloud_run_job_uses_instance_based_skus_with_one_minute_minimum(populated_run_db: str) -> None:
+def test_cloud_run_job_uses_instance_based_skus_with_one_minute_minimum(
+    populated_run_db: str,
+) -> None:
     """Verify that jobs use allocation SKUs with a 1-minute minimum execution time per task."""
     resource = Resource(
         provider="gcp",
@@ -123,7 +127,7 @@ def test_cloud_run_job_uses_instance_based_skus_with_one_minute_minimum(populate
             "task_count": 5,
             "runtime_seconds_per_task": 45,  # Billed as 60s minimum!
             "executions_per_month": 10,
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_run_db)
     mappings, unpriced = mapper.map_resource_to_skus(resource)
@@ -159,7 +163,7 @@ def test_cloud_run_gpu_sku_resolved_when_gpu_type_present(populated_run_db: str)
         usage={
             "runtime_seconds_per_invocation": 10.0,
             "invocations_per_month": 1000,
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_run_db)
     mappings, unpriced = mapper.map_resource_to_skus(resource)
@@ -172,7 +176,9 @@ def test_cloud_run_gpu_sku_resolved_when_gpu_type_present(populated_run_db: str)
     assert gpu_map["qty"] == 730 * 3600
 
 
-def test_cloud_run_region_outside_known_tier_list_surfaced_as_unpriced(populated_run_db: str) -> None:
+def test_cloud_run_region_outside_known_tier_list_surfaced_as_unpriced(
+    populated_run_db: str,
+) -> None:
     """Verify that an unknown region surfaces the resource as unpriced."""
     resource = Resource(
         provider="gcp",
@@ -183,11 +189,14 @@ def test_cloud_run_region_outside_known_tier_list_surfaced_as_unpriced(populated
         attributes={
             "cpu": "1",
             "memory": "512Mi",
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_run_db)
     mappings, unpriced = mapper.map_resource_to_skus(resource)
 
     assert len(mappings) == 0
     assert len(unpriced) > 0
-    assert any("no pricing data" in u["reason"].lower() or "no matching" in u["reason"].lower() for u in unpriced)
+    assert any(
+        "no pricing data" in u["reason"].lower() or "no matching" in u["reason"].lower()
+        for u in unpriced
+    )

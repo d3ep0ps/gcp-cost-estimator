@@ -133,10 +133,10 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_cloud_run_v2_job":
                         service = "run"
                         kind = "cloud_run_job"
-                    elif res_type_clean == "google_cloudfunctions_function":
-                        service = "functions"
-                        kind = "cloud_function"
-                    elif res_type_clean == "google_cloudfunctions2_function":
+                    elif res_type_clean in (
+                        "google_cloudfunctions_function",
+                        "google_cloudfunctions2_function",
+                    ):
                         service = "functions"
                         kind = "cloud_function"
                     elif res_type_clean == "google_app_engine_standard_app_version":
@@ -366,7 +366,9 @@ class TerraformHclParser(IaCParser):
                                     val = resolve_value(scaling.get(field))
                                     if val is not None:
                                         if _is_unresolved(val):
-                                            assumptions.append(f"Unresolved attribute {field}: '{val}'")
+                                            assumptions.append(
+                                                f"Unresolved attribute {field}: '{val}'"
+                                            )
                                         else:
                                             with contextlib.suppress(ValueError, TypeError):
                                                 attributes[field] = int(val)
@@ -385,9 +387,15 @@ class TerraformHclParser(IaCParser):
                                     cpu_idle_val = resolve_value(res_conf.get("cpu_idle"))
                                     if cpu_idle_val is not None:
                                         if _is_unresolved(cpu_idle_val):
-                                            assumptions.append(f"Unresolved attribute cpu_idle: '{cpu_idle_val}'")
+                                            assumptions.append(
+                                                f"Unresolved attribute cpu_idle: '{cpu_idle_val}'"
+                                            )
                                         else:
-                                            attributes["cpu_idle"] = str(cpu_idle_val).lower() in {"true", "1", "yes"}
+                                            attributes["cpu_idle"] = str(cpu_idle_val).lower() in {
+                                                "true",
+                                                "1",
+                                                "yes",
+                                            }
                                     limits_list = res_conf.get("limits", [])
                                     if not isinstance(limits_list, list):
                                         limits_list = [limits_list]
@@ -399,7 +407,9 @@ class TerraformHclParser(IaCParser):
                                             if val is not None:
                                                 attributes[limit_key] = val
                                                 if _is_unresolved(val):
-                                                    assumptions.append(f"Unresolved attribute {limit_key}: '{val}'")
+                                                    assumptions.append(
+                                                        f"Unresolved attribute {limit_key}: '{val}'"
+                                                    )
 
                     elif res_type_clean == "google_cloud_run_v2_job":
                         template_list = res_config.get("template", [])
@@ -437,7 +447,10 @@ class TerraformHclParser(IaCParser):
                                                 if val is not None:
                                                     attributes[limit_key] = val
                                                     if _is_unresolved(val):
-                                                        assumptions.append(f"Unresolved attribute {limit_key}: '{val}'")
+                                                        assumptions.append(
+                                                            f"Unresolved attribute {limit_key}: "
+                                                            f"'{val}'"
+                                                        )
                     elif res_type_clean == "google_cloudfunctions_function":
                         attributes["generation"] = "1st_gen"
                         for field in ("available_memory_mb", "min_instances"):
@@ -455,7 +468,12 @@ class TerraformHclParser(IaCParser):
                         for sc in sc_list:
                             if not isinstance(sc, dict):
                                 continue
-                            for field in ("available_memory", "available_cpu", "min_instance_count", "max_instance_count"):
+                            for field in (
+                                "available_memory",
+                                "available_cpu",
+                                "min_instance_count",
+                                "max_instance_count",
+                            ):
                                 val = resolve_value(sc.get(field))
                                 if val is not None:
                                     attributes[field] = val
@@ -467,10 +485,16 @@ class TerraformHclParser(IaCParser):
                         if iclass:
                             attributes["instance_class"] = iclass
                             if _is_unresolved(iclass):
-                                assumptions.append(f"Unresolved attribute instance_class: '{iclass}'")
+                                assumptions.append(
+                                    f"Unresolved attribute instance_class: '{iclass}'"
+                                )
 
                         # Extract scaling block info
-                        for scaling_type in ("automatic_scaling", "basic_scaling", "manual_scaling"):
+                        for scaling_type in (
+                            "automatic_scaling",
+                            "basic_scaling",
+                            "manual_scaling",
+                        ):
                             scaling_list = res_config.get(scaling_type, [])
                             if isinstance(scaling_list, list) and scaling_list:
                                 attributes["scaling_type"] = scaling_type
@@ -481,7 +505,10 @@ class TerraformHclParser(IaCParser):
                                         if resolved_v is not None:
                                             attributes[f"{scaling_type}_{k}"] = resolved_v
                                             if _is_unresolved(resolved_v):
-                                                assumptions.append(f"Unresolved attribute {scaling_type}_{k}: '{resolved_v}'")
+                                                assumptions.append(
+                                                    f"Unresolved attribute {scaling_type}_{k}: "
+                                                    f"'{resolved_v}'"
+                                                )
 
                     elif res_type_clean == "google_app_engine_flexible_app_version":
                         resources_blk = res_config.get("resources")

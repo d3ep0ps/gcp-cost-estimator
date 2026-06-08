@@ -8,7 +8,7 @@ from gcp_cost_estimator.core.model import AttachedResource, ResourceModel
 
 def parse_k8s_quantity(val: Any, is_cpu: bool = False) -> str:
     """Parse k8s quantity string to a standardized string representation.
-    
+
     CPU: "1000m" -> "1", "1.5" -> "1.5"
     Memory: "512Mi" -> "0.5", "1Gi" -> "1.0", "1024M" -> "1.024"
     """
@@ -17,7 +17,7 @@ def parse_k8s_quantity(val: Any, is_cpu: bool = False) -> str:
     val_str = str(val).strip()
     if not val_str:
         return ""
-        
+
     try:
         float(val_str)
         if not is_cpu:
@@ -25,11 +25,11 @@ def parse_k8s_quantity(val: Any, is_cpu: bool = False) -> str:
             f_val = float(val_str)
             if f_val.is_integer():
                 return f"{int(f_val)}.0"
-            return f"{f_val:.4f}".rstrip('0').rstrip('.')
+            return f"{f_val:.4f}".rstrip("0").rstrip(".")
         return val_str
     except ValueError:
         pass
-        
+
     if is_cpu:
         if val_str.endswith("m"):
             try:
@@ -39,40 +39,39 @@ def parse_k8s_quantity(val: Any, is_cpu: bool = False) -> str:
             except ValueError:
                 return val_str
         return val_str
+    m = re.match(r"^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$", val_str)
+    if not m:
+        return val_str
+    num_str, suffix = m.group(1), m.group(2)
+    try:
+        num = float(num_str)
+    except ValueError:
+        return val_str
+
+    suffix_lower = suffix.lower()
+    if suffix_lower == "ki":
+        bytes_val = num * 1024
+    elif suffix_lower == "mi":
+        bytes_val = num * 1024 * 1024
+    elif suffix_lower == "gi":
+        bytes_val = num * 1024 * 1024 * 1024
+    elif suffix_lower == "ti":
+        bytes_val = num * 1024 * 1024 * 1024 * 1024
+    elif suffix_lower == "k":
+        bytes_val = num * 1000
+    elif suffix_lower == "m":
+        bytes_val = num * 1000 * 1000
+    elif suffix_lower == "g":
+        bytes_val = num * 1000 * 1000 * 1000
+    elif suffix_lower == "t":
+        bytes_val = num * 1000 * 1000 * 1000 * 1000
     else:
-        m = re.match(r"^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$", val_str)
-        if not m:
-            return val_str
-        num_str, suffix = m.group(1), m.group(2)
-        try:
-            num = float(num_str)
-        except ValueError:
-            return val_str
-            
-        suffix_lower = suffix.lower()
-        if suffix_lower == "ki":
-            bytes_val = num * 1024
-        elif suffix_lower == "mi":
-            bytes_val = num * 1024 * 1024
-        elif suffix_lower == "gi":
-            bytes_val = num * 1024 * 1024 * 1024
-        elif suffix_lower == "ti":
-            bytes_val = num * 1024 * 1024 * 1024 * 1024
-        elif suffix_lower == "k":
-            bytes_val = num * 1000
-        elif suffix_lower == "m":
-            bytes_val = num * 1000 * 1000
-        elif suffix_lower == "g":
-            bytes_val = num * 1000 * 1000 * 1000
-        elif suffix_lower == "t":
-            bytes_val = num * 1000 * 1000 * 1000 * 1000
-        else:
-            return val_str
-            
-        gib = bytes_val / (1024 * 1024 * 1024)
-        if gib.is_integer():
-            return f"{int(gib)}.0"
-        return f"{gib:.4f}".rstrip('0').rstrip('.')
+        return val_str
+
+    gib = bytes_val / (1024 * 1024 * 1024)
+    if gib.is_integer():
+        return f"{int(gib)}.0"
+    return f"{gib:.4f}".rstrip("0").rstrip(".")
 
 
 def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
@@ -195,16 +194,20 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                     )
 
         # GCP Cloud Run checks
-        if r.provider == "gcp" and r.service == "run":
-            if r.kind in {"cloud_run_service", "cloud_run_job"}:
-                if not r.attributes.get("cpu"):
-                    errors.append(
-                        f"Resource '{r.resource_id}' is a Cloud Run resource but has no CPU limit."
-                    )
-                if not r.attributes.get("memory"):
-                    errors.append(
-                        f"Resource '{r.resource_id}' is a Cloud Run resource but has no Memory limit."
-                    )
+        if (
+            r.provider == "gcp"
+            and r.service == "run"
+            and r.kind in {"cloud_run_service", "cloud_run_job"}
+        ):
+            if not r.attributes.get("cpu"):
+                errors.append(
+                    f"Resource '{r.resource_id}' is a Cloud Run resource but has no CPU limit."
+                )
+            if not r.attributes.get("memory"):
+                errors.append(
+                    f"Resource '{r.resource_id}' is a Cloud Run resource "
+                    "but has no Memory limit."
+                )
 
         # GCP Cloud Functions checks
         if r.provider == "gcp" and r.service == "functions" and r.kind == "cloud_function":
@@ -215,20 +218,24 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                     memory_mb = int(memory_mb_raw)
                     if memory_mb not in {128, 256, 512, 1024, 2048, 4096, 8192}:
                         errors.append(
-                            f"Resource '{r.resource_id}' has non-standard memory allocation '{memory_mb_raw}' for 1st-gen function."
+                            f"Resource '{r.resource_id}' has non-standard "
+                            f"memory allocation '{memory_mb_raw}' for 1st-gen function."
                         )
                 except (ValueError, TypeError):
                     errors.append(
-                        f"Resource '{r.resource_id}' has non-standard memory allocation '{memory_mb_raw}' for 1st-gen function."
+                        f"Resource '{r.resource_id}' has non-standard "
+                        f"memory allocation '{memory_mb_raw}' for 1st-gen function."
                     )
             elif gen == "2nd_gen":
                 if not r.attributes.get("available_cpu"):
                     errors.append(
-                        f"Resource '{r.resource_id}' is a 2nd-gen Cloud Function but has no available_cpu limit."
+                        f"Resource '{r.resource_id}' is a 2nd-gen Cloud Function "
+                        "but has no available_cpu limit."
                     )
                 if not r.attributes.get("available_memory"):
                     errors.append(
-                        f"Resource '{r.resource_id}' is a 2nd-gen Cloud Function but has no available_memory limit."
+                        f"Resource '{r.resource_id}' is a 2nd-gen Cloud Function "
+                        "but has no available_memory limit."
                     )
 
         # GCP App Engine checks
@@ -237,14 +244,15 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                 iclass = r.attributes.get("instance_class", "F1")
                 if iclass not in {"F1", "F2", "F4", "F4_1G", "B1", "B2", "B4", "B4_1G", "B8"}:
                     errors.append(
-                        f"Resource '{r.resource_id}' has non-standard instance class '{iclass}' for App Engine standard."
+                        f"Resource '{r.resource_id}' has non-standard "
+                        f"instance class '{iclass}' for App Engine standard."
                     )
             elif r.kind == "app_engine_flexible_version":
                 for field in ("cpu", "memory_gb", "disk_gb"):
                     if field in r.attributes:
                         try:
                             float(r.attributes[field])
-                        except (ValueError, TypeError):
+                        except ValueError, TypeError:
                             errors.append(
                                 f"Resource '{r.resource_id}' has invalid '{field}' attribute."
                             )
@@ -485,22 +493,28 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                 if "cpu" in r.attributes:
                     r.attributes["cpu"] = parse_k8s_quantity(r.attributes["cpu"], is_cpu=True)
                 if "memory" in r.attributes:
-                    r.attributes["memory"] = parse_k8s_quantity(r.attributes["memory"], is_cpu=False)
-                
+                    r.attributes["memory"] = parse_k8s_quantity(
+                        r.attributes["memory"], is_cpu=False
+                    )
+
                 if "cpu_idle" not in r.attributes:
                     r.attributes["cpu_idle"] = True
                     r.assumptions.append("Defaulted cpu_idle to true.")
                 else:
-                    r.attributes["cpu_idle"] = str(r.attributes["cpu_idle"]).lower() in {"true", "1", "yes"}
+                    r.attributes["cpu_idle"] = str(r.attributes["cpu_idle"]).lower() in {
+                        "true",
+                        "1",
+                        "yes",
+                    }
 
                 if "min_instance_count" not in r.attributes:
                     r.attributes["min_instance_count"] = 0
                 else:
                     try:
                         r.attributes["min_instance_count"] = int(r.attributes["min_instance_count"])
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         r.attributes["min_instance_count"] = 0
-                
+
                 if r.attributes["min_instance_count"] > 0:
                     r.assumptions.append("min_instance_count > 0 enables idle instance billing.")
 
@@ -508,7 +522,9 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                     r.usage["runtime_seconds_per_invocation"] = 1.0
                     r.assumptions.append("Defaulted runtime_seconds_per_invocation to 1.0s.")
                 else:
-                    r.usage["runtime_seconds_per_invocation"] = float(r.usage["runtime_seconds_per_invocation"])
+                    r.usage["runtime_seconds_per_invocation"] = float(
+                        r.usage["runtime_seconds_per_invocation"]
+                    )
 
                 if "invocations_per_month" not in r.usage:
                     r.usage["invocations_per_month"] = 10_000
@@ -520,7 +536,9 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                 if "cpu" in r.attributes:
                     r.attributes["cpu"] = parse_k8s_quantity(r.attributes["cpu"], is_cpu=True)
                 if "memory" in r.attributes:
-                    r.attributes["memory"] = parse_k8s_quantity(r.attributes["memory"], is_cpu=False)
+                    r.attributes["memory"] = parse_k8s_quantity(
+                        r.attributes["memory"], is_cpu=False
+                    )
 
                 if "task_count" not in r.usage:
                     r.usage["task_count"] = 1
@@ -549,22 +567,16 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                     r.attributes["available_memory_mb"] = 256
                 else:
                     try:
-                        r.attributes["available_memory_mb"] = int(r.attributes["available_memory_mb"])
-                    except (ValueError, TypeError):
+                        r.attributes["available_memory_mb"] = int(
+                            r.attributes["available_memory_mb"]
+                        )
+                    except ValueError, TypeError:
                         r.attributes["available_memory_mb"] = 256
-                
+
                 memory_mb = r.attributes["available_memory_mb"]
                 r.attributes["memory_gb"] = float(memory_mb) / 1024.0
-                
-                ghz_map = {
-                    128: 0.2,
-                    256: 0.4,
-                    512: 0.8,
-                    1024: 1.4,
-                    2048: 2.4,
-                    4096: 4.8,
-                    8192: 4.8
-                }
+
+                ghz_map = {128: 0.2, 256: 0.4, 512: 0.8, 1024: 1.4, 2048: 2.4, 4096: 4.8, 8192: 4.8}
                 r.attributes["cpu_ghz"] = ghz_map.get(memory_mb, 0.4)
 
                 if "min_instances" not in r.attributes:
@@ -572,9 +584,9 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                 else:
                     try:
                         r.attributes["min_instances"] = int(r.attributes["min_instances"])
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         r.attributes["min_instances"] = 0
-                
+
                 if r.attributes["min_instances"] > 0:
                     r.assumptions.append("min_instances > 0 enables idle instance billing.")
 
@@ -592,24 +604,34 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
 
             elif gen == "2nd_gen":
                 if "available_cpu" in r.attributes:
-                    r.attributes["cpu"] = parse_k8s_quantity(r.attributes["available_cpu"], is_cpu=True)
+                    r.attributes["cpu"] = parse_k8s_quantity(
+                        r.attributes["available_cpu"], is_cpu=True
+                    )
                 if "available_memory" in r.attributes:
-                    r.attributes["memory"] = parse_k8s_quantity(r.attributes["available_memory"], is_cpu=False)
-                
+                    r.attributes["memory"] = parse_k8s_quantity(
+                        r.attributes["available_memory"], is_cpu=False
+                    )
+
                 if "cpu_idle" not in r.attributes:
                     r.attributes["cpu_idle"] = True
                 else:
-                    r.attributes["cpu_idle"] = str(r.attributes["cpu_idle"]).lower() in {"true", "1", "yes"}
+                    r.attributes["cpu_idle"] = str(r.attributes["cpu_idle"]).lower() in {
+                        "true",
+                        "1",
+                        "yes",
+                    }
 
                 if "min_instance_count" not in r.attributes:
                     try:
-                        r.attributes["min_instance_count"] = int(r.attributes.get("min_instances", 0))
-                    except (ValueError, TypeError):
+                        r.attributes["min_instance_count"] = int(
+                            r.attributes.get("min_instances", 0)
+                        )
+                    except ValueError, TypeError:
                         r.attributes["min_instance_count"] = 0
                 else:
                     try:
                         r.attributes["min_instance_count"] = int(r.attributes["min_instance_count"])
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         r.attributes["min_instance_count"] = 0
 
                 if r.attributes["min_instance_count"] > 0:
@@ -622,7 +644,9 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                     r.usage["invocations_per_month"] = int(r.usage["invocations_per_month"])
 
                 if "avg_execution_time_ms" in r.usage:
-                    r.usage["runtime_seconds_per_invocation"] = float(r.usage["avg_execution_time_ms"]) / 1000.0
+                    r.usage["runtime_seconds_per_invocation"] = (
+                        float(r.usage["avg_execution_time_ms"]) / 1000.0
+                    )
                 elif "runtime_seconds_per_invocation" not in r.usage:
                     r.usage["runtime_seconds_per_invocation"] = 0.1
                     r.assumptions.append("Defaulted runtime_seconds_per_invocation to 0.1s.")
@@ -636,7 +660,11 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                 else:
                     r.attributes["instance_class"] = str(r.attributes["instance_class"]).upper()
 
-                free_tier_msg = "App Engine standard includes a daily free tier per project (e.g. 28 hours for F-classes, 9 hours for B-classes) — not applied (list price only)."
+                free_tier_msg = (
+                    "App Engine standard includes a daily free tier per project "
+                    "(e.g. 28 hours for F-classes, 9 hours for B-classes) — "
+                    "not applied (list price only)."
+                )
                 if free_tier_msg not in r.assumptions:
                     r.assumptions.append(free_tier_msg)
 
@@ -646,7 +674,7 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                 else:
                     try:
                         r.attributes["cpu"] = int(r.attributes["cpu"])
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         r.attributes["cpu"] = 1
 
                 if "memory_gb" not in r.attributes:
@@ -654,7 +682,7 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                 else:
                     try:
                         r.attributes["memory_gb"] = float(r.attributes["memory_gb"])
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         r.attributes["memory_gb"] = 3.75
 
                 if "disk_gb" not in r.attributes:
@@ -664,16 +692,14 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                     try:
                         disk_gb = int(r.attributes["disk_gb"])
                         r.attributes["disk_gb"] = disk_gb
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         disk_gb = 10
                         r.attributes["disk_gb"] = disk_gb
 
                 if not any(a.kind == "pd_persistent_disk" for a in r.attached):
                     r.attached.append(
                         AttachedResource(
-                            kind="pd_persistent_disk",
-                            quantity=1,
-                            attributes={"size_gb": disk_gb}
+                            kind="pd_persistent_disk", quantity=1, attributes={"size_gb": disk_gb}
                         )
                     )
 

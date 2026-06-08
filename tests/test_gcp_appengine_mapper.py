@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from gcp_cost_estimator.core.model import Resource, ResourceModel, AttachedResource
+from gcp_cost_estimator.core.model import AttachedResource, Resource, ResourceModel
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
 from gcp_cost_estimator.core.service import estimate_infrastructure
@@ -29,7 +29,9 @@ def populated_appengine_db(temp_db_path: str) -> str:
     return temp_db_path
 
 
-def test_app_engine_standard_instance_hour_cost_equals_hand_computed_value(populated_appengine_db: str) -> None:
+def test_app_engine_standard_instance_hour_cost_equals_hand_computed_value(
+    populated_appengine_db: str,
+) -> None:
     """Verify standard instance hour cost equals hand-computed expected value.
     F2 instance class has 2x multiplier. 100 hours of runtime in us-central1:
     Quantity = 100 * 2 = 200 hours.
@@ -47,7 +49,7 @@ def test_app_engine_standard_instance_hour_cost_equals_hand_computed_value(popul
         },
         usage={
             "runtime_hours_per_month": 100.0,
-        }
+        },
     )
     model = ResourceModel(resources=[r])
     est = estimate_infrastructure(populated_appengine_db, model)
@@ -56,7 +58,9 @@ def test_app_engine_standard_instance_hour_cost_equals_hand_computed_value(popul
     assert abs(est.monthly_total - 10.00) < 1e-4
 
 
-def test_app_engine_standard_fifteen_minute_tail_added_to_instance_lifecycle(populated_appengine_db: str) -> None:
+def test_app_engine_standard_fifteen_minute_tail_added_to_instance_lifecycle(
+    populated_appengine_db: str,
+) -> None:
     """Verify that the 15-minute tail (+0.25h) is added per lifecycle event.
     F1 instance class (1x multiplier), 100 hours of runtime, 40 lifecycle events.
     Total runtime = 100 + 40 * 0.25 = 110 hours.
@@ -75,7 +79,7 @@ def test_app_engine_standard_fifteen_minute_tail_added_to_instance_lifecycle(pop
         usage={
             "runtime_hours_per_month": 100.0,
             "lifecycle_events_per_month": 40.0,
-        }
+        },
     )
     model = ResourceModel(resources=[r])
     est = estimate_infrastructure(populated_appengine_db, model)
@@ -84,7 +88,9 @@ def test_app_engine_standard_fifteen_minute_tail_added_to_instance_lifecycle(pop
     assert abs(est.monthly_total - 5.50) < 1e-4
 
 
-def test_app_engine_flexible_cost_reuses_compute_engine_vcpu_and_memory_skus(populated_appengine_db: str) -> None:
+def test_app_engine_flexible_cost_reuses_compute_engine_vcpu_and_memory_skus(
+    populated_appengine_db: str,
+) -> None:
     """Verify App Engine flexible CPU/RAM mapping and pricing.
     cpu = 2, memory_gb = 4.0, runtime_hours = 730
     vcpu price = 0.0526 / hr, ram price = 0.0071 / hr.
@@ -104,7 +110,7 @@ def test_app_engine_flexible_cost_reuses_compute_engine_vcpu_and_memory_skus(pop
         },
         usage={
             "runtime_hours_per_month": 730.0,
-        }
+        },
     )
     model = ResourceModel(resources=[r])
     est = estimate_infrastructure(populated_appengine_db, model)
@@ -113,7 +119,9 @@ def test_app_engine_flexible_cost_reuses_compute_engine_vcpu_and_memory_skus(pop
     assert abs(est.monthly_total - 97.928) < 1e-4
 
 
-def test_app_engine_flexible_persistent_disk_cost_reuses_compute_engine_pd_sku(populated_appengine_db: str) -> None:
+def test_app_engine_flexible_persistent_disk_cost_reuses_compute_engine_pd_sku(
+    populated_appengine_db: str,
+) -> None:
     """Verify App Engine flexible environment reuses the Compute Engine standard PD SKU."""
     r = Resource(
         provider="gcp",
@@ -127,12 +135,8 @@ def test_app_engine_flexible_persistent_disk_cost_reuses_compute_engine_pd_sku(p
             "disk_gb": 20,
         },
         attached=[
-            AttachedResource(
-                kind="pd_persistent_disk",
-                quantity=1,
-                attributes={"size_gb": 20}
-            )
-        ]
+            AttachedResource(kind="pd_persistent_disk", quantity=1, attributes={"size_gb": 20})
+        ],
     )
     mapper = GcpSkuMapper(populated_appengine_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
@@ -158,7 +162,7 @@ def test_app_engine_flexible_egress_cost_reuses_vpc_egress_sku(populated_appengi
         },
         usage={
             "egress_gb": 50.0,
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_appengine_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
@@ -170,7 +174,9 @@ def test_app_engine_flexible_egress_cost_reuses_vpc_egress_sku(populated_appengi
     assert egress_map["qty"] == 50.0
 
 
-def test_app_engine_network_egress_billed_per_gib_beyond_free_tier_threshold_documented(populated_appengine_db: str) -> None:
+def test_app_engine_network_egress_billed_per_gib_beyond_free_tier_threshold_documented(
+    populated_appengine_db: str,
+) -> None:
     """Verify that App Engine standard egress maps to egress SKU when usage is provided."""
     r = Resource(
         provider="gcp",
@@ -183,7 +189,7 @@ def test_app_engine_network_egress_billed_per_gib_beyond_free_tier_threshold_doc
         },
         usage={
             "egress_gb": 10.0,
-        }
+        },
     )
     mapper = GcpSkuMapper(populated_appengine_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)

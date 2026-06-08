@@ -9,7 +9,11 @@ def test_parse_appengine_standard_extracts_iclass_and_scaling() -> None:
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
 
-    res = next(r for r in model.resources if r.resource_id == "google_app_engine_standard_app_version.example")
+    res = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_app_engine_standard_app_version.example"
+    )
     assert res.provider == "gcp"
     assert res.service == "appengine"
     assert res.kind == "app_engine_standard_version"
@@ -24,7 +28,11 @@ def test_parse_appengine_flexible_extracts_resources() -> None:
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
 
-    res = next(r for r in model.resources if r.resource_id == "google_app_engine_flexible_app_version.example")
+    res = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_app_engine_flexible_app_version.example"
+    )
     assert res.provider == "gcp"
     assert res.service == "appengine"
     assert res.kind == "app_engine_flexible_version"
@@ -33,7 +41,11 @@ def test_parse_appengine_flexible_extracts_resources() -> None:
     assert float(res.attributes["memory_gb"]) == 2
     assert int(res.attributes["disk_gb"]) == 10
 
-    missing = next(r for r in model.resources if r.resource_id == "google_app_engine_flexible_app_version.missing_resources")
+    missing = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_app_engine_flexible_app_version.missing_resources"
+    )
     assert any("no resources configuration found" in a.lower() for a in missing.assumptions)
 
 
@@ -42,7 +54,11 @@ def test_parse_appengine_unresolved_variable_flagged() -> None:
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
 
-    res = next(r for r in model.resources if r.resource_id == "google_app_engine_standard_app_version.unresolved")
+    res = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_app_engine_standard_app_version.unresolved"
+    )
     assert any("unresolved attribute" in a.lower() for a in res.assumptions)
 
 
@@ -51,7 +67,11 @@ def test_plan_json_resolves_appengine_resources() -> None:
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/appengine_plan.json")
 
-    standard = next(r for r in model.resources if r.resource_id == "google_app_engine_standard_app_version.example")
+    standard = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_app_engine_standard_app_version.example"
+    )
     assert standard.provider == "gcp"
     assert standard.service == "appengine"
     assert standard.kind == "app_engine_standard_version"
@@ -59,7 +79,11 @@ def test_plan_json_resolves_appengine_resources() -> None:
     assert standard.attributes["instance_class"] == "F2"
     assert standard.attributes.get("scaling_type") == "automatic_scaling"
 
-    flexible = next(r for r in model.resources if r.resource_id == "google_app_engine_flexible_app_version.example")
+    flexible = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_app_engine_flexible_app_version.example"
+    )
     assert flexible.provider == "gcp"
     assert flexible.service == "appengine"
     assert flexible.kind == "app_engine_flexible_version"
@@ -68,5 +92,9 @@ def test_plan_json_resolves_appengine_resources() -> None:
     assert float(flexible.attributes["memory_gb"]) == 2
     assert int(flexible.attributes["disk_gb"]) == 10
 
-    missing = next(r for r in model.resources if r.resource_id == "google_app_engine_flexible_app_version.missing_resources")
+    missing = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_app_engine_flexible_app_version.missing_resources"
+    )
     assert any("no resources configuration found" in a.lower() for a in missing.assumptions)

@@ -113,6 +113,37 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
             "hint": "Set attributes.backup_enabled=true to include backup storage cost.",
         },
     },
+    "run": {
+        "invocations_per_month": {
+            "value": 10_000,
+            "unit": "invocations/month",
+            "hint": "Override usage.invocations_per_month.",
+        },
+        "runtime_seconds_per_invocation": {
+            "value": 1,
+            "unit": "seconds",
+            "hint": "Override usage.runtime_seconds_per_invocation.",
+        },
+    },
+    "functions": {
+        "invocations_per_month": {
+            "value": 1_000_000,
+            "unit": "invocations/month",
+            "hint": "Override usage.invocations_per_month.",
+        },
+        "avg_execution_time_ms": {
+            "value": 100,
+            "unit": "ms",
+            "hint": "Override usage.avg_execution_time_ms.",
+        },
+    },
+    "appengine": {
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": "Override usage.runtime_hours_per_month.",
+        },
+    },
 }
 
 CATALOG_COVERAGE: dict[str, Any] = {
@@ -146,6 +177,21 @@ CATALOG_COVERAGE: dict[str, Any] = {
             "kinds": ["bigquery_dataset"],
             "notes": (
                 "Data storage (active/long-term), on-demand query scans, legacy streaming inserts."
+            ),
+        },
+        "run": {
+            "kinds": ["cloud_run_service", "cloud_run_job"],
+            "notes": "CPU/RAM allocation, invocations, execution time, min/max instances.",
+        },
+        "functions": {
+            "kinds": ["cloud_function"],
+            "notes": "1st & 2nd gen function instance classes, memory limits, and regional tiers.",
+        },
+        "appengine": {
+            "kinds": ["app_engine_standard_version", "app_engine_flexible_version"],
+            "notes": (
+                "Standard Frontend/Backend instance-hours, "
+                "flexible CPU/RAM, and standard disk/egress."
             ),
         },
     },

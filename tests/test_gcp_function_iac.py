@@ -9,7 +9,9 @@ def test_parse_cloudfunctions_function_1st_gen_extracts_memory_and_trigger() -> 
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
 
-    res = next(r for r in model.resources if r.resource_id == "google_cloudfunctions_function.example")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_cloudfunctions_function.example"
+    )
     assert res.provider == "gcp"
     assert res.service == "functions"
     assert res.kind == "cloud_function"
@@ -23,7 +25,9 @@ def test_parse_cloudfunctions2_function_extracts_service_config() -> None:
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
 
-    res = next(r for r in model.resources if r.resource_id == "google_cloudfunctions2_function.example")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_cloudfunctions2_function.example"
+    )
     assert res.provider == "gcp"
     assert res.service == "functions"
     assert res.kind == "cloud_function"
@@ -39,7 +43,9 @@ def test_parse_cloud_function_unresolved_runtime_variable_flagged() -> None:
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
 
-    res = next(r for r in model.resources if r.resource_id == "google_cloudfunctions_function.unresolved")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_cloudfunctions_function.unresolved"
+    )
     assert any("unresolved attribute" in a.lower() for a in res.assumptions)
 
 
@@ -48,7 +54,9 @@ def test_plan_json_resolves_cloud_functions_resources() -> None:
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/function_plan.json")
 
-    f1 = next(r for r in model.resources if r.resource_id == "google_cloudfunctions_function.example")
+    f1 = next(
+        r for r in model.resources if r.resource_id == "google_cloudfunctions_function.example"
+    )
     assert f1.provider == "gcp"
     assert f1.service == "functions"
     assert f1.kind == "cloud_function"
@@ -56,7 +64,9 @@ def test_plan_json_resolves_cloud_functions_resources() -> None:
     assert f1.attributes["available_memory_mb"] == 256
     assert f1.attributes["generation"] == "1st_gen"
 
-    f2 = next(r for r in model.resources if r.resource_id == "google_cloudfunctions2_function.example")
+    f2 = next(
+        r for r in model.resources if r.resource_id == "google_cloudfunctions2_function.example"
+    )
     assert f2.provider == "gcp"
     assert f2.service == "functions"
     assert f2.kind == "cloud_function"

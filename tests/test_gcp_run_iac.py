@@ -39,7 +39,9 @@ def test_parse_cloud_run_unresolved_variable_in_cpu_flagged_not_assumed() -> Non
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
 
-    res = next(r for r in model.resources if r.resource_id == "google_cloud_run_v2_service.unresolved")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_cloud_run_v2_service.unresolved"
+    )
     assert any("unresolved attribute" in a.lower() for a in res.assumptions)
 
 
@@ -48,7 +50,9 @@ def test_plan_json_resolves_cloud_run_resources() -> None:
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/run_plan.json")
 
-    service = next(r for r in model.resources if r.resource_id == "google_cloud_run_v2_service.example")
+    service = next(
+        r for r in model.resources if r.resource_id == "google_cloud_run_v2_service.example"
+    )
     assert service.provider == "gcp"
     assert service.service == "run"
     assert service.kind == "cloud_run_service"
