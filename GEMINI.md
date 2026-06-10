@@ -85,6 +85,13 @@ Always use `uv` for package management and script execution.
 - **Security:** Secrets/credentials must never be logged. Redact secret-flagged Terraform attributes before returning a model.
 - **Commits:** Conventional commits; small, behavior-scoped commits that pair a test with its implementation.
 
+### Codebase Structure & GCP Pricing Modularization
+The GCP pricing mapper is modularized under `src/gcp_cost_estimator/core/pricing/gcp/` to satisfy SRP and OCP. Do not add code to a monolithic file. To add pricing support for a new GCP resource:
+1. Create a new module file under `src/gcp_cost_estimator/core/pricing/gcp/<service>.py` (e.g. `gcs.py`, `sql.py`).
+2. Implement the mapping function: `map_<resource_kind>(resource: Resource, cursor: sqlite3.Cursor) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]`.
+3. Import and delegate to this function inside `GcpSkuMapper` in `mapper.py`.
+4. Ensure any shared specifications/resolvers (e.g., machine/tier specs) are placed in `specs.py` and re-exported in `__init__.py`.
+
 ## Architecture Decisions (ADRs)
 Key decisions recorded here for quick reference. Full rationale in `gcp-cost-estimator-server-architecture.md` §7.
 
