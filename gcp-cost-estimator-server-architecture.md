@@ -113,7 +113,7 @@ This section is the authoritative guide for adding a new GCP service. Every serv
 New GCP service
       │
       ├─ 1. Validation & normalisation  core/validate.py
-      ├─ 2. SKU mapping                 core/pricing/gcp.py  (GcpSkuMapper)
+      ├─ 2. SKU mapping                 core/pricing/gcp/ (GcpSkuMapper)
       ├─ 3. Terraform IaC parsing       core/iac/terraform_hcl.py
       │                                 core/iac/terraform_plan.py
       ├─ 4. Coverage catalog            catalog://coverage resource
@@ -151,19 +151,21 @@ Validation rules must cover:
 - Values that are warnings rather than errors (e.g. unknown `database_version` prefix).
 - Secret-flagged attributes to redact (any key containing `password`, `secret`, `key`, `token`).
 
-### Touch-point 2 — SKU mapping (`core/pricing/gcp.py`)
+### Touch-point 2 — SKU mapping (`core/pricing/gcp/` package)
 
-`GcpSkuMapper.map_resource_to_skus` dispatches on `resource.kind`. Add a private method `_map_{kind}` and wire it into the dispatch table:
+The GCP pricing mapper is modularized under `src/gcp_cost_estimator/core/pricing/gcp/` to satisfy the Single Responsibility Principle (SRP) and Open/Closed Principle (OCP). Individual services have their own mapping files, and the core mapper `GcpSkuMapper` in `mapper.py` imports and delegates to them.
 
-```python
-_MAPPER_DISPATCH: dict[str, Callable] = {
-    "gce_instance":       "_map_gce_instance",
-    "cloud_sql_instance": "_map_cloud_sql",
-    # add new kind → method name here
-}
-```
+To add pricing support for a new GCP resource:
+1. **Create a new module file** under `src/gcp_cost_estimator/core/pricing/gcp/<service>.py` (e.g., `storage.py`, `sql.py`).
+2. **Implement the mapping function** with the signature:
+   ```python
+   def map_<resource_kind>(resource: Resource, cursor: sqlite3.Cursor) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+       ...
+   ```
+3. **Import and delegate** to this function inside `GcpSkuMapper.map_resource_to_skus` (located in `mapper.py`).
+4. **Ensure specifications/resolvers** (e.g., machine/tier specs) are placed in `specs.py` and re-exported in `__init__.py`.
 
-Each `_map_{kind}` method must:
+Each mapping function must:
 1. Read all pricing inputs from `resource.attributes` and `resource.usage` — never from hardcoded numbers.
 2. Look up SKUs from the SQLite cache by `(service, description_fragment, region)` — never by hardcoded SKU IDs.
 3. Return `(mappings, unpriced)` where `mappings` is a list of `{sku_id, unit_price, unit, qty, component}` dicts and `unpriced` contains any component that could not be resolved.
@@ -171,14 +173,7 @@ Each `_map_{kind}` method must:
 5. Emit all cost-driving multipliers explicitly (e.g. HA doubles compute qty; storage qty is not multiplied).
 
 SKU lookup convention — use description fragments, not hardcoded SKU IDs:
-
-```python
-_SKU_DESCRIPTION_KEYS: dict[tuple[str, str], str] = {
-    # (service_kind, component) → fragment to match in cache `description` column
-    ("cloud_sql_instance", "mysql_ent_vcpu"): "Cloud SQL for MySQL: Enterprise vCPU",
-    # add new entries here
-}
-```
+For database and serverless lookup, query the cache using description filters matching the official GCP billing description. Lookups are dynamic and based on region + description tags.
 
 ### Touch-point 3 — Terraform IaC parsing
 
@@ -415,7 +410,21 @@ gcp-cost-estimator/
 │  │  │  ├─ terraform_hcl.py         # static HCL parser (python-hcl2)
 │  │  │  └─ terraform_plan.py        # terraform show -json parser + auto-mode dispatch
 │  │  ├─ pricing/
-│  │  │  ├─ gcp.py                   # GcpSkuMapper + resolve_machine_type_specs
+│  │  │  ├─ gcp/                     # GCP pricing package
+│  │  │  │  ├─ __init__.py           # Package exports (GcpSkuMapper, resolvers)
+│  │  │  │  ├─ mapper.py             # GcpSkuMapper delegating to service mappers
+│  │  │  │  ├─ specs.py              # Rule engine + machine/SQL specs resolvers
+│  │  │  │  ├─ compute.py            # Compute Engine & GKE pricing logic
+│  │  │  │  ├─ storage.py            # Cloud Storage bucket pricing logic
+│  │  │  │  ├─ sql.py                # Cloud SQL pricing logic
+│  │  │  │  ├─ serverless.py         # Cloud Run & Cloud Functions pricing logic
+│  │  │  │  ├─ appengine.py          # App Engine pricing logic
+│  │  │  │  ├─ bigquery.py           # BigQuery pricing logic
+│  │  │  │  ├─ spanner.py            # Spanner database pricing logic
+│  │  │  │  ├─ firestore.py          # Firestore database pricing logic
+│  │  │  │  ├─ memorystore.py        # Memorystore (Redis/Valkey) pricing logic
+│  │  │  │  ├─ bigtable.py           # Bigtable pricing logic
+│  │  │  │  └─ alloydb.py            # AlloyDB pricing logic
 │  │  │  ├─ gcp_fetch.py             # GCP Pricing API refresh (injectable transport)
 │  │  │  └─ cache.py                 # SQLite cache + atomic swap + get_cache_status
 │  │  └─ render/

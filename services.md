@@ -31,6 +31,8 @@ These five services dominate the bill for the vast majority of GCP customers.
 
 ## Tier 2 — Serverless & containers (~15% of typical spend)
 
+Implemented in `plan3.md` (steps SVL-1 through SVL-11). Pricing logic lives in `src/gcp_cost_estimator/core/pricing/gcp/serverless.py`.
+
 | Service | Status | Pricing page | Terraform resource(s) |
 |---|---|---|---|
 | Cloud Run | done | [run/pricing](https://cloud.google.com/run/pricing) | `google_cloud_run_v2_service`, `google_cloud_run_v2_job` |
@@ -40,6 +42,8 @@ These five services dominate the bill for the vast majority of GCP customers.
 ---
 
 ## Tier 3 — Databases (~8% of typical spend)
+
+Implemented in `plan4.md` (steps SP-1 through AD-3, plus T3-1). Pricing modules: `spanner.py`, `firestore.py`, `memorystore.py`, `bigtable.py`, `alloydb.py`.
 
 | Service | Status | Pricing page | Terraform resource(s) |
 |---|---|---|---|
@@ -53,6 +57,8 @@ These five services dominate the bill for the vast majority of GCP customers.
 
 ## Tier 4 — Networking (~5% of typical spend)
 
+Plan: `plan5.md` (steps CDN-*, DNS-*, NAT-*, VPC-*, ARM-*). **Current active work.**
+
 | Service | Status | Pricing page | Terraform resource(s) |
 |---|---|---|---|
 | Cloud Load Balancing | done (partial) | [load-balancing/pricing](https://cloud.google.com/load-balancing/pricing) | `google_compute_forwarding_rule`, `google_compute_global_forwarding_rule` |
@@ -60,12 +66,14 @@ These five services dominate the bill for the vast majority of GCP customers.
 | Cloud CDN | planned | [cdn/pricing](https://cloud.google.com/cdn/pricing) | `google_compute_backend_bucket`, `google_compute_backend_service` |
 | Cloud DNS | planned | [dns/pricing](https://cloud.google.com/dns/pricing) | `google_dns_managed_zone`, `google_dns_record_set` |
 | Cloud NAT | planned | [nat/pricing](https://cloud.google.com/nat/pricing) | `google_compute_router_nat` |
-| VPC (static IPs, VPN, Interconnect) | planned | [vpc/pricing](https://cloud.google.com/vpc/pricing) | `google_compute_address`, `google_compute_vpn_gateway` |
+| VPC (static IPs, VPN) | planned | [vpc/network-pricing](https://cloud.google.com/vpc/network-pricing) | `google_compute_address`, `google_compute_vpn_gateway` |
 | Cloud Armor | planned | [armor/pricing](https://cloud.google.com/armor/pricing) | `google_compute_security_policy` |
 
 ---
 
 ## Tier 5 — Data & analytics (~5% of typical spend)
+
+Plan: `plan5.md` (steps PS-*, DF-*, DP-*, plus T45-1). **Current active work.**
 
 | Service | Status | Pricing page | Terraform resource(s) |
 |---|---|---|---|
@@ -115,13 +123,13 @@ These services have pricing but are below the threshold or require specialist bi
 | Tier | Estimated spend share | Status |
 |---|---|---|
 | Tier 1 — Core infrastructure | ~60% | 5/5 done ✅ |
-| Tier 2 — Serverless & containers | ~15% | 0/3 in-progress (plan3.md drafted) |
-| Tier 3 — Databases | ~8% | 0/5 planned |
-| Tier 4 — Networking | ~5% | 2/7 done (partial); 5 planned |
-| Tier 5 — Data & analytics | ~5% | 0/3 planned |
+| Tier 2 — Serverless & containers | ~15% | 3/3 done ✅ (plan3.md) |
+| Tier 3 — Databases | ~8% | 5/5 done ✅ (plan4.md) |
+| Tier 4 — Networking | ~5% | 2/7 done (partial); 5 in-progress (plan5.md) |
+| Tier 5 — Data & analytics | ~5% | 0/3 in-progress (plan5.md) |
 | Tier 6 — Storage & AI | ~4% | 1/4 done; 3 planned |
 | **Total at plan completion** | **~97%** | — |
-| **Total currently done** | **~61%** | Tier 1 complete |
+| **Total currently done** | **~83%** | Tiers 1–3 complete |
 
 ---
 
@@ -129,10 +137,16 @@ These services have pricing but are below the threshold or require specialist bi
 
 Work Tier 1 → Tier 2 → Tier 3 in order. Within each tier, pick the highest-spend service first. Tiers 4–6 can be parallelised once Tiers 1–3 are complete.
 
-**Tier 1 complete. Tier 2 plan drafted ([`plan3.md`](plan3.md)); implementation order:**
-1. Cloud Run — vCPU-seconds + memory-seconds + requests (steps SVL-1–SVL-4)
-2. Cloud Functions — invocations + compute time (1st gen and 2nd gen) (steps SVL-5–SVL-7)
-3. App Engine — standard instance-hours + flexible GCE-based billing (steps SVL-8–SVL-10)
+**Tiers 1–3 complete.** Tier 4 & Tier 5 in progress — see [`plan5.md`](plan5.md):
+1. Cloud CDN — cache transfer + cache fill + requests (steps CDN-1–CDN-3)
+2. Cloud DNS — zones + queries (steps DNS-1–DNS-2)
+3. Cloud NAT — gateway hours + data processed + IP hours (steps NAT-1–NAT-3)
+4. VPC static IPs — unused + in-use IPs (steps VPC-1–VPC-2)
+5. Cloud Armor — policies + rules + requests (steps ARM-1–ARM-3)
+6. Pub/Sub — throughput + subscription storage (steps PS-1–PS-4)
+7. Dataflow — batch/streaming vCPU + memory + shuffle/streaming engine (steps DF-1–DF-4)
+8. Dataproc — cluster vCPU premium + underlying Compute Engine (steps DP-1–DP-3)
+9. Integration — end-to-end Terraform plan estimates (step T45-1)
 
 ---
 

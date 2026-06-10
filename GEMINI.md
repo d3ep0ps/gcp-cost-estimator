@@ -18,7 +18,11 @@ This project is a **GCP Cost Estimator MCP server**: a deterministic server that
 
 **Active extension plans:**
 - [`plan.md`](plan.md) — original v1 milestone plan (Milestones 0–8, all substantially complete).
-- [`plan1.md`](plan1.md) — Cloud SQL full coverage extension (Steps CS-1 through CS-10). **Current active work.**
+- [`plan1.md`](plan1.md) — Cloud SQL full coverage extension (Steps CS-1 through CS-10). Complete.
+- [`plan2.md`](plan2.md) — Tier 1 remaining services: Cloud Storage, GKE, BigQuery (Steps GCS-*, GKE-*, BQ-*, T2-1). Complete.
+- [`plan3.md`](plan3.md) — Tier 2 Serverless & Containers: Cloud Run, Cloud Functions, App Engine (Steps SVL-1 through SVL-11). Complete. Pricing lives in [`serverless.py`](src/gcp_cost_estimator/core/pricing/gcp/serverless.py) (all three services combined in one module following the refactoring).
+- [`plan4.md`](plan4.md) — Tier 3 Databases: Spanner, Firestore, Memorystore, Bigtable, AlloyDB. Complete. Modules: [`spanner.py`](src/gcp_cost_estimator/core/pricing/gcp/spanner.py), [`firestore.py`](src/gcp_cost_estimator/core/pricing/gcp/firestore.py), [`memorystore.py`](src/gcp_cost_estimator/core/pricing/gcp/memorystore.py), [`bigtable.py`](src/gcp_cost_estimator/core/pricing/gcp/bigtable.py), [`alloydb.py`](src/gcp_cost_estimator/core/pricing/gcp/alloydb.py).
+- [`plan5.md`](plan5.md) — Tier 4 Networking (CDN, DNS, NAT, VPC static IPs, Cloud Armor) + Tier 5 Data & analytics (Pub/Sub, Dataflow, Dataproc). **Current active work.**
 - [`services.md`](services.md) — target services list for 90% GCP spend coverage; implementation order and per-service documentation links.
 
 ## Non-Negotiable Principles
