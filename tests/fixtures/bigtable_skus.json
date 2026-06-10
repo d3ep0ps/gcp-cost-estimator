@@ -1,0 +1,52 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/bigtable/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-BIGTABLE-SSD-NODE",
+    "service": "Bigtable",
+    "region": "us-central1",
+    "description": "Bigtable SSD Node",
+    "unit": "node-hour",
+    "unit_price": 0.65,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-BIGTABLE-HDD-NODE",
+    "service": "Bigtable",
+    "region": "us-central1",
+    "description": "Bigtable HDD Node",
+    "unit": "node-hour",
+    "unit_price": 0.26,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-BIGTABLE-SSD-STORAGE",
+    "service": "Bigtable",
+    "region": "us-central1",
+    "description": "Bigtable SSD Storage",
+    "unit": "GiB-month",
+    "unit_price": 0.17,
+    "sku_group": "SSD"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-BIGTABLE-HDD-STORAGE",
+    "service": "Bigtable",
+    "region": "us-central1",
+    "description": "Bigtable HDD Storage",
+    "unit": "GiB-month",
+    "unit_price": 0.026,
+    "sku_group": "HDD"
+  }
+]

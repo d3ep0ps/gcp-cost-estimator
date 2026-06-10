@@ -1,0 +1,62 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/firestore/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FIRESTORE-STORAGE",
+    "service": "Firestore",
+    "region": "us-central1",
+    "description": "Firestore Storage",
+    "unit": "GiB-month",
+    "unit_price": 0.108,
+    "sku_group": "Storage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FIRESTORE-READS",
+    "service": "Firestore",
+    "region": "us-central1",
+    "description": "Firestore Document Reads",
+    "unit": "100K-reads",
+    "unit_price": 0.036,
+    "sku_group": "Operations"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FIRESTORE-WRITES",
+    "service": "Firestore",
+    "region": "us-central1",
+    "description": "Firestore Document Writes",
+    "unit": "100K-writes",
+    "unit_price": 0.108,
+    "sku_group": "Operations"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FIRESTORE-DELETES",
+    "service": "Firestore",
+    "region": "us-central1",
+    "description": "Firestore Document Deletes",
+    "unit": "100K-deletes",
+    "unit_price": 0.012,
+    "sku_group": "Operations"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FIRESTORE-EGRESS",
+    "service": "Firestore",
+    "region": "us-central1",
+    "description": "Firestore Internet Egress",
+    "unit": "GiB",
+    "unit_price": 0.12,
+    "sku_group": "Egress"
+  }
+]

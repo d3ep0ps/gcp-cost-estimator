@@ -1,0 +1,47 @@
+[
+  {
+    "label": "Production, 3 nodes, SSD, 1 cluster, us-central1, 730h",
+    "region": "us-central1",
+    "instance_type": "PRODUCTION",
+    "clusters": [
+      {
+        "cluster_id": "us-central1-cluster",
+        "zone": "us-central1-a",
+        "num_nodes": 3,
+        "storage_type": "SSD",
+        "region": "us-central1"
+      }
+    ],
+    "runtime_hours": 730.0,
+    "storage_gb_per_cluster": 100.0,
+    "expected_node_cost": 1423.50,
+    "expected_storage_cost": 17.00,
+    "expected_total": 1440.50
+  },
+  {
+    "label": "Production, 4 nodes, HDD, 2 clusters, us-central1, 730h",
+    "region": "us-central1",
+    "instance_type": "PRODUCTION",
+    "clusters": [
+      {
+        "cluster_id": "us-central1-cluster1",
+        "zone": "us-central1-a",
+        "num_nodes": 4,
+        "storage_type": "HDD",
+        "region": "us-central1"
+      },
+      {
+        "cluster_id": "us-central1-cluster2",
+        "zone": "us-central1-b",
+        "num_nodes": 4,
+        "storage_type": "HDD",
+        "region": "us-central1"
+      }
+    ],
+    "runtime_hours": 730.0,
+    "storage_gb_per_cluster": 200.0,
+    "expected_node_cost": 1518.40,
+    "expected_storage_cost": 10.40,
+    "expected_total": 1528.80
+  }
+]

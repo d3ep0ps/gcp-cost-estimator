@@ -1,0 +1,32 @@
+[
+  {
+    "label": "Standard, regional, 100 PU, 10 GB storage, us-central1, 730h",
+    "region": "us-central1",
+    "edition": "STANDARD",
+    "config": "regional-us-central1",
+    "processing_units": 100,
+    "storage_gb": 10,
+    "storage_multiplier": 1,
+    "runtime_hours": 730,
+    "compute_price_per_pu_hour": 0.00009,
+    "storage_price_per_gb_month": 0.30,
+    "expected_compute_cost": 6.57,
+    "expected_storage_cost": 3.00,
+    "expected_total": 9.57
+  },
+  {
+    "label": "Standard, multi-region, 1000 PU, 50 GB storage, storage_multiplier=3",
+    "region": "us-central1",
+    "edition": "STANDARD",
+    "config": "nam6",
+    "processing_units": 1000,
+    "storage_gb": 50,
+    "storage_multiplier": 3,
+    "runtime_hours": 730,
+    "compute_price_per_pu_hour": 0.00027,
+    "storage_price_per_gb_month": 0.30,
+    "expected_compute_cost": 197.10,
+    "expected_storage_cost": 45.00,
+    "expected_total": 242.10
+  }
+]

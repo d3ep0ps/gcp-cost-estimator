@@ -1,0 +1,124 @@
+{
+  "pricing_snapshot": "2026-06-10T12:00:00Z",
+  "monthly_total": 1876.0102,
+  "unpriced": [],
+  "line_items": [
+    {
+      "resource_id": "spanner-golden",
+      "component": "compute",
+      "sku_id": "SKU-SPANNER-STD-REG-COMPUTE",
+      "unit": "PU-hour",
+      "unit_price": 0.00009,
+      "qty": 73000.0,
+      "monthly_cost": 6.57
+    },
+    {
+      "resource_id": "spanner-golden",
+      "component": "storage",
+      "sku_id": "SKU-SPANNER-STORAGE",
+      "unit": "GiB-month",
+      "unit_price": 0.30,
+      "qty": 10.0,
+      "monthly_cost": 3.00
+    },
+    {
+      "resource_id": "firestore-golden",
+      "component": "storage",
+      "sku_id": "SKU-FIRESTORE-STORAGE",
+      "unit": "GiB-month",
+      "unit_price": 0.108,
+      "qty": 1.0,
+      "monthly_cost": 0.108
+    },
+    {
+      "resource_id": "firestore-golden",
+      "component": "reads",
+      "sku_id": "SKU-FIRESTORE-READS",
+      "unit": "100K-reads",
+      "unit_price": 0.036,
+      "qty": 5.0,
+      "monthly_cost": 0.18
+    },
+    {
+      "resource_id": "firestore-golden",
+      "component": "writes",
+      "sku_id": "SKU-FIRESTORE-WRITES",
+      "unit": "100K-writes",
+      "unit_price": 0.108,
+      "qty": 1.0,
+      "monthly_cost": 0.108
+    },
+    {
+      "resource_id": "firestore-golden",
+      "component": "deletes",
+      "sku_id": "SKU-FIRESTORE-DELETES",
+      "unit": "100K-deletes",
+      "unit_price": 0.012,
+      "qty": 0.1,
+      "monthly_cost": 0.0012
+    },
+    {
+      "resource_id": "redis-golden",
+      "component": "cache",
+      "sku_id": "SKU-REDIS-BASIC-CAPACITY",
+      "unit": "GiB-hour",
+      "unit_price": 0.0135,
+      "qty": 3650.0,
+      "monthly_cost": 49.275
+    },
+    {
+      "resource_id": "valkey-golden",
+      "component": "cache",
+      "sku_id": "SKU-VALKEY-CAPACITY",
+      "unit": "GiB-hour",
+      "unit_price": 0.0110,
+      "qty": 3650.0,
+      "monthly_cost": 40.15
+    },
+    {
+      "resource_id": "bigtable-golden",
+      "component": "compute",
+      "sku_id": "SKU-BIGTABLE-SSD-NODE",
+      "unit": "node-hour",
+      "unit_price": 0.65,
+      "qty": 2190.0,
+      "monthly_cost": 1423.50
+    },
+    {
+      "resource_id": "bigtable-golden",
+      "component": "storage",
+      "sku_id": "SKU-BIGTABLE-SSD-STORAGE",
+      "unit": "GiB-month",
+      "unit_price": 0.17,
+      "qty": 100.0,
+      "monthly_cost": 17.0
+    },
+    {
+      "resource_id": "alloydb-instance-golden",
+      "component": "compute_vcpu",
+      "sku_id": "SKU-ALLOYDB-VCPU",
+      "unit": "h",
+      "unit_price": 0.0717,
+      "qty": 2920.0,
+      "monthly_cost": 209.364
+    },
+    {
+      "resource_id": "alloydb-instance-golden",
+      "component": "compute_ram",
+      "sku_id": "SKU-ALLOYDB-RAM",
+      "unit": "GiBy.h",
+      "unit_price": 0.0048375,
+      "qty": 23360.0,
+      "monthly_cost": 113.004
+    },
+    {
+      "resource_id": "alloydb-cluster-golden",
+      "component": "storage",
+      "sku_id": "SKU-ALLOYDB-STORAGE",
+      "unit": "GiB-month",
+      "unit_price": 0.1375,
+      "qty": 100.0,
+      "monthly_cost": 13.75
+    }
+  ]
+}

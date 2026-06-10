@@ -145,6 +145,27 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_app_engine_flexible_app_version":
                         service = "appengine"
                         kind = "app_engine_flexible_version"
+                    elif res_type_clean == "google_spanner_instance":
+                        service = "spanner"
+                        kind = "spanner_instance"
+                    elif res_type_clean == "google_firestore_database":
+                        service = "firestore"
+                        kind = "firestore_database"
+                    elif res_type_clean == "google_redis_instance":
+                        service = "memorystore"
+                        kind = "redis_instance"
+                    elif res_type_clean == "google_memorystore_instance":
+                        service = "memorystore"
+                        kind = "memorystore_instance"
+                    elif res_type_clean == "google_bigtable_instance":
+                        service = "bigtable"
+                        kind = "bigtable_instance"
+                    elif res_type_clean == "google_alloydb_cluster":
+                        service = "alloydb"
+                        kind = "alloydb_cluster"
+                    elif res_type_clean == "google_alloydb_instance":
+                        service = "alloydb"
+                        kind = "alloydb_instance"
                     elif res_type_clean == "google_app_engine_application":
                         service = "appengine"
                         kind = "google_app_engine_application"
@@ -523,6 +544,153 @@ class TerraformHclParser(IaCParser):
                                         assumptions.append(f"Unresolved attribute {field}: '{val}'")
                         else:
                             assumptions.append("No resources configuration found; using defaults.")
+
+                    elif res_type_clean == "google_spanner_instance":
+                        for field in ("config", "num_nodes", "processing_units", "edition"):
+                            val = resolve_value(res_config.get(field))
+                            if val is not None:
+                                attributes[field] = val
+                                if _is_unresolved(val):
+                                    assumptions.append(f"Unresolved attribute {field}: '{val}'")
+                        if not region:
+                            config_val = attributes.get("config")
+                            if config_val and isinstance(config_val, str):
+                                if config_val.startswith("regional-"):
+                                    region = config_val[len("regional-") :]
+                                elif config_val.startswith("nam"):
+                                    region = "us-central1"
+                                elif config_val.startswith("eur"):
+                                    region = "europe-west1"
+                                elif config_val.startswith("asia"):
+                                    region = "asia-east1"
+
+                    elif res_type_clean == "google_firestore_database":
+                        db_type = resolve_value(res_config.get("type"))
+                        if db_type is not None:
+                            attributes["database_type"] = db_type
+                            if _is_unresolved(db_type):
+                                assumptions.append(f"Unresolved attribute type: '{db_type}'")
+                        loc_id = resolve_value(res_config.get("location_id"))
+                        if loc_id is not None:
+                            if not _is_unresolved(loc_id):
+                                region = loc_id
+                            else:
+                                assumptions.append(f"Unresolved attribute location_id: '{loc_id}'")
+
+                    elif res_type_clean == "google_redis_instance":
+                        for field in ("memory_size_gb", "tier", "region", "redis_version"):
+                            val = resolve_value(res_config.get(field))
+                            if val is not None:
+                                attributes[field] = val
+                                if _is_unresolved(val):
+                                    assumptions.append(f"Unresolved attribute {field}: '{val}'")
+                        if not region and attributes.get("region"):
+                            region = attributes["region"]
+
+                    elif res_type_clean == "google_memorystore_instance":
+                        fields = ("instance_id", "location", "shard_count", "node_type", "mode")
+                        for field in fields:
+                            val = resolve_value(res_config.get(field))
+                            if val is not None:
+                                attributes[field] = val
+                                if _is_unresolved(val):
+                                    assumptions.append(f"Unresolved attribute {field}: '{val}'")
+                        if not region and attributes.get("location"):
+                            region = attributes["location"]
+
+                    elif res_type_clean == "google_bigtable_instance":
+                        inst_type = resolve_value(res_config.get("instance_type"))
+                        if inst_type is not None:
+                            attributes["instance_type"] = inst_type
+                            if _is_unresolved(inst_type):
+                                msg = f"Unresolved attribute instance_type: '{inst_type}'"
+                                assumptions.append(msg)
+
+                        clusters_raw = res_config.get("cluster")
+                        if clusters_raw:
+                            if not isinstance(clusters_raw, list):
+                                clusters_raw = [clusters_raw]
+                            clusters_list = []
+                            for cl in clusters_raw:
+                                if isinstance(cl, dict):
+                                    cl_dict = {}
+                                    for k, v in cl.items():
+                                        resolved_v = resolve_value(v)
+                                        cl_dict[k] = resolved_v
+                                        if resolved_v is not None and _is_unresolved(resolved_v):
+                                            msg = (
+                                                f"Unresolved attribute cluster_{k}: '{resolved_v}'"
+                                            )
+                                            assumptions.append(msg)
+                                    clusters_list.append(cl_dict)
+                            attributes["clusters"] = clusters_list
+
+                        if clusters_raw and not region:
+                            first_cl = clusters_raw[0]
+                            if isinstance(first_cl, dict):
+                                first_zone = resolve_value(first_cl.get("zone"))
+                                if first_zone and not _is_unresolved(first_zone):
+                                    region = re.sub(r"-[a-z]$", "", str(first_zone).strip()).lower()
+
+                    elif res_type_clean == "google_alloydb_cluster":
+                        initial_user = res_config.get("initial_user")
+                        if initial_user:
+                            if isinstance(initial_user, list) and initial_user:
+                                initial_user_blk = initial_user[0]
+                            else:
+                                initial_user_blk = initial_user
+                            if isinstance(initial_user_blk, dict):
+                                initial_user_blk_copy = dict(initial_user_blk)
+                                initial_user_blk_copy.pop("password", None)
+                                attributes["initial_user"] = initial_user_blk_copy
+
+                        for k, v in res_config.items():
+                            if k == "initial_user":
+                                continue
+                            resolved_v = resolve_value(v)
+                            if resolved_v is not None:
+                                attributes[k] = resolved_v
+
+                    elif res_type_clean == "google_alloydb_instance":
+                        itype = resolve_value(res_config.get("instance_type"))
+                        if itype is not None:
+                            attributes["instance_type"] = itype
+                        if _is_unresolved(itype):
+                            assumptions.append(f"Unresolved attribute instance_type: '{itype}'")
+
+                        mconfig = res_config.get("machine_config")
+                        if mconfig:
+                            if isinstance(mconfig, list) and mconfig:
+                                mconfig_blk = mconfig[0]
+                            else:
+                                mconfig_blk = mconfig
+                            if isinstance(mconfig_blk, dict):
+                                cpu_count = resolve_value(mconfig_blk.get("cpu_count"))
+                                if cpu_count is not None:
+                                    attributes["cpu_count"] = cpu_count
+                                    if _is_unresolved(cpu_count):
+                                        msg = f"Unresolved attribute cpu_count: '{cpu_count}'"
+                                        assumptions.append(msg)
+
+                        rpconfig = res_config.get("read_pool_config")
+                        if rpconfig:
+                            if isinstance(rpconfig, list) and rpconfig:
+                                rpconfig_blk = rpconfig[0]
+                            else:
+                                rpconfig_blk = rpconfig
+                            if isinstance(rpconfig_blk, dict):
+                                node_count = resolve_value(rpconfig_blk.get("node_count"))
+                                if node_count is not None:
+                                    attributes["node_count"] = node_count
+                                    if _is_unresolved(node_count):
+                                        msg = f"Unresolved attribute node_count: '{node_count}'"
+                                        assumptions.append(msg)
+
+                        cluster = resolve_value(res_config.get("cluster"))
+                        if cluster is not None:
+                            attributes["cluster_ref"] = cluster
+                            if _is_unresolved(cluster):
+                                assumptions.append(f"Unresolved attribute cluster: '{cluster}'")
 
                     else:
                         for k, v in res_config.items():

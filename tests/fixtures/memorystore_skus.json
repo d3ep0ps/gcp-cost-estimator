@@ -1,0 +1,42 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/memorystore/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-REDIS-BASIC-CAPACITY",
+    "service": "Memorystore",
+    "region": "us-central1",
+    "description": "Memorystore for Redis Basic Capacity",
+    "unit": "GiB-hour",
+    "unit_price": 0.0135,
+    "sku_group": "Cache"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-REDIS-STANDARD-CAPACITY",
+    "service": "Memorystore",
+    "region": "us-central1",
+    "description": "Memorystore for Redis Standard Capacity",
+    "unit": "GiB-hour",
+    "unit_price": 0.0270,
+    "sku_group": "Cache"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-VALKEY-CAPACITY",
+    "service": "Memorystore",
+    "region": "us-central1",
+    "description": "Memorystore Valkey Capacity",
+    "unit": "GiB-hour",
+    "unit_price": 0.0110,
+    "sku_group": "Cache"
+  }
+]

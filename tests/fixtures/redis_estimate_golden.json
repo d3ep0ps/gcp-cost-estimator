@@ -1,0 +1,16 @@
+{
+  "pricing_snapshot": "2026-06-10T12:00:00Z",
+  "monthly_total": 49.275,
+  "unpriced": [],
+  "line_items": [
+    {
+      "resource_id": "redis-golden",
+      "component": "cache",
+      "sku_id": "SKU-REDIS-BASIC-CAPACITY",
+      "unit": "GiB-hour",
+      "unit_price": 0.0135,
+      "qty": 3650.0,
+      "monthly_cost": 49.275
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "pricing_snapshot": "2026-06-10T12:00:00Z",
+  "monthly_total": 0.3972,
+  "unpriced": [],
+  "line_items": [
+    {
+      "resource_id": "firestore-golden",
+      "component": "storage",
+      "sku_id": "SKU-FIRESTORE-STORAGE",
+      "unit": "GiB-month",
+      "unit_price": 0.108,
+      "qty": 1.0,
+      "monthly_cost": 0.108
+    },
+    {
+      "resource_id": "firestore-golden",
+      "component": "reads",
+      "sku_id": "SKU-FIRESTORE-READS",
+      "unit": "100K-reads",
+      "unit_price": 0.036,
+      "qty": 5.0,
+      "monthly_cost": 0.18
+    },
+    {
+      "resource_id": "firestore-golden",
+      "component": "writes",
+      "sku_id": "SKU-FIRESTORE-WRITES",
+      "unit": "100K-writes",
+      "unit_price": 0.108,
+      "qty": 1.0,
+      "monthly_cost": 0.108
+    },
+    {
+      "resource_id": "firestore-golden",
+      "component": "deletes",
+      "sku_id": "SKU-FIRESTORE-DELETES",
+      "unit": "100K-deletes",
+      "unit_price": 0.012,
+      "qty": 0.1,
+      "monthly_cost": 0.0012
+    }
+  ]
+}

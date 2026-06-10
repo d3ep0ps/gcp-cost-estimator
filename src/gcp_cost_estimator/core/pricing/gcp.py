@@ -141,6 +141,23 @@ def resolve_sql_tier_specs(tier: str) -> tuple[int, float]:
     return 0, 0.0
 
 
+def resolve_alloydb_instance_specs(cpu_count: int) -> tuple[int, float]:
+    """Resolve AlloyDB CPU count to (vcpu, ram_gb) spec."""
+    mapping: dict[int, float] = {
+        2: 16.0,
+        4: 32.0,
+        8: 64.0,
+        16: 128.0,
+        32: 256.0,
+        64: 512.0,
+        96: 768.0,
+        128: 864.0,
+    }
+    if cpu_count in mapping:
+        return cpu_count, mapping[cpu_count]
+    return 0, 0.0
+
+
 class GcpSkuMapper(SkuMapper):
     """GCP-specific SKU mapper implementing the SkuMapper interface."""
 
@@ -156,6 +173,17 @@ class GcpSkuMapper(SkuMapper):
             "Cloud Run",
             "Cloud Functions",
             "App Engine",
+            "Spanner",
+            "Cloud Spanner",
+            "Firestore",
+            "Cloud Firestore",
+            "Bigtable",
+            "Cloud Bigtable",
+            "AlloyDB",
+            "AlloyDB for PostgreSQL",
+            "Memorystore for Redis",
+            "Memorystore for Valkey",
+            "Memorystore",
         ]
 
     def _map_gce_compute(
@@ -540,6 +568,34 @@ class GcpSkuMapper(SkuMapper):
                 ae_mappings, ae_unpriced = self._map_app_engine_flexible_version(resource, cursor)
                 mappings.extend(ae_mappings)
                 unpriced.extend(ae_unpriced)
+            elif resource.service == "spanner" and resource.kind == "spanner_instance":
+                sp_mappings, sp_unpriced = self._map_spanner_instance(resource, cursor)
+                mappings.extend(sp_mappings)
+                unpriced.extend(sp_unpriced)
+            elif resource.service == "firestore" and resource.kind == "firestore_database":
+                fs_mappings, fs_unpriced = self._map_firestore_database(resource, cursor)
+                mappings.extend(fs_mappings)
+                unpriced.extend(fs_unpriced)
+            elif resource.service == "memorystore" and resource.kind == "redis_instance":
+                redis_mappings, redis_unpriced = self._map_redis_instance(resource, cursor)
+                mappings.extend(redis_mappings)
+                unpriced.extend(redis_unpriced)
+            elif resource.service == "memorystore" and resource.kind == "memorystore_instance":
+                ms_mappings, ms_unpriced = self._map_memorystore_instance(resource, cursor)
+                mappings.extend(ms_mappings)
+                unpriced.extend(ms_unpriced)
+            elif resource.service == "bigtable" and resource.kind == "bigtable_instance":
+                bt_mappings, bt_unpriced = self._map_bigtable_instance(resource, cursor)
+                mappings.extend(bt_mappings)
+                unpriced.extend(bt_unpriced)
+            elif resource.service == "alloydb" and resource.kind == "alloydb_cluster":
+                ad_mappings, ad_unpriced = self._map_alloydb_cluster(resource, cursor)
+                mappings.extend(ad_mappings)
+                unpriced.extend(ad_unpriced)
+            elif resource.service == "alloydb" and resource.kind == "alloydb_instance":
+                adi_mappings, adi_unpriced = self._map_alloydb_instance(resource, cursor)
+                mappings.extend(adi_mappings)
+                unpriced.extend(adi_unpriced)
             else:
                 unpriced.append(
                     {
@@ -1913,8 +1969,7 @@ class GcpSkuMapper(SkuMapper):
                     {
                         "resource_id": resource.resource_id,
                         "reason": (
-                            f"No egress SKU found for App Engine standard "
-                            f"in region '{region}'"
+                            f"No egress SKU found for App Engine standard in region '{region}'"
                         ),
                     }
                 )
@@ -2087,6 +2142,687 @@ class GcpSkuMapper(SkuMapper):
                         "reason": f"No egress SKU found in region '{region}'",
                     }
                 )
+
+        return mappings, unpriced
+
+    def _map_spanner_instance(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        mappings: list[dict[str, Any]] = []
+        unpriced: list[dict[str, Any]] = []
+
+        region = resource.region
+        if region is None:
+            return mappings, unpriced
+
+        edition = resource.attributes.get("edition", "STANDARD").upper()
+        config_type = resource.attributes.get("config_type", "regional")
+        processing_units = float(resource.attributes.get("processing_units", 100))
+        runtime_hours = float(resource.usage.get("runtime_hours_per_month", 730))
+        storage_gb = float(resource.usage.get("storage_gb", 0))
+        monthly_egress_gb = float(resource.usage.get("monthly_egress_gb", 0))
+
+        edition_display_map = {
+            "STANDARD": "Standard",
+            "ENTERPRISE": "Enterprise",
+            "ENTERPRISE_PLUS": "Enterprise Plus",
+        }
+        edition_display = edition_display_map.get(edition, "Standard")
+        config_display = "Regional" if config_type == "regional" else "Multi-Region"
+        desc_pattern = f"Cloud Spanner {edition_display}: {config_display} Processing Unit"
+
+        cursor.execute(
+            """
+            SELECT sku_id, unit, unit_price, description
+            FROM pricing_cache
+            WHERE provider = 'gcp' AND region = ? AND description = ?
+            """,
+            (region, desc_pattern),
+        )
+        compute_rows = cursor.fetchall()
+        if compute_rows:
+            comp_match = compute_rows[0]
+            qty = processing_units * runtime_hours * resource.quantity
+            mappings.append(
+                {
+                    "sku_id": comp_match[0],
+                    "component": "compute",
+                    "unit": comp_match[1],
+                    "unit_price": comp_match[2],
+                    "qty": qty,
+                }
+            )
+        else:
+            reason_msg = (
+                f"No Cloud Spanner compute SKU found for edition '{edition}' "
+                f"config_type '{config_type}' in region '{region}'"
+            )
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": reason_msg,
+                }
+            )
+
+        if storage_gb > 0:
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE '%Spanner%Storage%'
+                """,
+                (region,),
+            )
+            storage_rows = cursor.fetchall()
+            if storage_rows:
+                stor_match = storage_rows[0]
+                mult = 1
+                config = resource.attributes.get("config")
+                if config:
+                    config_str = str(config).lower()
+                    if config_str.startswith("regional-"):
+                        mult = 1
+                    elif config_str in {"nam4", "eur4"}:
+                        mult = 2
+                    else:
+                        mult = 3
+                qty = storage_gb * mult * resource.quantity
+                mappings.append(
+                    {
+                        "sku_id": stor_match[0],
+                        "component": "storage",
+                        "unit": stor_match[1],
+                        "unit_price": stor_match[2],
+                        "qty": qty,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No Cloud Spanner storage SKU found in region '{region}'",
+                    }
+                )
+
+        if monthly_egress_gb > 0:
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE '%Spanner%Egress%'
+                """,
+                (region,),
+            )
+            egress_rows = cursor.fetchall()
+            if egress_rows:
+                eg_match = egress_rows[0]
+                qty = monthly_egress_gb * resource.quantity
+                mappings.append(
+                    {
+                        "sku_id": eg_match[0],
+                        "component": "egress",
+                        "unit": eg_match[1],
+                        "unit_price": eg_match[2],
+                        "qty": qty,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No Cloud Spanner egress SKU found in region '{region}'",
+                    }
+                )
+
+        return mappings, unpriced
+
+    def _map_firestore_database(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        mappings: list[dict[str, Any]] = []
+        unpriced: list[dict[str, Any]] = []
+
+        region = resource.region
+        if region is None:
+            return mappings, unpriced
+
+        storage_gb = float(resource.usage.get("storage_gb", 1))
+        monthly_reads = float(resource.usage.get("monthly_reads", 500000))
+        monthly_writes = float(resource.usage.get("monthly_writes", 100000))
+        monthly_deletes = float(resource.usage.get("monthly_deletes", 10000))
+        monthly_egress_gb = float(resource.usage.get("monthly_egress_gb", 0))
+
+        # 1. Storage SKU
+        if storage_gb > 0:
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE '%Firestore%Storage%'
+                """,
+                (region,),
+            )
+            storage_rows = cursor.fetchall()
+            if storage_rows:
+                row = storage_rows[0]
+                mappings.append(
+                    {
+                        "sku_id": row[0],
+                        "component": "storage",
+                        "unit": row[1],
+                        "unit_price": row[2],
+                        "qty": storage_gb * resource.quantity,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No Firestore storage SKU found in region '{region}'",
+                    }
+                )
+
+        # 2. Reads SKU
+        if monthly_reads > 0:
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE '%Firestore%Read%'
+                """,
+                (region,),
+            )
+            reads_rows = cursor.fetchall()
+            if reads_rows:
+                row = reads_rows[0]
+                mappings.append(
+                    {
+                        "sku_id": row[0],
+                        "component": "reads",
+                        "unit": row[1],
+                        "unit_price": row[2],
+                        "qty": (monthly_reads / 100000.0) * resource.quantity,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No Firestore reads SKU found in region '{region}'",
+                    }
+                )
+
+        # 3. Writes SKU
+        if monthly_writes > 0:
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE '%Firestore%Write%'
+                """,
+                (region,),
+            )
+            writes_rows = cursor.fetchall()
+            if writes_rows:
+                row = writes_rows[0]
+                mappings.append(
+                    {
+                        "sku_id": row[0],
+                        "component": "writes",
+                        "unit": row[1],
+                        "unit_price": row[2],
+                        "qty": (monthly_writes / 100000.0) * resource.quantity,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No Firestore writes SKU found in region '{region}'",
+                    }
+                )
+
+        # 4. Deletes SKU
+        if monthly_deletes > 0:
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE '%Firestore%Delete%'
+                """,
+                (region,),
+            )
+            deletes_rows = cursor.fetchall()
+            if deletes_rows:
+                row = deletes_rows[0]
+                mappings.append(
+                    {
+                        "sku_id": row[0],
+                        "component": "deletes",
+                        "unit": row[1],
+                        "unit_price": row[2],
+                        "qty": (monthly_deletes / 100000.0) * resource.quantity,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No Firestore deletes SKU found in region '{region}'",
+                    }
+                )
+
+        # 5. Egress SKU
+        if monthly_egress_gb > 0:
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE '%Firestore%Egress%'
+                """,
+                (region,),
+            )
+            egress_rows = cursor.fetchall()
+            if egress_rows:
+                row = egress_rows[0]
+                mappings.append(
+                    {
+                        "sku_id": row[0],
+                        "component": "egress",
+                        "unit": row[1],
+                        "unit_price": row[2],
+                        "qty": monthly_egress_gb * resource.quantity,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No Firestore egress SKU found in region '{region}'",
+                    }
+                )
+
+        return mappings, unpriced
+
+    def _map_redis_instance(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        mappings: list[dict[str, Any]] = []
+        unpriced: list[dict[str, Any]] = []
+
+        region = resource.region
+        if region is None:
+            return mappings, unpriced
+
+        tier = resource.attributes.get("tier", "BASIC").upper()
+        memory_size_gb = float(resource.attributes.get("memory_size_gb", 0))
+        runtime_hours = float(resource.usage.get("runtime_hours_per_month", 730))
+
+        tier_desc = "Basic" if tier == "BASIC" else "Standard"
+        cursor.execute(
+            """
+            SELECT sku_id, unit, unit_price, description
+            FROM pricing_cache
+            WHERE provider = 'gcp' AND region = ? AND description LIKE ?
+            """,
+            (region, f"%Redis%{tier_desc}%Capacity%"),
+        )
+        rows = cursor.fetchall()
+        if rows:
+            row = rows[0]
+            mappings.append(
+                {
+                    "sku_id": row[0],
+                    "component": "cache",
+                    "unit": row[1],
+                    "unit_price": row[2],
+                    "qty": memory_size_gb * runtime_hours * resource.quantity,
+                }
+            )
+        else:
+            reason_msg = (
+                f"No Memorystore Redis capacity SKU found for tier '{tier}' in region '{region}'"
+            )
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": reason_msg,
+                }
+            )
+
+        return mappings, unpriced
+
+    def _map_memorystore_instance(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        mappings: list[dict[str, Any]] = []
+        unpriced: list[dict[str, Any]] = []
+
+        region = resource.region
+        if region is None:
+            return mappings, unpriced
+
+        shard_count = int(resource.attributes.get("shard_count", 1))
+        node_type = resource.attributes.get("node_type", "")
+        runtime_hours = float(resource.usage.get("runtime_hours_per_month", 730))
+
+        node_memory_map = {
+            "SHARED_CORE_NANO": 1.0,
+            "STANDARD_SMALL": 5.0,
+            "HIGHMEM_MEDIUM": 13.0,
+            "HIGHMEM_XLARGE": 58.0,
+        }
+        if node_type not in node_memory_map:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"Unknown node_type '{node_type}' for Memorystore Valkey instance",
+                }
+            )
+            return mappings, unpriced
+
+        memory_gb_per_shard = node_memory_map[node_type]
+        total_gb = memory_gb_per_shard * shard_count
+
+        cursor.execute(
+            """
+            SELECT sku_id, unit, unit_price, description
+            FROM pricing_cache
+            WHERE provider = 'gcp' AND region = ? AND description LIKE '%Valkey%Capacity%'
+            """,
+            (region,),
+        )
+        rows = cursor.fetchall()
+        if rows:
+            row = rows[0]
+            mappings.append(
+                {
+                    "sku_id": row[0],
+                    "component": "cache",
+                    "unit": row[1],
+                    "unit_price": row[2],
+                    "qty": total_gb * runtime_hours * resource.quantity,
+                }
+            )
+        else:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No Memorystore Valkey capacity SKU found in region '{region}'",
+                }
+            )
+
+        return mappings, unpriced
+
+    def _map_bigtable_instance(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        mappings: list[dict[str, Any]] = []
+        unpriced: list[dict[str, Any]] = []
+
+        clusters = resource.attributes.get("clusters")
+        if not clusters:
+            return mappings, unpriced
+
+        storage_gb_per_cluster = float(resource.usage.get("storage_gb_per_cluster", 0))
+        runtime_hours = float(resource.usage.get("runtime_hours_per_month", 730))
+
+        for cl in clusters:
+            reg = cl.get("region")
+            if not reg:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No region derived for cluster in zone '{cl.get('zone')}'",
+                    }
+                )
+                continue
+
+            stype = cl.get("storage_type", "SSD").upper()
+            num_nodes = int(cl.get("num_nodes", 3))
+
+            # 1. Node SKU
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE ?
+                """,
+                (reg, f"%Bigtable%{stype}%Node%"),
+            )
+            node_rows = cursor.fetchall()
+            if node_rows:
+                row = node_rows[0]
+                qty = num_nodes * runtime_hours * resource.quantity
+                mappings.append(
+                    {
+                        "sku_id": row[0],
+                        "component": "compute",
+                        "unit": row[1],
+                        "unit_price": row[2],
+                        "qty": qty,
+                    }
+                )
+            else:
+                reason_msg = f"No Bigtable node SKU found for type '{stype}' in region '{reg}'"
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": reason_msg,
+                    }
+                )
+
+            # 2. Storage SKU
+            if storage_gb_per_cluster > 0:
+                cursor.execute(
+                    """
+                    SELECT sku_id, unit, unit_price, description
+                    FROM pricing_cache
+                    WHERE provider = 'gcp' AND region = ? AND description LIKE ?
+                    """,
+                    (reg, f"%Bigtable%{stype}%Storage%"),
+                )
+                storage_rows = cursor.fetchall()
+                if storage_rows:
+                    row = storage_rows[0]
+                    qty = storage_gb_per_cluster * resource.quantity
+                    mappings.append(
+                        {
+                            "sku_id": row[0],
+                            "component": "storage",
+                            "unit": row[1],
+                            "unit_price": row[2],
+                            "qty": qty,
+                        }
+                    )
+                else:
+                    reason_msg = (
+                        f"No Bigtable storage SKU found for type '{stype}' in region '{reg}'"
+                    )
+                    unpriced.append(
+                        {
+                            "resource_id": resource.resource_id,
+                            "reason": reason_msg,
+                        }
+                    )
+
+        return mappings, unpriced
+
+    def _map_alloydb_cluster(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        mappings: list[dict[str, Any]] = []
+        unpriced: list[dict[str, Any]] = []
+        region = resource.region
+
+        storage_gb = float(resource.usage.get("storage_gb", 100))
+        backup_enabled = bool(resource.usage.get("backup_enabled", False))
+
+        # 1. Storage SKU
+        cursor.execute(
+            """
+            SELECT sku_id, unit, unit_price, description
+            FROM pricing_cache
+            WHERE provider = 'gcp'
+              AND region = ?
+              AND description LIKE '%AlloyDB%Storage%'
+              AND description NOT LIKE '%Backup%'
+            """,
+            (region,),
+        )
+        rows = cursor.fetchall()
+        if rows:
+            row = rows[0]
+            mappings.append(
+                {
+                    "sku_id": row[0],
+                    "component": "storage",
+                    "unit": row[1],
+                    "unit_price": row[2],
+                    "qty": storage_gb * resource.quantity,
+                }
+            )
+        else:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No AlloyDB storage SKU found in region '{region}'",
+                }
+            )
+
+        # 2. Backup SKU
+        if backup_enabled:
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND description LIKE '%AlloyDB%Backup%'
+                """,
+                (region,),
+            )
+            rows = cursor.fetchall()
+            if rows:
+                row = rows[0]
+                mappings.append(
+                    {
+                        "sku_id": row[0],
+                        "component": "backup",
+                        "unit": row[1],
+                        "unit_price": row[2],
+                        "qty": storage_gb * resource.quantity,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": resource.resource_id,
+                        "reason": f"No AlloyDB backup SKU found in region '{region}'",
+                    }
+                )
+
+        return mappings, unpriced
+
+    def _map_alloydb_instance(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        mappings: list[dict[str, Any]] = []
+        unpriced: list[dict[str, Any]] = []
+        region = resource.region
+
+        cpu_count = resource.attributes.get("cpu_count")
+        if cpu_count is None:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": "Missing cpu_count attribute",
+                }
+            )
+            return mappings, unpriced
+
+        try:
+            cpu_val = int(cpu_count)
+        except ValueError, TypeError:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"Invalid cpu_count attribute: {cpu_count}",
+                }
+            )
+            return mappings, unpriced
+
+        vcpu, ram_gb = resolve_alloydb_instance_specs(cpu_val)
+        if vcpu == 0:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"Unsupported cpu_count attribute: {cpu_count}",
+                }
+            )
+            return mappings, unpriced
+
+        instance_type = resource.attributes.get("instance_type", "PRIMARY").upper()
+        node_count = int(resource.attributes.get("node_count", 1))
+        node_multiplier = node_count if instance_type == "READ_POOL" else 1
+
+        runtime_hours = float(resource.usage.get("runtime_hours_per_month", 730))
+
+        # 1. vCPU SKU
+        cursor.execute(
+            """
+            SELECT sku_id, unit, unit_price, description
+            FROM pricing_cache
+            WHERE provider = 'gcp' AND region = ? AND description LIKE '%AlloyDB%vCPU%'
+            """,
+            (region,),
+        )
+        rows = cursor.fetchall()
+        if rows:
+            row = rows[0]
+            mappings.append(
+                {
+                    "sku_id": row[0],
+                    "component": "compute_vcpu",
+                    "unit": row[1],
+                    "unit_price": row[2],
+                    "qty": vcpu * node_multiplier * runtime_hours * resource.quantity,
+                }
+            )
+        else:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No AlloyDB vCPU SKU found in region '{region}'",
+                }
+            )
+
+        # 2. RAM SKU
+        cursor.execute(
+            """
+            SELECT sku_id, unit, unit_price, description
+            FROM pricing_cache
+            WHERE provider = 'gcp' AND region = ? AND description LIKE '%AlloyDB%RAM%'
+            """,
+            (region,),
+        )
+        rows = cursor.fetchall()
+        if rows:
+            row = rows[0]
+            mappings.append(
+                {
+                    "sku_id": row[0],
+                    "component": "compute_ram",
+                    "unit": row[1],
+                    "unit_price": row[2],
+                    "qty": ram_gb * node_multiplier * runtime_hours * resource.quantity,
+                }
+            )
+        else:
+            unpriced.append(
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"No AlloyDB RAM SKU found in region '{region}'",
+                }
+            )
 
         return mappings, unpriced
 

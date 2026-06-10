@@ -1,0 +1,33 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_spanner_instance.spanner_pu",
+          "type": "google_spanner_instance",
+          "name": "spanner_pu",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "spanner-pu",
+            "config": "regional-us-central1",
+            "processing_units": 100,
+            "edition": "STANDARD"
+          }
+        },
+        {
+          "address": "google_spanner_instance.spanner_nodes",
+          "type": "google_spanner_instance",
+          "name": "spanner_nodes",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "spanner-nodes",
+            "config": "nam6",
+            "num_nodes": 2,
+            "edition": "ENTERPRISE_PLUS"
+          }
+        }
+      ]
+    }
+  }
+}

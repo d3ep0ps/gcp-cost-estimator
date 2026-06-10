@@ -1,0 +1,34 @@
+{
+  "pricing_snapshot": "2026-06-10T12:00:00Z",
+  "monthly_total": 336.118,
+  "unpriced": [],
+  "line_items": [
+    {
+      "resource_id": "alloydb-instance-golden",
+      "component": "compute_vcpu",
+      "sku_id": "SKU-ALLOYDB-VCPU",
+      "unit": "h",
+      "unit_price": 0.0717,
+      "qty": 2920.0,
+      "monthly_cost": 209.364
+    },
+    {
+      "resource_id": "alloydb-instance-golden",
+      "component": "compute_ram",
+      "sku_id": "SKU-ALLOYDB-RAM",
+      "unit": "GiBy.h",
+      "unit_price": 0.0048375,
+      "qty": 23360.0,
+      "monthly_cost": 113.004
+    },
+    {
+      "resource_id": "alloydb-cluster-golden",
+      "component": "storage",
+      "sku_id": "SKU-ALLOYDB-STORAGE",
+      "unit": "GiB-month",
+      "unit_price": 0.1375,
+      "qty": 100.0,
+      "monthly_cost": 13.75
+    }
+  ]
+}

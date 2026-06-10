@@ -1,0 +1,32 @@
+[
+  {
+    "label": "Redis Basic, 5 GB, us-central1, 730h",
+    "kind": "redis_instance",
+    "region": "us-central1",
+    "tier": "BASIC",
+    "memory_size_gb": 5.0,
+    "runtime_hours": 730.0,
+    "price_per_gb_hour": 0.0135,
+    "expected_total": 49.275
+  },
+  {
+    "label": "Redis Standard HA, 10 GB, us-central1, 730h",
+    "kind": "redis_instance",
+    "region": "us-central1",
+    "tier": "STANDARD_HA",
+    "memory_size_gb": 10.0,
+    "runtime_hours": 730.0,
+    "price_per_gb_hour": 0.0270,
+    "expected_total": 197.10
+  },
+  {
+    "label": "Valkey Cluster, STANDARD_SMALL (5 GB), 3 shards, us-central1, 730h",
+    "kind": "memorystore_instance",
+    "region": "us-central1",
+    "node_type": "STANDARD_SMALL",
+    "shard_count": 3,
+    "runtime_hours": 730.0,
+    "price_per_gb_hour": 0.0110,
+    "expected_total": 120.45
+  }
+]

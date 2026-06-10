@@ -1,0 +1,35 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_memorystore_instance.valkey_standalone",
+          "type": "google_memorystore_instance",
+          "name": "valkey_standalone",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "instance_id": "valkey-standalone",
+            "location": "us-central1",
+            "shard_count": 1,
+            "node_type": "SHARED_CORE_NANO",
+            "mode": "STANDALONE"
+          }
+        },
+        {
+          "address": "google_memorystore_instance.valkey_cluster",
+          "type": "google_memorystore_instance",
+          "name": "valkey_cluster",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "instance_id": "valkey-cluster",
+            "location": "us-central1",
+            "shard_count": 3,
+            "node_type": "STANDARD_SMALL",
+            "mode": "CLUSTER"
+          }
+        }
+      ]
+    }
+  }
+}

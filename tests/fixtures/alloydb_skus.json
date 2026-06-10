@@ -1,0 +1,52 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/alloydb/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ALLOYDB-VCPU",
+    "service": "AlloyDB",
+    "region": "us-central1",
+    "description": "AlloyDB Instance vCPU",
+    "unit": "h",
+    "unit_price": 0.0717,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ALLOYDB-RAM",
+    "service": "AlloyDB",
+    "region": "us-central1",
+    "description": "AlloyDB Instance RAM",
+    "unit": "GiBy.h",
+    "unit_price": 0.0048375,
+    "sku_group": "RAM"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ALLOYDB-STORAGE",
+    "service": "AlloyDB",
+    "region": "us-central1",
+    "description": "AlloyDB Storage",
+    "unit": "GiB-month",
+    "unit_price": 0.1375,
+    "sku_group": "Storage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ALLOYDB-BACKUP",
+    "service": "AlloyDB",
+    "region": "us-central1",
+    "description": "AlloyDB Backup Storage",
+    "unit": "GiB-month",
+    "unit_price": 0.1375,
+    "sku_group": "Backup"
+  }
+]

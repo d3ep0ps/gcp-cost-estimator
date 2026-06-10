@@ -1,0 +1,16 @@
+{
+  "pricing_snapshot": "2026-06-10T12:00:00Z",
+  "monthly_total": 40.15,
+  "unpriced": [],
+  "line_items": [
+    {
+      "resource_id": "valkey-golden",
+      "component": "cache",
+      "sku_id": "SKU-VALKEY-CAPACITY",
+      "unit": "GiB-hour",
+      "unit_price": 0.0110,
+      "qty": 3650.0,
+      "monthly_cost": 40.15
+    }
+  ]
+}

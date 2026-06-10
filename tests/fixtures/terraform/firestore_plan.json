@@ -1,0 +1,31 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_firestore_database.firestore_native",
+          "type": "google_firestore_database",
+          "name": "firestore_native",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "fs-native",
+            "location_id": "us-central",
+            "type": "FIRESTORE_NATIVE"
+          }
+        },
+        {
+          "address": "google_firestore_database.firestore_datastore",
+          "type": "google_firestore_database",
+          "name": "firestore_datastore",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "fs-datastore",
+            "location_id": "europe-west",
+            "type": "DATASTORE_MODE"
+          }
+        }
+      ]
+    }
+  }
+}
