@@ -359,3 +359,208 @@ def test_suggest_sql_tier_returns_cheaper_custom(temp_db_path: str) -> None:
     assert sug["ram_gb"] == 30.0
     assert sug["monthly_cost"] == 300.0
     assert sug["monthly_savings"] == 200.0
+
+
+def test_suggest_alloydb_smaller_cpu_count_at_lower_cost(temp_db_path: str) -> None:
+    """Verify that we suggest cheaper AlloyDB configurations if they exist."""
+    import json
+    from pathlib import Path
+
+    conn = sqlite3.connect(temp_db_path)
+    init_db(conn)
+    conn.close()
+
+    with Path("tests/fixtures/alloydb_skus.json").open() as f:
+        mock_skus = json.load(f)
+    update_cache(temp_db_path, "gcp", mock_skus, "2026-06-10T12:00:00Z")
+
+    # We have a READ_POOL with 8 vCPU and 2 nodes (16 effective vCPUs).
+    # If 16 vCPU and 1 node is cheaper, it should be recommended.
+    # Let's verify compute cost:
+    # Current: 8 vCPU * 2 nodes * 730 * (0.0717 + 8 * 0.0048375)? No, RAM is per-GiB.
+    # RAM for 8 vCPU is 64 GB. Total RAM = 64 * 2 = 128 GB.
+    # If we suggest 16 vCPU (128 GB RAM) and 1 node, vCPU cost: 16 * 730 * 0.0717. RAM: 128 * 730 * 0.0048375.
+    # Wait, the total cost for 16 vCPU * 1 node is identical to 8 vCPU * 2 nodes because vCPU and RAM are linear.
+    # But if we mock the pricing or if we have a slightly different price, or if the candidate is cheaper.
+    # Let's mock estimate_infrastructure to control costs directly for suggestions test.
+    from unittest.mock import patch
+
+    from gcp_cost_estimator.core.estimate import Estimate
+
+    resource = Resource(
+        provider="gcp",
+        resource_id="db-read-pool",
+        service="alloydb",
+        kind="alloydb_instance",
+        region="us-central1",
+        attributes={
+            "instance_type": "READ_POOL",
+            "cpu_count": 8,
+            "node_count": 2,
+        },
+    )
+
+    def mock_estimate_infra(_db_path, model):
+        res = model.resources[0]
+        cpu = int(res.attributes.get("cpu_count", 0))
+        nodes = int(res.attributes.get("node_count", 1))
+        # Current: 8 vCPU * 2 nodes = 16 capacity -> Cost = 500
+        if cpu == 8 and nodes == 2:
+            return Estimate(
+                pricing_snapshot="2026-06-03",
+                line_items=[],
+                monthly_total=500.0,
+                unpriced=[],
+                assumptions=[],
+            )
+        # Candidate 1: 16 vCPU * 1 node = 16 capacity -> Cost = 400 (cheaper!)
+        if cpu == 16 and nodes == 1:
+            return Estimate(
+                pricing_snapshot="2026-06-03",
+                line_items=[],
+                monthly_total=400.0,
+                unpriced=[],
+                assumptions=[],
+            )
+        # Candidate 2: 4 vCPU * 4 nodes = 16 capacity -> Cost = 600 (more expensive)
+        return Estimate(
+            pricing_snapshot="2026-06-03",
+            line_items=[],
+            monthly_total=1000.0,
+            unpriced=[],
+            assumptions=[],
+        )
+
+    with patch(
+        "gcp_cost_estimator.core.compare.estimate_infrastructure", side_effect=mock_estimate_infra
+    ):
+        suggestions = suggest_cheaper_machine_types(temp_db_path, resource)
+
+    assert len(suggestions) > 0
+    # Candidate 1 should be suggested
+    sug = next(s for s in suggestions if s["cpu_count"] == 16 and s["node_count"] == 1)
+    assert sug["monthly_cost"] == 400.0
+    assert sug["monthly_savings"] == 100.0
+
+
+def test_suggest_alloydb_never_recommends_under_spec(temp_db_path: str) -> None:
+    """Verify suggestions never recommend AlloyDB configurations under capacity."""
+    resource = Resource(
+        provider="gcp",
+        resource_id="db-read-pool",
+        service="alloydb",
+        kind="alloydb_instance",
+        region="us-central1",
+        attributes={
+            "instance_type": "READ_POOL",
+            "cpu_count": 8,
+            "node_count": 2,
+        },
+    )
+    # 8 * 2 = 16 effective vCPUs. Any suggestion must have vcpu * node_count >= 16.
+    from unittest.mock import patch
+
+    from gcp_cost_estimator.core.estimate import Estimate
+
+    def mock_estimate_infra(_db_path, model):
+        return Estimate(
+            pricing_snapshot="2026-06-03",
+            line_items=[],
+            monthly_total=10.0,
+            unpriced=[],
+            assumptions=[],
+        )
+
+    with patch(
+        "gcp_cost_estimator.core.compare.estimate_infrastructure", side_effect=mock_estimate_infra
+    ):
+        suggestions = suggest_cheaper_machine_types(temp_db_path, resource)
+
+    for s in suggestions:
+        assert s["cpu_count"] * s["node_count"] >= 16
+
+
+def test_suggest_alloydb_read_pool_considers_total_capacity(temp_db_path: str) -> None:
+    """Verify read pool suggestions check total capacity (cpu * nodes)."""
+    resource = Resource(
+        provider="gcp",
+        resource_id="db-read-pool",
+        service="alloydb",
+        kind="alloydb_instance",
+        region="us-central1",
+        attributes={
+            "instance_type": "READ_POOL",
+            "cpu_count": 4,
+            "node_count": 2,
+        },
+    )
+    # Capacity = 8.
+    from unittest.mock import patch
+
+    from gcp_cost_estimator.core.estimate import Estimate
+
+    def mock_estimate_infra(_db_path, model):
+        # make all candidate estimates return a cheap cost so they are considered
+        return Estimate(
+            pricing_snapshot="2026-06-03",
+            line_items=[],
+            monthly_total=10.0,
+            unpriced=[],
+            assumptions=[],
+        )
+
+    with patch(
+        "gcp_cost_estimator.core.compare.estimate_infrastructure", side_effect=mock_estimate_infra
+    ):
+        suggestions = suggest_cheaper_machine_types(temp_db_path, resource)
+
+    # Suggestions should include configurations like (8, 1), (4, 2), etc., which have capacity >= 8
+    for s in suggestions:
+        assert s["cpu_count"] * s["node_count"] >= 8
+
+
+def test_suggest_alloydb_no_option_returns_empty_list(temp_db_path: str) -> None:
+    """Verify suggest returns empty if no cheaper option exists."""
+    resource = Resource(
+        provider="gcp",
+        resource_id="db-read-pool",
+        service="alloydb",
+        kind="alloydb_instance",
+        region="us-central1",
+        attributes={
+            "instance_type": "READ_POOL",
+            "cpu_count": 8,
+            "node_count": 2,
+        },
+    )
+    from unittest.mock import patch
+
+    from gcp_cost_estimator.core.estimate import Estimate
+
+    def mock_estimate_infra(_db_path, model):
+        # Current is cheapest
+        res = model.resources[0]
+        cpu = int(res.attributes.get("cpu_count", 0))
+        nodes = int(res.attributes.get("node_count", 1))
+        if cpu == 8 and nodes == 2:
+            return Estimate(
+                pricing_snapshot="2026-06-03",
+                line_items=[],
+                monthly_total=10.0,
+                unpriced=[],
+                assumptions=[],
+            )
+        return Estimate(
+            pricing_snapshot="2026-06-03",
+            line_items=[],
+            monthly_total=100.0,
+            unpriced=[],
+            assumptions=[],
+        )
+
+    with patch(
+        "gcp_cost_estimator.core.compare.estimate_infrastructure", side_effect=mock_estimate_infra
+    ):
+        suggestions = suggest_cheaper_machine_types(temp_db_path, resource)
+
+    assert len(suggestions) == 0

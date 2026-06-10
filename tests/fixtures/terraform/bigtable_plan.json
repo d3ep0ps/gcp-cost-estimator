@@ -1,0 +1,51 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_bigtable_instance.bigtable_ssd",
+          "type": "google_bigtable_instance",
+          "name": "bigtable_ssd",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "bigtable-ssd",
+            "instance_type": "PRODUCTION",
+            "cluster": [
+              {
+                "cluster_id": "cluster-1",
+                "zone": "us-central1-a",
+                "num_nodes": 3,
+                "storage_type": "SSD"
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_bigtable_instance.bigtable_multi",
+          "type": "google_bigtable_instance",
+          "name": "bigtable_multi",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "bigtable-multi",
+            "instance_type": "PRODUCTION",
+            "cluster": [
+              {
+                "cluster_id": "cluster-1",
+                "zone": "us-central1-a",
+                "num_nodes": 3,
+                "storage_type": "SSD"
+              },
+              {
+                "cluster_id": "cluster-2",
+                "zone": "us-central1-b",
+                "num_nodes": 4,
+                "storage_type": "SSD"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

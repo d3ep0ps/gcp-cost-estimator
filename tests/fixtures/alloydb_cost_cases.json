@@ -1,0 +1,35 @@
+[
+  {
+    "label": "Primary 4-vCPU, 100 GB storage, us-central1, 730h, no backup",
+    "cpu_count": 4,
+    "vcpu": 4,
+    "ram_gb": 32.0,
+    "storage_gb": 100,
+    "backup_enabled": false,
+    "node_count": 1,
+    "instance_type": "PRIMARY",
+    "region": "us-central1",
+    "runtime_hours": 730,
+    "expected_vcpu_cost": 209.364,
+    "expected_ram_cost": 113.004,
+    "expected_storage_cost": 13.75,
+    "expected_total": 336.118
+  },
+  {
+    "label": "Read Pool 8-vCPU, 2 nodes, 200 GB storage, us-central1, 730h, backup enabled",
+    "cpu_count": 8,
+    "vcpu": 8,
+    "ram_gb": 64.0,
+    "storage_gb": 200,
+    "backup_enabled": true,
+    "node_count": 2,
+    "instance_type": "READ_POOL",
+    "region": "us-central1",
+    "runtime_hours": 730,
+    "expected_vcpu_cost": 837.456,
+    "expected_ram_cost": 452.016,
+    "expected_storage_cost": 27.50,
+    "expected_backup_cost": 27.50,
+    "expected_total": 1344.472
+  }
+]

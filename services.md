@@ -31,13 +31,11 @@ These five services dominate the bill for the vast majority of GCP customers.
 
 ## Tier 2 — Serverless & containers (~15% of typical spend)
 
-**Plan:** [`plan3.md`](plan3.md) — Tier 2 Serverless & Containers Coverage (steps `SVL-1`–`SVL-11`). Status: in-progress (plan drafted 2026-06-08, implementation not yet started).
-
 | Service | Status | Pricing page | Terraform resource(s) |
 |---|---|---|---|
-| Cloud Run | in-progress | [run/pricing](https://cloud.google.com/run/pricing) | `google_cloud_run_v2_service`, `google_cloud_run_v2_job` |
-| Cloud Functions | in-progress | [functions/pricing](https://cloud.google.com/functions/pricing) | `google_cloudfunctions_function`, `google_cloudfunctions2_function` |
-| App Engine | in-progress | [appengine/pricing](https://cloud.google.com/appengine/pricing) | `google_app_engine_standard_app_version`, `google_app_engine_flexible_app_version` |
+| Cloud Run | done | [run/pricing](https://cloud.google.com/run/pricing) | `google_cloud_run_v2_service`, `google_cloud_run_v2_job` |
+| Cloud Functions | done | [functions/pricing](https://cloud.google.com/functions/pricing) | `google_cloudfunctions_function`, `google_cloudfunctions2_function` |
+| App Engine | done | [appengine/pricing](https://cloud.google.com/appengine/pricing) | `google_app_engine_standard_app_version`, `google_app_engine_flexible_app_version` |
 
 ---
 
@@ -45,11 +43,11 @@ These five services dominate the bill for the vast majority of GCP customers.
 
 | Service | Status | Pricing page | Terraform resource(s) |
 |---|---|---|---|
-| Cloud Spanner | planned | [spanner/pricing](https://cloud.google.com/spanner/pricing) | `google_spanner_instance` |
-| Firestore | planned | [firestore/pricing](https://cloud.google.com/firestore/pricing) | `google_firestore_database` |
-| Memorystore (Redis / Valkey) | planned | [memorystore/pricing](https://cloud.google.com/memorystore/pricing) | `google_redis_instance`, `google_memorystore_instance` |
-| Bigtable | planned | [bigtable/pricing](https://cloud.google.com/bigtable/pricing) | `google_bigtable_instance` |
-| AlloyDB for PostgreSQL | planned | [alloydb](https://cloud.google.com/alloydb) | `google_alloydb_cluster`, `google_alloydb_instance` |
+| Cloud Spanner | done | [spanner/pricing](https://cloud.google.com/spanner/pricing) | `google_spanner_instance` |
+| Firestore | done | [firestore/pricing](https://cloud.google.com/firestore/pricing) | `google_firestore_database` |
+| Memorystore (Redis / Valkey) | done | [memorystore/pricing](https://cloud.google.com/memorystore/pricing) | `google_redis_instance`, `google_memorystore_instance` |
+| Bigtable | done | [bigtable/pricing](https://cloud.google.com/bigtable/pricing) | `google_bigtable_instance` |
+| AlloyDB for PostgreSQL | done | [alloydb](https://cloud.google.com/alloydb) | `google_alloydb_cluster`, `google_alloydb_instance` |
 
 ---
 

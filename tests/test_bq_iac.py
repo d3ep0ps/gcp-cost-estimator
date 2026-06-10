@@ -37,7 +37,9 @@ def test_hcl_bigquery_table_parsed_but_no_separate_resource_emitted() -> None:
     model = parser.parse("tests/fixtures/terraform")
     # There should NOT be any table resource
     resources = [
-        x for x in model.resources if "table" in x.kind or "google_bigquery_table" in x.resource_id
+        x
+        for x in model.resources
+        if x.kind == "bigquery_table" or "google_bigquery_table" in x.resource_id
     ]
     assert len(resources) == 0
 

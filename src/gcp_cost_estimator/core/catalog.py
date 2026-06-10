@@ -144,6 +144,119 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
             "hint": "Override usage.runtime_hours_per_month.",
         },
     },
+    "spanner": {
+        "processing_units": {
+            "value": 100,
+            "unit": "PU",
+            "hint": "Override attributes.processing_units. 1 node = 1000 PU.",
+        },
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": "Override usage.runtime_hours_per_month for non-24/7 instances.",
+        },
+        "storage_gb": {
+            "value": 0,
+            "unit": "GB",
+            "hint": "Override usage.storage_gb with your expected data size.",
+        },
+        "monthly_egress_gb": {
+            "value": 0,
+            "unit": "GB/month",
+            "hint": "Override usage.monthly_egress_gb with expected internet egress.",
+        },
+    },
+    "firestore": {
+        "storage_gb": {
+            "value": 1,
+            "unit": "GB",
+            "hint": "Override usage.storage_gb with your expected document store size.",
+        },
+        "monthly_reads": {
+            "value": 500_000,
+            "unit": "reads/month",
+            "hint": "Override usage.monthly_reads (~16K reads/day assumed).",
+        },
+        "monthly_writes": {
+            "value": 100_000,
+            "unit": "writes/month",
+            "hint": "Override usage.monthly_writes (~3K writes/day assumed).",
+        },
+        "monthly_deletes": {
+            "value": 10_000,
+            "unit": "deletes/month",
+            "hint": "Override usage.monthly_deletes (~330 deletes/day assumed).",
+        },
+        "monthly_egress_gb": {
+            "value": 0,
+            "unit": "GB/month",
+            "hint": "Override usage.monthly_egress_gb with expected internet egress.",
+        },
+    },
+    "memorystore": {
+        "tier": {
+            "value": "BASIC",
+            "unit": None,
+            "hint": "Override attributes.tier to STANDARD_HA for high availability.",
+        },
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": "Override usage.runtime_hours_per_month for non-24/7 caches.",
+        },
+    },
+    "bigtable": {
+        "instance_type": {
+            "value": "PRODUCTION",
+            "unit": None,
+            "hint": "Override attributes.instance_type to DEVELOPMENT for non-production use.",
+        },
+        "num_nodes_per_cluster": {
+            "value": 3,
+            "unit": "nodes",
+            "hint": "Override cluster.num_nodes to match your provisioned cluster size.",
+        },
+        "storage_type": {
+            "value": "SSD",
+            "unit": None,
+            "hint": (
+                "Override cluster.storage_type to HDD for cost reduction "
+                "on throughput-tolerant workloads."
+            ),
+        },
+        "storage_gb_per_cluster": {
+            "value": 0,
+            "unit": "GB",
+            "hint": "Override usage.storage_gb_per_cluster with your expected data size.",
+        },
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": "Override usage.runtime_hours_per_month for non-24/7 instances.",
+        },
+    },
+    "alloydb": {
+        "storage_gb": {
+            "value": 100,
+            "unit": "GB",
+            "hint": "Override usage.storage_gb with your expected database size.",
+        },
+        "backup_enabled": {
+            "value": False,
+            "unit": None,
+            "hint": "Set usage.backup_enabled=true to include backup storage cost.",
+        },
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": "Override usage.runtime_hours_per_month for non-24/7 databases.",
+        },
+        "node_count": {
+            "value": 1,
+            "unit": "nodes",
+            "hint": "Override attributes.node_count (READ_POOL instances only).",
+        },
+    },
 }
 
 CATALOG_COVERAGE: dict[str, Any] = {
@@ -192,6 +305,37 @@ CATALOG_COVERAGE: dict[str, Any] = {
             "notes": (
                 "Standard Frontend/Backend instance-hours, "
                 "flexible CPU/RAM, and standard disk/egress."
+            ),
+        },
+        "spanner": {
+            "kinds": ["spanner_instance"],
+            "notes": (
+                "Compute capacity (processing units/nodes), storage, "
+                "and regional/multi-regional configurations."
+            ),
+        },
+        "firestore": {
+            "kinds": ["firestore_database"],
+            "notes": "Document reads, writes, deletes, and multi-region/regional storage.",
+        },
+        "memorystore": {
+            "kinds": ["redis_instance", "memorystore_instance"],
+            "notes": (
+                "Redis Basic/Standard HA memory size billing, and Valkey Cluster shard capacities."
+            ),
+        },
+        "bigtable": {
+            "kinds": ["bigtable_instance"],
+            "notes": (
+                "Compute nodes per replicated cluster, SSD/HDD storage, "
+                "and multi-cluster replication."
+            ),
+        },
+        "alloydb": {
+            "kinds": ["alloydb_cluster", "alloydb_instance"],
+            "notes": (
+                "Primary/read-pool instance compute (vCPU & RAM), "
+                "automated storage, and backup billing."
             ),
         },
     },

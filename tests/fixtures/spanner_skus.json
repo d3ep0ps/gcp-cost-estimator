@@ -1,0 +1,92 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/spanner/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SPANNER-STD-REG-COMPUTE",
+    "service": "Spanner",
+    "region": "us-central1",
+    "description": "Cloud Spanner Standard: Regional Processing Unit",
+    "unit": "PU-hour",
+    "unit_price": 0.00009,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SPANNER-STD-MR-COMPUTE",
+    "service": "Spanner",
+    "region": "us-central1",
+    "description": "Cloud Spanner Standard: Multi-Region Processing Unit",
+    "unit": "PU-hour",
+    "unit_price": 0.00027,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SPANNER-ENT-REG-COMPUTE",
+    "service": "Spanner",
+    "region": "us-central1",
+    "description": "Cloud Spanner Enterprise: Regional Processing Unit",
+    "unit": "PU-hour",
+    "unit_price": 0.00065,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SPANNER-ENT-MR-COMPUTE",
+    "service": "Spanner",
+    "region": "us-central1",
+    "description": "Cloud Spanner Enterprise: Multi-Region Processing Unit",
+    "unit": "PU-hour",
+    "unit_price": 0.00195,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SPANNER-ENTPLUS-REG-COMPUTE",
+    "service": "Spanner",
+    "region": "us-central1",
+    "description": "Cloud Spanner Enterprise Plus: Regional Processing Unit",
+    "unit": "PU-hour",
+    "unit_price": 0.00100,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SPANNER-ENTPLUS-MR-COMPUTE",
+    "service": "Spanner",
+    "region": "us-central1",
+    "description": "Cloud Spanner Enterprise Plus: Multi-Region Processing Unit",
+    "unit": "PU-hour",
+    "unit_price": 0.00300,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SPANNER-STORAGE",
+    "service": "Spanner",
+    "region": "us-central1",
+    "description": "Cloud Spanner Storage",
+    "unit": "GiB-month",
+    "unit_price": 0.30,
+    "sku_group": "SSD"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-SPANNER-EGRESS",
+    "service": "Spanner",
+    "region": "us-central1",
+    "description": "Cloud Spanner Internet Egress",
+    "unit": "GiB",
+    "unit_price": 0.12,
+    "sku_group": "Egress"
+  }
+]

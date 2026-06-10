@@ -2,6 +2,7 @@
 
 import contextlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -91,6 +92,27 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_app_engine_flexible_app_version":
                 service = "appengine"
                 kind = "app_engine_flexible_version"
+            elif res_type == "google_spanner_instance":
+                service = "spanner"
+                kind = "spanner_instance"
+            elif res_type == "google_firestore_database":
+                service = "firestore"
+                kind = "firestore_database"
+            elif res_type == "google_redis_instance":
+                service = "memorystore"
+                kind = "redis_instance"
+            elif res_type == "google_memorystore_instance":
+                service = "memorystore"
+                kind = "memorystore_instance"
+            elif res_type == "google_bigtable_instance":
+                service = "bigtable"
+                kind = "bigtable_instance"
+            elif res_type == "google_alloydb_cluster":
+                service = "alloydb"
+                kind = "alloydb_cluster"
+            elif res_type == "google_alloydb_instance":
+                service = "alloydb"
+                kind = "alloydb_instance"
             elif res_type == "google_app_engine_application":
                 service = "appengine"
                 kind = "google_app_engine_application"
@@ -311,6 +333,127 @@ class TerraformPlanParser(IaCParser):
                             attributes[field] = val
                 else:
                     assumptions.append("No resources configuration found; using defaults.")
+
+            elif res_type == "google_spanner_instance":
+                for field in ("config", "num_nodes", "processing_units", "edition"):
+                    val = values.get(field)
+                    if val is not None:
+                        attributes[field] = val
+                if not region:
+                    config_val = attributes.get("config")
+                    if config_val and isinstance(config_val, str):
+                        if config_val.startswith("regional-"):
+                            region = config_val[len("regional-") :]
+                        elif config_val.startswith("nam"):
+                            region = "us-central1"
+                        elif config_val.startswith("eur"):
+                            region = "europe-west1"
+                        elif config_val.startswith("asia"):
+                            region = "asia-east1"
+
+            elif res_type == "google_firestore_database":
+                db_type = values.get("type")
+                if db_type is not None:
+                    attributes["database_type"] = db_type
+                loc_id = values.get("location_id")
+                if loc_id is not None:
+                    region = loc_id
+
+            elif res_type == "google_redis_instance":
+                for field in ("memory_size_gb", "tier", "region", "redis_version"):
+                    val = values.get(field)
+                    if val is not None:
+                        attributes[field] = val
+                if not region and attributes.get("region"):
+                    region = attributes["region"]
+
+            elif res_type == "google_memorystore_instance":
+                for field in ("instance_id", "location", "shard_count", "node_type", "mode"):
+                    val = values.get(field)
+                    if val is not None:
+                        attributes[field] = val
+                if not region and attributes.get("location"):
+                    region = attributes["location"]
+
+            elif res_type == "google_bigtable_instance":
+                inst_type = values.get("instance_type")
+                if inst_type is not None:
+                    attributes["instance_type"] = inst_type
+
+                clusters_raw = values.get("cluster")
+                if clusters_raw:
+                    if not isinstance(clusters_raw, list):
+                        clusters_raw = [clusters_raw]
+                    clusters_list = []
+                    for cl in clusters_raw:
+                        if isinstance(cl, dict):
+                            cl_dict = {}
+                            for k, v in cl.items():
+                                if v is not None:
+                                    cl_dict[k] = v
+                            clusters_list.append(cl_dict)
+                    attributes["clusters"] = clusters_list
+
+                if clusters_raw and not region:
+                    first_cl = clusters_raw[0]
+                    if isinstance(first_cl, dict):
+                        first_zone = first_cl.get("zone")
+                        if first_zone:
+                            region = re.sub(r"-[a-z]$", "", str(first_zone).strip()).lower()
+
+            elif res_type == "google_alloydb_cluster":
+                initial_user = values.get("initial_user")
+                if initial_user:
+                    if isinstance(initial_user, list) and initial_user:
+                        initial_user_blk = initial_user[0]
+                    else:
+                        initial_user_blk = initial_user
+                    if isinstance(initial_user_blk, dict):
+                        initial_user_blk_copy = dict(initial_user_blk)
+                        initial_user_blk_copy.pop("password", None)
+                        attributes["initial_user"] = initial_user_blk_copy
+
+                for k, v in values.items():
+                    if k == "initial_user":
+                        continue
+                    if v is not None:
+                        attributes[k] = v
+                if not region and attributes.get("location"):
+                    region = attributes["location"]
+
+            elif res_type == "google_alloydb_instance":
+                itype = values.get("instance_type")
+                if itype is not None:
+                    attributes["instance_type"] = itype
+
+                mconfig = values.get("machine_config")
+                if mconfig:
+                    mconfig_blk = mconfig[0] if isinstance(mconfig, list) and mconfig else mconfig
+                    if isinstance(mconfig_blk, dict):
+                        cpu_count = mconfig_blk.get("cpu_count")
+                        if cpu_count is not None:
+                            attributes["cpu_count"] = cpu_count
+
+                rpconfig = values.get("read_pool_config")
+                if rpconfig:
+                    rpconfig_blk = (
+                        rpconfig[0] if isinstance(rpconfig, list) and rpconfig else rpconfig
+                    )
+                    if isinstance(rpconfig_blk, dict):
+                        node_count = rpconfig_blk.get("node_count")
+                        if node_count is not None:
+                            attributes["node_count"] = node_count
+
+                cluster = values.get("cluster")
+                if cluster is not None:
+                    if isinstance(cluster, str) and "/clusters/" in cluster:
+                        cluster_id = cluster.split("/clusters/")[-1]
+                        attributes["cluster_ref"] = cluster_id
+                        if "/locations/" in cluster:
+                            loc_part = cluster.split("/locations/")[1].split("/")[0]
+                            region = loc_part
+                    else:
+                        attributes["cluster_ref"] = cluster
 
             else:
                 for k, v in values.items():

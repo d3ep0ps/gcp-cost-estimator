@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import contextlib
 import re
 from typing import Any
 
@@ -205,8 +206,7 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                 )
             if not r.attributes.get("memory"):
                 errors.append(
-                    f"Resource '{r.resource_id}' is a Cloud Run resource "
-                    "but has no Memory limit."
+                    f"Resource '{r.resource_id}' is a Cloud Run resource but has no Memory limit."
                 )
 
         # GCP Cloud Functions checks
@@ -221,7 +221,7 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                             f"Resource '{r.resource_id}' has non-standard "
                             f"memory allocation '{memory_mb_raw}' for 1st-gen function."
                         )
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     errors.append(
                         f"Resource '{r.resource_id}' has non-standard "
                         f"memory allocation '{memory_mb_raw}' for 1st-gen function."
@@ -266,6 +266,109 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                     "which is not supported in v1."
                 )
 
+        # GCP Spanner instance checks
+        if r.provider == "gcp" and r.service == "spanner" and r.kind == "spanner_instance":
+            edition = r.attributes.get("edition", "STANDARD")
+            if edition not in {"STANDARD", "ENTERPRISE", "ENTERPRISE_PLUS"}:
+                warnings.append(f"Resource '{r.resource_id}' has unrecognized edition '{edition}'.")
+            config = r.attributes.get("config")
+            if not config:
+                warnings.append(f"Resource '{r.resource_id}' is missing config.")
+            num_nodes = r.attributes.get("num_nodes")
+            processing_units = r.attributes.get("processing_units")
+            if num_nodes is not None and processing_units is not None:
+                msg = (
+                    f"Resource '{r.resource_id}' cannot specify both "
+                    "num_nodes and processing_units."
+                )
+                errors.append(msg)
+
+        # GCP Firestore database checks
+        if r.provider == "gcp" and r.service == "firestore" and r.kind == "firestore_database":
+            db_type = r.attributes.get("database_type", "FIRESTORE_NATIVE")
+            if db_type not in {"FIRESTORE_NATIVE", "DATASTORE_MODE"}:
+                warnings.append(
+                    f"Resource '{r.resource_id}' has unrecognized database_type '{db_type}'."
+                )
+
+        # GCP Memorystore checks
+        if r.provider == "gcp" and r.service == "memorystore":
+            if r.kind == "redis_instance":
+                if "memory_size_gb" not in r.attributes:
+                    errors.append(
+                        f"Resource '{r.resource_id}' is missing memory_size_gb attribute."
+                    )
+            elif r.kind == "memorystore_instance":
+                node_type = r.attributes.get("node_type")
+                valid_types = {
+                    "SHARED_CORE_NANO",
+                    "STANDARD_SMALL",
+                    "HIGHMEM_MEDIUM",
+                    "HIGHMEM_XLARGE",
+                }
+                if node_type and node_type not in valid_types:
+                    warnings.append(
+                        f"Resource '{r.resource_id}' has unrecognized node_type '{node_type}'."
+                    )
+
+        # GCP Bigtable checks
+        if r.provider == "gcp" and r.service == "bigtable" and r.kind == "bigtable_instance":
+            inst_type = r.attributes.get("instance_type", "PRODUCTION").upper()
+            clusters = r.attributes.get("clusters")
+            if not clusters:
+                errors.append(f"Resource '{r.resource_id}' is missing cluster configuration.")
+            else:
+                for cl in clusters:
+                    if not cl.get("zone"):
+                        errors.append(f"Resource '{r.resource_id}' cluster is missing zone.")
+
+                    num_nodes = cl.get("num_nodes")
+                    if inst_type == "DEVELOPMENT":
+                        if num_nodes is not None:
+                            try:
+                                if int(num_nodes) != 1:
+                                    msg = (
+                                        f"Resource '{r.resource_id}' is a "
+                                        "DEVELOPMENT instance but num_nodes is not 1."
+                                    )
+                                    errors.append(msg)
+                            except ValueError, TypeError:
+                                msg = (
+                                    f"Resource '{r.resource_id}' is a "
+                                    "DEVELOPMENT instance but num_nodes is not 1."
+                                )
+                                errors.append(msg)
+                    elif inst_type == "PRODUCTION" and num_nodes is not None:
+                        try:
+                            if int(num_nodes) < 3:
+                                msg = (
+                                    f"Resource '{r.resource_id}' cluster has "
+                                    "fewer than 3 nodes (recommended minimum for production)."
+                                )
+                                warnings.append(msg)
+                        except ValueError, TypeError:
+                            pass
+
+        # GCP AlloyDB checks
+        if r.provider == "gcp" and r.service == "alloydb" and r.kind == "alloydb_instance":
+            if "cpu_count" not in r.attributes:
+                errors.append(f"Resource '{r.resource_id}' is missing cpu_count attribute.")
+            else:
+                cpu_count = r.attributes.get("cpu_count")
+                if cpu_count is None:
+                    errors.append(f"Resource '{r.resource_id}' cpu_count cannot be null.")
+                else:
+                    try:
+                        cpu_val = int(cpu_count)
+                        if cpu_val not in {2, 4, 8, 16, 32, 64, 96, 128}:
+                            msg = (
+                                f"Resource '{r.resource_id}' has "
+                                f"unsupported vcpu count '{cpu_val}'."
+                            )
+                            warnings.append(msg)
+                    except ValueError, TypeError:
+                        errors.append(f"Resource '{r.resource_id}' cpu_count must be an integer.")
+
     normalized = None
     if not errors:
         normalized = normalize_resource_model(model)
@@ -292,6 +395,10 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
         for k in list(r.attributes.keys()):
             if "secret" in k.lower() or "password" in k.lower():
                 r.attributes[k] = "[REDACTED]"
+            elif isinstance(r.attributes[k], dict):
+                for sub_k in list(r.attributes[k].keys()):
+                    if "secret" in sub_k.lower() or "password" in sub_k.lower():
+                        r.attributes[k][sub_k] = "[REDACTED]"
 
         # 3. Apply default runtime hours if not present in usage
         if "runtime_hours_per_month" not in r.usage:
@@ -702,5 +809,321 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                             kind="pd_persistent_disk", quantity=1, attributes={"size_gb": disk_gb}
                         )
                     )
+
+        # Apply Spanner defaults
+        if r.provider == "gcp" and r.service == "spanner" and r.kind == "spanner_instance":
+            edition = r.attributes.get("edition")
+            if edition:
+                edition_upper = str(edition).upper()
+                if edition_upper not in {"STANDARD", "ENTERPRISE", "ENTERPRISE_PLUS"}:
+                    r.attributes["edition"] = "STANDARD"
+                    msg = (
+                        "Defaulted edition to STANDARD "
+                        f"(unrecognized edition '{edition}' was specified)."
+                    )
+                    r.assumptions.append(msg)
+                else:
+                    r.attributes["edition"] = edition_upper
+            else:
+                r.attributes["edition"] = "STANDARD"
+                r.assumptions.append("Defaulted edition to STANDARD.")
+
+            num_nodes = r.attributes.get("num_nodes")
+            processing_units = r.attributes.get("processing_units")
+
+            if num_nodes is not None and processing_units is not None:
+                pass
+            elif num_nodes is not None:
+                try:
+                    r.attributes["processing_units"] = int(num_nodes) * 1000
+                    msg = (
+                        f"Converted num_nodes={num_nodes} to "
+                        f"processing_units={r.attributes['processing_units']}."
+                    )
+                    r.assumptions.append(msg)
+                except ValueError, TypeError:
+                    r.attributes["processing_units"] = 100
+                    r.assumptions.append("Invalid num_nodes; defaulted processing_units to 100.")
+            elif processing_units is not None:
+                try:
+                    r.attributes["processing_units"] = int(processing_units)
+                except ValueError, TypeError:
+                    r.attributes["processing_units"] = 100
+                    msg = "Invalid processing_units; defaulted processing_units to 100."
+                    r.assumptions.append(msg)
+            else:
+                r.attributes["processing_units"] = 100
+                r.assumptions.append("Defaulted processing_units to 100.")
+
+            if "storage_gb" not in r.usage:
+                r.usage["storage_gb"] = 0
+                r.assumptions.append("Defaulted storage_gb to 0 GB.")
+            else:
+                try:
+                    r.usage["storage_gb"] = float(r.usage["storage_gb"])
+                except ValueError, TypeError:
+                    r.usage["storage_gb"] = 0
+                    r.assumptions.append("Invalid storage_gb; defaulted storage_gb to 0 GB.")
+
+            config = r.attributes.get("config")
+            if config:
+                config_str = str(config).lower()
+                if config_str.startswith("regional-"):
+                    config_type = "regional"
+                    mult = 1
+                elif config_str in {"nam4", "eur4"}:
+                    config_type = "dual-region"
+                    mult = 2
+                else:
+                    config_type = "multi-region"
+                    mult = 3
+                r.attributes["config_type"] = config_type
+                msg = f"Derived config_type={config_type} with storage multiplier {mult}x."
+                r.assumptions.append(msg)
+
+        # Apply Firestore defaults
+        if r.provider == "gcp" and r.service == "firestore" and r.kind == "firestore_database":
+            db_type = r.attributes.get("database_type")
+            if db_type:
+                db_type_upper = str(db_type).upper()
+                if db_type_upper not in {"FIRESTORE_NATIVE", "DATASTORE_MODE"}:
+                    r.attributes["database_type"] = "FIRESTORE_NATIVE"
+                    msg = (
+                        "Defaulted database_type to FIRESTORE_NATIVE "
+                        f"(unrecognized database_type '{db_type}' was specified)."
+                    )
+                    r.assumptions.append(msg)
+                else:
+                    r.attributes["database_type"] = db_type_upper
+            else:
+                r.attributes["database_type"] = "FIRESTORE_NATIVE"
+                r.assumptions.append("Defaulted database_type to FIRESTORE_NATIVE.")
+
+            # Normalise Firestore location IDs to GCP regions
+            if r.region:
+                location_map = {
+                    "us-central": "us-central1",
+                    "europe-west": "europe-west1",
+                    "asia-northeast": "asia-northeast1",
+                }
+                r.region = location_map.get(r.region.lower(), r.region)
+
+            # Usage defaults
+            for field, val in [
+                ("storage_gb", 1),
+                ("monthly_reads", 500000),
+                ("monthly_writes", 100000),
+                ("monthly_deletes", 10000),
+                ("monthly_egress_gb", 0),
+            ]:
+                if field not in r.usage:
+                    r.usage[field] = val
+                    r.assumptions.append(f"Defaulted {field} to {val}.")
+                else:
+                    try:
+                        is_float = field in ("storage_gb", "monthly_egress_gb")
+                        r.usage[field] = float(r.usage[field]) if is_float else int(r.usage[field])
+                    except ValueError, TypeError:
+                        r.usage[field] = val
+                        r.assumptions.append(f"Invalid {field}; defaulted to {val}.")
+
+            r.assumptions.append(
+                "Free tier (1 GB storage, 50K reads/day, 20K writes/day, "
+                "20K deletes/day) not applied — list price only."
+            )
+
+        # Apply Memorystore defaults
+        if r.provider == "gcp" and r.service == "memorystore":
+            if r.kind == "redis_instance":
+                if "tier" not in r.attributes:
+                    r.attributes["tier"] = "BASIC"
+                    r.assumptions.append("Defaulted tier to BASIC.")
+                else:
+                    tier_val = str(r.attributes["tier"]).upper()
+                    if tier_val not in {"BASIC", "STANDARD_HA"}:
+                        r.attributes["tier"] = "BASIC"
+                        msg = (
+                            "Defaulted tier to BASIC "
+                            f"(unrecognized tier '{tier_val}' was specified)."
+                        )
+                        r.assumptions.append(msg)
+                    else:
+                        r.attributes["tier"] = tier_val
+
+                if "memory_size_gb" in r.attributes:
+                    with contextlib.suppress(ValueError, TypeError):
+                        r.attributes["memory_size_gb"] = float(r.attributes["memory_size_gb"])
+
+            elif r.kind == "memorystore_instance":
+                if "shard_count" not in r.attributes:
+                    r.attributes["shard_count"] = 1
+                    r.assumptions.append("Defaulted shard_count to 1.")
+                else:
+                    try:
+                        r.attributes["shard_count"] = int(r.attributes["shard_count"])
+                    except ValueError, TypeError:
+                        r.attributes["shard_count"] = 1
+                        r.assumptions.append("Invalid shard_count; defaulted to 1.")
+
+                if "mode" not in r.attributes:
+                    r.attributes["mode"] = "STANDALONE"
+                    r.assumptions.append("Defaulted mode to STANDALONE.")
+                else:
+                    mode_val = str(r.attributes["mode"]).upper()
+                    if mode_val not in {"STANDALONE", "CLUSTER"}:
+                        r.attributes["mode"] = "STANDALONE"
+                        msg = (
+                            "Defaulted mode to STANDALONE "
+                            f"(unrecognized mode '{mode_val}' was specified)."
+                        )
+                        r.assumptions.append(msg)
+                    else:
+                        r.attributes["mode"] = mode_val
+
+        # Apply Bigtable defaults
+        if r.provider == "gcp" and r.service == "bigtable" and r.kind == "bigtable_instance":
+            if "instance_type" not in r.attributes:
+                r.attributes["instance_type"] = "PRODUCTION"
+                r.assumptions.append("Defaulted instance_type to PRODUCTION.")
+            else:
+                inst_type = str(r.attributes["instance_type"]).upper()
+                if inst_type not in {"PRODUCTION", "DEVELOPMENT"}:
+                    r.attributes["instance_type"] = "PRODUCTION"
+                    msg = (
+                        "Defaulted instance_type to PRODUCTION "
+                        f"(unrecognized instance_type '{inst_type}' was specified)."
+                    )
+                    r.assumptions.append(msg)
+                else:
+                    r.attributes["instance_type"] = inst_type
+
+            # Cluster defaults & region derivation
+            clusters = r.attributes.get("clusters")
+            if clusters:
+                for cl in clusters:
+                    # Default storage_type to SSD
+                    if "storage_type" not in cl:
+                        cl["storage_type"] = "SSD"
+                        r.assumptions.append("Defaulted storage_type to SSD.")
+                    else:
+                        stype = str(cl["storage_type"]).upper()
+                        if stype not in {"SSD", "HDD"}:
+                            cl["storage_type"] = "SSD"
+                            msg = (
+                                "Defaulted storage_type to SSD "
+                                f"(unrecognized storage_type '{stype}' was specified)."
+                            )
+                            r.assumptions.append(msg)
+                        else:
+                            cl["storage_type"] = stype
+
+                    # Default num_nodes
+                    if "num_nodes" not in cl:
+                        if r.attributes["instance_type"] == "DEVELOPMENT":
+                            cl["num_nodes"] = 1
+                            msg = "Defaulted num_nodes to 1 for DEVELOPMENT instance."
+                            r.assumptions.append(msg)
+                        else:
+                            cl["num_nodes"] = 3
+                            r.assumptions.append("Defaulted num_nodes to 3.")
+                    else:
+                        try:
+                            cl["num_nodes"] = int(cl["num_nodes"])
+                        except ValueError, TypeError:
+                            is_dev = r.attributes["instance_type"] == "DEVELOPMENT"
+                            cl["num_nodes"] = 1 if is_dev else 3
+
+                    # Derive region from zone (strip trailing zone letter like -a, -b, -c)
+                    zone = cl.get("zone")
+                    if zone:
+                        reg = re.sub(r"-[a-z]$", "", str(zone).strip()).lower()
+                        cl["region"] = reg
+
+            if "storage_gb_per_cluster" not in r.usage:
+                r.usage["storage_gb_per_cluster"] = 0
+                r.assumptions.append("Defaulted storage_gb_per_cluster to 0.")
+            else:
+                try:
+                    r.usage["storage_gb_per_cluster"] = float(r.usage["storage_gb_per_cluster"])
+                except ValueError, TypeError:
+                    r.usage["storage_gb_per_cluster"] = 0
+                    r.assumptions.append("Invalid storage_gb_per_cluster; defaulted to 0.")
+
+        # Apply AlloyDB defaults
+        if r.provider == "gcp" and r.service == "alloydb":
+            if r.kind == "alloydb_cluster":
+                if "storage_gb" not in r.usage:
+                    r.usage["storage_gb"] = 100
+                    r.assumptions.append("Defaulted storage_gb to 100.")
+                else:
+                    try:
+                        r.usage["storage_gb"] = float(r.usage["storage_gb"])
+                    except ValueError, TypeError:
+                        r.usage["storage_gb"] = 100
+                        r.assumptions.append("Invalid storage_gb; defaulted to 100.")
+
+                if "backup_enabled" not in r.usage:
+                    r.usage["backup_enabled"] = False
+                    r.assumptions.append("Defaulted backup_enabled to False.")
+                else:
+                    if isinstance(r.usage["backup_enabled"], str):
+                        r.usage["backup_enabled"] = r.usage["backup_enabled"].lower() == "true"
+                    else:
+                        r.usage["backup_enabled"] = bool(r.usage["backup_enabled"])
+
+            elif r.kind == "alloydb_instance":
+                if "instance_type" not in r.attributes:
+                    r.attributes["instance_type"] = "PRIMARY"
+                    r.assumptions.append("Defaulted instance_type to PRIMARY.")
+                else:
+                    itype = str(r.attributes["instance_type"]).upper()
+                    if itype not in {"PRIMARY", "READ_POOL"}:
+                        r.attributes["instance_type"] = "PRIMARY"
+                        msg = (
+                            "Defaulted instance_type to PRIMARY "
+                            f"(unrecognized instance_type '{itype}' was specified)."
+                        )
+                        r.assumptions.append(msg)
+                    else:
+                        r.attributes["instance_type"] = itype
+
+                if r.attributes["instance_type"] == "READ_POOL":
+                    if "node_count" not in r.attributes:
+                        r.attributes["node_count"] = 1
+                        r.assumptions.append("Defaulted node_count to 1 for READ_POOL instance.")
+                    else:
+                        try:
+                            r.attributes["node_count"] = int(r.attributes["node_count"])
+                        except ValueError, TypeError:
+                            r.attributes["node_count"] = 1
+                            r.assumptions.append("Invalid node_count; defaulted to 1.")
+
+        # Propagate AlloyDB cluster location to instances if missing
+        alloydb_cluster_regions = {}
+        for res in model_copy.resources:
+            if res.provider == "gcp" and res.service == "alloydb" and res.kind == "alloydb_cluster":
+                clean_id = res.resource_id.split(".")[-1]
+                if res.region:
+                    alloydb_cluster_regions[clean_id] = res.region
+                    alloydb_cluster_regions[res.resource_id] = res.region
+
+        for res in model_copy.resources:
+            is_alloy_inst = (
+                res.provider == "gcp"
+                and res.service == "alloydb"
+                and res.kind == "alloydb_instance"
+            )
+            if is_alloy_inst and not res.region:
+                cluster_ref = res.attributes.get("cluster_ref")
+                if cluster_ref:
+                    clean_ref = str(cluster_ref).split(".")[-1]
+                    if clean_ref in alloydb_cluster_regions:
+                        res.region = alloydb_cluster_regions[clean_ref]
+                        msg = f"Derived region '{res.region}' from parent cluster."
+                        res.assumptions.append(msg)
+                    elif str(cluster_ref) in alloydb_cluster_regions:
+                        res.region = alloydb_cluster_regions[str(cluster_ref)]
+                        msg = f"Derived region '{res.region}' from parent cluster."
+                        res.assumptions.append(msg)
 
     return model_copy

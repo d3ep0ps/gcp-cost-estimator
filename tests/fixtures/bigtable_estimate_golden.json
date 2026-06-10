@@ -1,0 +1,25 @@
+{
+  "pricing_snapshot": "2026-06-10T12:00:00Z",
+  "monthly_total": 1440.50,
+  "unpriced": [],
+  "line_items": [
+    {
+      "resource_id": "bigtable-golden",
+      "component": "compute",
+      "sku_id": "SKU-BIGTABLE-SSD-NODE",
+      "unit": "node-hour",
+      "unit_price": 0.65,
+      "qty": 2190.0,
+      "monthly_cost": 1423.50
+    },
+    {
+      "resource_id": "bigtable-golden",
+      "component": "storage",
+      "sku_id": "SKU-BIGTABLE-SSD-STORAGE",
+      "unit": "GiB-month",
+      "unit_price": 0.17,
+      "qty": 100.0,
+      "monthly_cost": 17.0
+    }
+  ]
+}

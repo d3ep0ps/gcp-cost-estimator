@@ -1,0 +1,25 @@
+{
+  "pricing_snapshot": "2026-06-10T12:00:00Z",
+  "monthly_total": 9.57,
+  "unpriced": [],
+  "line_items": [
+    {
+      "resource_id": "spanner-golden",
+      "component": "compute",
+      "sku_id": "SKU-SPANNER-STD-REG-COMPUTE",
+      "unit": "PU-hour",
+      "unit_price": 0.00009,
+      "qty": 73000.0,
+      "monthly_cost": 6.57
+    },
+    {
+      "resource_id": "spanner-golden",
+      "component": "storage",
+      "sku_id": "SKU-SPANNER-STORAGE",
+      "unit": "GiB-month",
+      "unit_price": 0.30,
+      "qty": 10.0,
+      "monthly_cost": 3.00
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+[
+  {
+    "label": "1 GB storage, 500K reads, 100K writes, 10K deletes — us-central1",
+    "region": "us-central1",
+    "storage_gb": 1.0,
+    "monthly_reads": 500000.0,
+    "monthly_writes": 100000.0,
+    "monthly_deletes": 10000.0,
+    "storage_price_per_gb_month": 0.108,
+    "reads_price_per_100k": 0.036,
+    "writes_price_per_100k": 0.108,
+    "deletes_price_per_100k": 0.012,
+    "expected_storage_cost": 0.108,
+    "expected_reads_cost": 0.18,
+    "expected_writes_cost": 0.108,
+    "expected_deletes_cost": 0.0012,
+    "expected_total": 0.3972
+  }
+]

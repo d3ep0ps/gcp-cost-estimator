@@ -1,0 +1,61 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_alloydb_cluster.alloydb_cluster",
+          "type": "google_alloydb_cluster",
+          "name": "alloydb_cluster",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "cluster_id": "alloydb-cluster",
+            "location": "us-central1",
+            "initial_user": [
+              {
+                "password": "super-secret-password"
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_alloydb_instance.alloydb_primary",
+          "type": "google_alloydb_instance",
+          "name": "alloydb_primary",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "cluster": "projects/foo/locations/us-central1/clusters/alloydb-cluster",
+            "instance_id": "alloydb-primary",
+            "instance_type": "PRIMARY",
+            "machine_config": [
+              {
+                "cpu_count": 4
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_alloydb_instance.alloydb_read_pool",
+          "type": "google_alloydb_instance",
+          "name": "alloydb_read_pool",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "cluster": "projects/foo/locations/us-central1/clusters/alloydb-cluster",
+            "instance_id": "alloydb-read-pool",
+            "instance_type": "READ_POOL",
+            "read_pool_config": [
+              {
+                "node_count": 2
+              }
+            ],
+            "machine_config": [
+              {
+                "cpu_count": 8
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

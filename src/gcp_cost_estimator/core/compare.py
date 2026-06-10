@@ -6,7 +6,11 @@ from typing import Any
 
 from gcp_cost_estimator.core.estimate import Estimate
 from gcp_cost_estimator.core.model import Resource, ResourceModel
-from gcp_cost_estimator.core.pricing.gcp import resolve_machine_type_specs, resolve_sql_tier_specs
+from gcp_cost_estimator.core.pricing.gcp import (
+    resolve_alloydb_instance_specs,
+    resolve_machine_type_specs,
+    resolve_sql_tier_specs,
+)
 from gcp_cost_estimator.core.registries import get_sku_mapper
 from gcp_cost_estimator.core.service import estimate_infrastructure
 
@@ -314,6 +318,84 @@ def suggest_cheaper_machine_types(db_path: str, resource: Resource) -> list[dict
                     }
                 ]
         return []
+
+    if resource.service == "alloydb" and resource.kind == "alloydb_instance":
+        cpu_count = resource.attributes.get("cpu_count")
+        if cpu_count is None:
+            return []
+        try:
+            current_cpu = int(cpu_count)
+        except ValueError, TypeError:
+            return []
+
+        current_vcpu, current_ram = resolve_alloydb_instance_specs(current_cpu)
+        if current_vcpu == 0:
+            return []
+
+        # Price current instance to establish a baseline
+        current_model = ResourceModel(resources=[resource])
+        current_est = estimate_infrastructure(db_path, current_model)
+        current_cost = current_est.monthly_total
+
+        instance_type = resource.attributes.get("instance_type", "PRIMARY").upper()
+        current_nodes = int(resource.attributes.get("node_count", 1))
+
+        req_vcpu = current_vcpu * current_nodes
+
+        suggestions = []
+        candidate_cpu_counts = [2, 4, 8, 16, 32, 64, 96, 128]
+
+        if instance_type == "PRIMARY":
+            for cand_cpu in candidate_cpu_counts:
+                if cand_cpu == current_cpu:
+                    continue
+                cand_vcpu, cand_ram = resolve_alloydb_instance_specs(cand_cpu)
+                if cand_vcpu >= current_vcpu and cand_ram >= current_ram:
+                    candidate_resource = resource.model_copy(deep=True)
+                    candidate_resource.attributes["cpu_count"] = cand_cpu
+                    candidate_model = ResourceModel(resources=[candidate_resource])
+                    candidate_est = estimate_infrastructure(db_path, candidate_model)
+                    candidate_cost = candidate_est.monthly_total
+                    if candidate_cost < current_cost:
+                        suggestions.append(
+                            {
+                                "cpu_count": cand_cpu,
+                                "node_count": 1,
+                                "vcpu": cand_vcpu,
+                                "ram_gb": cand_ram,
+                                "monthly_cost": candidate_cost,
+                                "monthly_savings": current_cost - candidate_cost,
+                            }
+                        )
+        elif instance_type == "READ_POOL":
+            for cand_cpu in candidate_cpu_counts:
+                cand_vcpu, cand_ram = resolve_alloydb_instance_specs(cand_cpu)
+                if cand_vcpu == 0:
+                    continue
+                for cand_nodes in range(1, 11):
+                    if cand_cpu == current_cpu and cand_nodes == current_nodes:
+                        continue
+                    if cand_vcpu * cand_nodes >= req_vcpu:
+                        candidate_resource = resource.model_copy(deep=True)
+                        candidate_resource.attributes["cpu_count"] = cand_cpu
+                        candidate_resource.attributes["node_count"] = cand_nodes
+                        candidate_model = ResourceModel(resources=[candidate_resource])
+                        candidate_est = estimate_infrastructure(db_path, candidate_model)
+                        candidate_cost = candidate_est.monthly_total
+                        if candidate_cost < current_cost:
+                            suggestions.append(
+                                {
+                                    "cpu_count": cand_cpu,
+                                    "node_count": cand_nodes,
+                                    "vcpu": cand_vcpu,
+                                    "ram_gb": cand_ram,
+                                    "monthly_cost": candidate_cost,
+                                    "monthly_savings": current_cost - candidate_cost,
+                                }
+                            )
+
+        suggestions.sort(key=lambda x: x["monthly_cost"])
+        return suggestions
 
     return []
 
