@@ -76,6 +76,7 @@ tests/         # mirrors src/; known-answer fixtures under tests/fixtures/
 ```
 
 ## Conventions
+- **Clean Code & SOLID:** Strictly follow the guidelines in [clean-code.md](clean-code.md) and [solid.md](solid.md).
 - Pydantic (or dataclasses) for the resource model + estimate model; validation centralized in `core/model.py`.
 - Pure functions in `core/`; side effects (cache I/O, refresh) isolated and injectable for testing.
 - Registries are the only place concrete impls are wired; never import a concrete impl from shared code.

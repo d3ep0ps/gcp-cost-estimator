@@ -77,6 +77,7 @@ Always use `uv` for package management and script execution.
 - [tests/](tests/) — Mirrors `src/`; known-answer fixtures under `tests/fixtures/`
 
 ## Coding Conventions
+- **Clean Code & SOLID:** Strictly follow the repository's clean code practices in [clean-code.md](clean-code.md) and SOLID principles in [solid.md](solid.md).
 - **Data Models:** Use Pydantic (or dataclasses) for the resource model + estimate model; validation is centralized in `core/model.py`.
 - **Side Effects:** Write pure functions in `core/`; isolate side effects (cache I/O, refresh) and make them injectable for testing.
 - **Registries:** Registries are the only place concrete implementations are wired; never import a concrete implementation directly from shared code.
