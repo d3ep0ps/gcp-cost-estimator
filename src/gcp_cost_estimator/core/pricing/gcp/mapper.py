@@ -35,6 +35,7 @@ from gcp_cost_estimator.core.pricing.gcp.cdn import map_cloud_cdn_backend
 from gcp_cost_estimator.core.pricing.gcp.dns import map_dns_managed_zone
 from gcp_cost_estimator.core.pricing.gcp.nat import map_nat_gateway
 from gcp_cost_estimator.core.pricing.gcp.vpc import map_compute_address
+from gcp_cost_estimator.core.pricing.gcp.armor import map_compute_security_policy
 from gcp_cost_estimator.core.registries import SkuMapper, register_sku_mapper
 
 
@@ -134,6 +135,11 @@ class GcpSkuMapper(SkuMapper):
         self, resource: Resource, cursor: sqlite3.Cursor
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         return map_compute_address(resource, cursor)
+
+    def _map_compute_security_policy(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_compute_security_policy(resource, cursor)
 
     def _map_bigquery_dataset(
         self, resource: Resource, cursor: sqlite3.Cursor
@@ -332,6 +338,10 @@ class GcpSkuMapper(SkuMapper):
                 vpc_mappings, vpc_unpriced = self._map_compute_address(resource, cursor)
                 mappings.extend(vpc_mappings)
                 unpriced.extend(vpc_unpriced)
+            elif resource.service == "armor" and resource.kind == "compute_security_policy":
+                armor_mappings, armor_unpriced = self._map_compute_security_policy(resource, cursor)
+                mappings.extend(armor_mappings)
+                unpriced.extend(armor_unpriced)
             elif resource.service == "bigquery" and resource.kind == "bigquery_dataset":
                 bq_mappings, bq_unpriced = self._map_bigquery_dataset(resource, cursor)
                 mappings.extend(bq_mappings)

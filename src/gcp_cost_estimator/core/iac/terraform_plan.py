@@ -131,6 +131,9 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_compute_address":
                 service = "vpc"
                 kind = "compute_address"
+            elif res_type == "google_compute_security_policy":
+                service = "armor"
+                kind = "compute_security_policy"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -151,7 +154,7 @@ class TerraformPlanParser(IaCParser):
             elif raw_location and isinstance(raw_location, str):
                 region = raw_location
 
-            if kind == "dns_managed_zone":
+            if kind in ("dns_managed_zone", "compute_security_policy"):
                 region = "global"
 
             attributes: dict[str, Any] = {}
@@ -179,6 +182,15 @@ class TerraformPlanParser(IaCParser):
                 purpose = values.get("purpose")
                 if purpose:
                     attributes["purpose"] = purpose
+
+            if kind == "compute_security_policy":
+                rules = values.get("rule", [])
+                if isinstance(rules, dict):
+                    attributes["rule_count"] = 1
+                elif isinstance(rules, list):
+                    attributes["rule_count"] = len(rules)
+                else:
+                    attributes["rule_count"] = 0
 
             if res_type == "google_compute_instance":
                 mtype = values.get("machine_type")

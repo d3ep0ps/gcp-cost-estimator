@@ -184,6 +184,9 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_compute_address":
                         service = "vpc"
                         kind = "compute_address"
+                    elif res_type_clean == "google_compute_security_policy":
+                        service = "armor"
+                        kind = "compute_security_policy"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -214,7 +217,7 @@ class TerraformHclParser(IaCParser):
                         else:
                             region = raw_location
 
-                    if kind == "dns_managed_zone":
+                    if kind in ("dns_managed_zone", "compute_security_policy"):
                         region = "global"
 
                     quantity = 1
@@ -258,6 +261,15 @@ class TerraformHclParser(IaCParser):
                         purpose = resolve_value(res_config.get("purpose"))
                         if purpose:
                             attributes["purpose"] = purpose
+
+                    if kind == "compute_security_policy":
+                        rules = res_config.get("rule", [])
+                        if isinstance(rules, dict):
+                            attributes["rule_count"] = 1
+                        elif isinstance(rules, list):
+                            attributes["rule_count"] = len(rules)
+                        else:
+                            attributes["rule_count"] = 0
 
                     if res_type_clean == "google_compute_instance":
                         mtype = resolve_value(res_config.get("machine_type"))

@@ -1,0 +1,42 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/armor/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ARMOR-POLICY",
+    "service": "Cloud Armor",
+    "region": "global",
+    "description": "Cloud Armor Security Policy",
+    "unit": "month",
+    "unit_price": 5.0,
+    "sku_group": "ArmorPolicy"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ARMOR-RULE",
+    "service": "Cloud Armor",
+    "region": "global",
+    "description": "Cloud Armor Security Rule",
+    "unit": "month",
+    "unit_price": 1.0,
+    "sku_group": "ArmorRule"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ARMOR-REQUESTS",
+    "service": "Cloud Armor",
+    "region": "global",
+    "description": "Cloud Armor Requests",
+    "unit": "1M request",
+    "unit_price": 0.75,
+    "sku_group": "ArmorRequests"
+  }
+]

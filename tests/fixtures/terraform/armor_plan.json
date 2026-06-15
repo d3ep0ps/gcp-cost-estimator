@@ -1,0 +1,28 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_security_policy.my_policy",
+          "type": "google_compute_security_policy",
+          "name": "my_policy",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-policy",
+            "rule": [
+              {
+                "action": "allow",
+                "priority": 1000
+              },
+              {
+                "action": "deny(403)",
+                "priority": 2147483647
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
