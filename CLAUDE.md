@@ -91,6 +91,15 @@ The GCP pricing mapper is modularized under `src/gcp_cost_estimator/core/pricing
 3. Import and delegate to this function inside `GcpSkuMapper` in `mapper.py`.
 4. Ensure any shared specifications/resolvers (e.g., machine/tier specs) are placed in `specs.py` and re-exported in `__init__.py`.
 
+### Codebase Structure & GCP Validation/Normalization Modularization
+The GCP validation and normalization logic is modularized under `src/gcp_cost_estimator/core/validation/gcp/` to satisfy SRP and OCP. Do not add service-specific validation or normalization code to `validate.py`. To add validation or normalization support for a new GCP resource/service:
+1. Create a new module file under `src/gcp_cost_estimator/core/validation/gcp/<service>.py` (e.g., `storage.py`, `sql.py`).
+2. Implement validation and normalization functions:
+   - `validate_<service>(r: Resource, errors: list[str], warnings: list[str], unpriced: list[dict[str, Any]]) -> None`
+   - `normalize_<service>(r: Resource) -> None`
+3. Import and register these functions in `VALIDATORS` and `NORMALIZERS` inside `src/gcp_cost_estimator/core/validation/gcp/__init__.py`.
+
+
 ## Architecture decisions (ADRs)
 Key decisions recorded here for quick reference. Full rationale in `gcp-cost-estimator-server-architecture.md` §7.
 
