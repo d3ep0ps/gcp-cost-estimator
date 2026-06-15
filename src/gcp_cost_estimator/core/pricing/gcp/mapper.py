@@ -31,6 +31,7 @@ from gcp_cost_estimator.core.pricing.gcp.serverless import (
 from gcp_cost_estimator.core.pricing.gcp.spanner import map_spanner_instance
 from gcp_cost_estimator.core.pricing.gcp.sql import map_cloud_sql
 from gcp_cost_estimator.core.pricing.gcp.storage import map_gcs_bucket
+from gcp_cost_estimator.core.pricing.gcp.cdn import map_cloud_cdn_backend
 from gcp_cost_estimator.core.registries import SkuMapper, register_sku_mapper
 
 
@@ -42,6 +43,13 @@ class GcpSkuMapper(SkuMapper):
         """Return the list of official billing service display names required by this provider."""
         return [
             "Compute Engine",
+            "Cloud CDN",
+            "Cloud DNS",
+            "Cloud NAT",
+            "Cloud Armor",
+            "Pub/Sub",
+            "Dataflow",
+            "Dataproc",
             "Cloud SQL",
             "Cloud Storage",
             "Kubernetes Engine",
@@ -103,6 +111,11 @@ class GcpSkuMapper(SkuMapper):
         self, resource: Resource, cursor: sqlite3.Cursor
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         return map_gcs_bucket(resource, cursor)
+
+    def _map_cloud_cdn_backend(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_cloud_cdn_backend(resource, cursor)
 
     def _map_bigquery_dataset(
         self, resource: Resource, cursor: sqlite3.Cursor
@@ -285,6 +298,10 @@ class GcpSkuMapper(SkuMapper):
                 gcs_mappings, gcs_unpriced = self._map_gcs_bucket(resource, cursor)
                 mappings.extend(gcs_mappings)
                 unpriced.extend(gcs_unpriced)
+            elif resource.service == "cdn" and resource.kind == "cloud_cdn_backend":
+                cdn_mappings, cdn_unpriced = self._map_cloud_cdn_backend(resource, cursor)
+                mappings.extend(cdn_mappings)
+                unpriced.extend(cdn_unpriced)
             elif resource.service == "bigquery" and resource.kind == "bigquery_dataset":
                 bq_mappings, bq_unpriced = self._map_bigquery_dataset(resource, cursor)
                 mappings.extend(bq_mappings)

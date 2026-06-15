@@ -166,6 +166,12 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_alloydb_instance":
                         service = "alloydb"
                         kind = "alloydb_instance"
+                    elif res_type_clean in (
+                        "google_compute_backend_bucket",
+                        "google_compute_backend_service",
+                    ) and res_config.get("cdn_policy"):
+                        service = "cdn"
+                        kind = "cloud_cdn_backend"
                     elif res_type_clean == "google_app_engine_application":
                         service = "appengine"
                         kind = "google_app_engine_application"
@@ -217,6 +223,9 @@ class TerraformHclParser(IaCParser):
 
                     attributes: dict[str, Any] = {}
                     attached: list[AttachedResource] = []
+
+                    if kind == "cloud_cdn_backend":
+                        attributes["cdn_enabled"] = True
 
                     if res_type_clean == "google_compute_instance":
                         mtype = resolve_value(res_config.get("machine_type"))

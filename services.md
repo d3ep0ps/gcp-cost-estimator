@@ -115,13 +115,13 @@ These services have pricing but are below the threshold or require specialist bi
 | Tier | Estimated spend share | Status |
 |---|---|---|
 | Tier 1 — Core infrastructure | ~60% | 5/5 done ✅ |
-| Tier 2 — Serverless & containers | ~15% | 0/3 in-progress (plan3.md drafted) |
-| Tier 3 — Databases | ~8% | 0/5 planned |
+| Tier 2 — Serverless & containers | ~15% | 3/3 done ✅ |
+| Tier 3 — Databases | ~8% | 5/5 done ✅ |
 | Tier 4 — Networking | ~5% | 2/7 done (partial); 5 planned |
 | Tier 5 — Data & analytics | ~5% | 0/3 planned |
 | Tier 6 — Storage & AI | ~4% | 1/4 done; 3 planned |
 | **Total at plan completion** | **~97%** | — |
-| **Total currently done** | **~61%** | Tier 1 complete |
+| **Total currently done** | **~83%** | Tiers 1–3 complete |
 
 ---
 
@@ -129,10 +129,15 @@ These services have pricing but are below the threshold or require specialist bi
 
 Work Tier 1 → Tier 2 → Tier 3 in order. Within each tier, pick the highest-spend service first. Tiers 4–6 can be parallelised once Tiers 1–3 are complete.
 
-**Tier 1 complete. Tier 2 plan drafted ([`plan3.md`](plan3.md)); implementation order:**
-1. Cloud Run — vCPU-seconds + memory-seconds + requests (steps SVL-1–SVL-4)
-2. Cloud Functions — invocations + compute time (1st gen and 2nd gen) (steps SVL-5–SVL-7)
-3. App Engine — standard instance-hours + flexible GCE-based billing (steps SVL-8–SVL-10)
+**Tiers 1–3 complete. Tier 4 + Tier 5 plan drafted ([`plan5.md`](plan5.md)); implementation order:**
+1. Cloud CDN (steps CDN-1–CDN-3)
+2. Cloud DNS (step DNS-1)
+3. Cloud NAT (steps NAT-1–NAT-3)
+4. VPC Static IPs (steps VPC-1–VPC-2)
+5. Cloud Armor (steps ARM-1–ARM-3)
+6. Pub/Sub (steps PS-1–PS-4)
+7. Dataflow (steps DF-1–DF-4)
+8. Dataproc (steps DP-1–DP-3)
 
 ---
 

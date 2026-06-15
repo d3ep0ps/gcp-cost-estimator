@@ -369,6 +369,31 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                     except ValueError, TypeError:
                         errors.append(f"Resource '{r.resource_id}' cpu_count must be an integer.")
 
+        # GCP Cloud CDN checks
+        if r.provider == "gcp" and r.service == "cdn" and r.kind == "cloud_cdn_backend":
+            https_frac = r.usage.get("https_fraction")
+            if https_frac is not None:
+                try:
+                    frac_val = float(https_frac)
+                    if not (0.0 <= frac_val <= 1.0):
+                        errors.append(
+                            f"Resource '{r.resource_id}' https_fraction '{https_frac}' "
+                            "is out of valid range [0.0, 1.0]."
+                        )
+                except (ValueError, TypeError):
+                    errors.append(
+                        f"Resource '{r.resource_id}' https_fraction '{https_frac}' "
+                        "must be a float."
+                    )
+
+        # GCP Dataflow checks
+        if r.provider == "gcp" and r.service == "dataflow" and r.kind == "dataflow_job":
+            job_type = r.usage.get("job_type", "batch")
+            if job_type not in {"batch", "streaming"}:
+                errors.append(
+                    f"Resource '{r.resource_id}' has unrecognized job_type '{job_type}'."
+                )
+
     normalized = None
     if not errors:
         normalized = normalize_resource_model(model)
@@ -1097,6 +1122,207 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                         except ValueError, TypeError:
                             r.attributes["node_count"] = 1
                             r.assumptions.append("Invalid node_count; defaulted to 1.")
+
+        # Apply CDN defaults
+        if r.provider == "gcp" and r.service == "cdn" and r.kind == "cloud_cdn_backend":
+            for field, val in [
+                ("monthly_cache_transfer_gb", 100.0),
+                ("monthly_cache_fill_gb", 10.0),
+                ("monthly_requests", 1000000),
+                ("https_fraction", 1.0),
+            ]:
+                if field not in r.usage:
+                    r.usage[field] = val
+                    r.assumptions.append(f"Defaulted {field} to {val}.")
+                else:
+                    try:
+                        r.usage[field] = float(r.usage[field]) if field == "https_fraction" else int(float(r.usage[field]))
+                    except (ValueError, TypeError):
+                        r.usage[field] = val
+                        r.assumptions.append(f"Invalid {field}; defaulted to {val}.")
+
+        # Apply DNS defaults
+        if r.provider == "gcp" and r.service == "dns" and r.kind == "dns_managed_zone":
+            if "visibility" not in r.attributes:
+                r.attributes["visibility"] = "public"
+                r.assumptions.append("Defaulted visibility to public.")
+            else:
+                r.attributes["visibility"] = str(r.attributes["visibility"]).lower()
+            
+            if "monthly_queries" not in r.usage:
+                r.usage["monthly_queries"] = 1000000
+                r.assumptions.append("Defaulted monthly_queries to 1000000.")
+            else:
+                try:
+                    r.usage["monthly_queries"] = int(float(r.usage["monthly_queries"]))
+                except (ValueError, TypeError):
+                    r.usage["monthly_queries"] = 1000000
+                    r.assumptions.append("Invalid monthly_queries; defaulted to 1000000.")
+
+        # Apply NAT defaults
+        if r.provider == "gcp" and r.service == "nat" and r.kind == "nat_gateway":
+            for field, val in [
+                ("num_vms", 1),
+                ("num_nat_ips", 1),
+                ("monthly_data_processed_gb", 10),
+            ]:
+                if field not in r.usage:
+                    r.usage[field] = val
+                    r.assumptions.append(f"Defaulted {field} to {val}.")
+                else:
+                    try:
+                        r.usage[field] = int(float(r.usage[field]))
+                    except (ValueError, TypeError):
+                        r.usage[field] = val
+                        r.assumptions.append(f"Invalid {field}; defaulted to {val}.")
+
+        # Apply VPC defaults
+        if r.provider == "gcp" and r.service == "vpc" and r.kind == "compute_address":
+            addr_type = r.attributes.get("address_type", "EXTERNAL")
+            r.attributes["address_type"] = str(addr_type).upper()
+            
+            for field, val in [
+                ("in_use", True),
+                ("on_spot_vm", False),
+                ("on_forwarding_rule", False),
+            ]:
+                if field not in r.usage:
+                    r.usage[field] = val
+                    r.assumptions.append(f"Defaulted {field} to {val}.")
+                else:
+                    if isinstance(r.usage[field], str):
+                        r.usage[field] = r.usage[field].lower() in {"true", "1", "yes"}
+                    else:
+                        r.usage[field] = bool(r.usage[field])
+
+        # Apply Cloud Armor defaults
+        if r.provider == "gcp" and r.service == "armor" and r.kind == "compute_security_policy":
+            if "rule_count" not in r.attributes:
+                r.attributes["rule_count"] = 0
+            else:
+                try:
+                    r.attributes["rule_count"] = int(r.attributes["rule_count"])
+                except (ValueError, TypeError):
+                    r.attributes["rule_count"] = 0
+            
+            if "monthly_requests" not in r.usage:
+                r.usage["monthly_requests"] = 1000000
+                r.assumptions.append("Defaulted monthly_requests to 1000000.")
+            else:
+                try:
+                    r.usage["monthly_requests"] = int(float(r.usage["monthly_requests"]))
+                except (ValueError, TypeError):
+                    r.usage["monthly_requests"] = 1000000
+                    r.assumptions.append("Invalid monthly_requests; defaulted to 1000000.")
+
+        # Apply Pub/Sub defaults
+        if r.provider == "gcp" and r.service == "pubsub":
+            if r.kind == "pubsub_topic":
+                if "monthly_message_throughput_gb" not in r.usage:
+                    r.usage["monthly_message_throughput_gb"] = 10.0
+                    r.assumptions.append("Defaulted monthly_message_throughput_gb to 10.0 GB.")
+                else:
+                    try:
+                        r.usage["monthly_message_throughput_gb"] = float(r.usage["monthly_message_throughput_gb"])
+                    except (ValueError, TypeError):
+                        r.usage["monthly_message_throughput_gb"] = 10.0
+                        r.assumptions.append("Invalid monthly_message_throughput_gb; defaulted to 10.0 GB.")
+            elif r.kind == "pubsub_subscription":
+                if "retain_acked_messages" not in r.attributes:
+                    r.attributes["retain_acked_messages"] = False
+                else:
+                    if isinstance(r.attributes["retain_acked_messages"], str):
+                        r.attributes["retain_acked_messages"] = r.attributes["retain_acked_messages"].lower() in {"true", "1", "yes"}
+                    else:
+                        r.attributes["retain_acked_messages"] = bool(r.attributes["retain_acked_messages"])
+
+                if "subscription_storage_gb" not in r.usage:
+                    r.usage["subscription_storage_gb"] = 0.0
+                    r.assumptions.append("Defaulted subscription_storage_gb to 0.0 GB.")
+                else:
+                    try:
+                        r.usage["subscription_storage_gb"] = float(r.usage["subscription_storage_gb"])
+                    except (ValueError, TypeError):
+                        r.usage["subscription_storage_gb"] = 0.0
+                        r.assumptions.append("Invalid subscription_storage_gb; defaulted to 0.0 GB.")
+
+        # Apply Dataflow defaults
+        if r.provider == "gcp" and r.service == "dataflow" and r.kind == "dataflow_job":
+            if "runtime_hours_per_month" not in r.usage or r.usage.get("runtime_hours_per_month") == 730:
+                if "Defaulted runtime to 730 hours/month." in r.assumptions:
+                    r.assumptions.remove("Defaulted runtime to 730 hours/month.")
+                r.usage["runtime_hours_per_month"] = 100
+                r.assumptions.append("Defaulted runtime to 100 hours/month.")
+            
+            mtype = r.attributes.get("machine_type", "n1-standard-4")
+            from gcp_cost_estimator.core.pricing.gcp.specs import resolve_machine_type_specs
+            with contextlib.suppress(Exception):
+                vcpus, ram = resolve_machine_type_specs(mtype)
+                r.attributes["vcpus"] = vcpus
+                r.attributes["ram_gb"] = ram
+            
+            if "num_vcpus" not in r.usage:
+                r.usage["num_vcpus"] = r.attributes.get("vcpus", 4)
+            if "memory_gb" not in r.usage:
+                r.usage["memory_gb"] = r.attributes.get("ram_gb", 15.0)
+            
+            if "max_workers" not in r.attributes:
+                r.attributes["max_workers"] = 1
+                r.assumptions.append("Defaulted max_workers to 1.")
+            else:
+                try:
+                    r.attributes["max_workers"] = int(r.attributes["max_workers"])
+                except (ValueError, TypeError):
+                    r.attributes["max_workers"] = 1
+                    r.assumptions.append("Invalid max_workers; defaulted to 1.")
+
+            if "job_type" not in r.usage:
+                r.usage["job_type"] = "batch"
+                r.assumptions.append("Defaulted job_type to batch.")
+            else:
+                r.usage["job_type"] = str(r.usage["job_type"]).lower()
+
+            if "shuffle_data_gb" not in r.usage:
+                r.usage["shuffle_data_gb"] = 50.0
+                r.assumptions.append("Defaulted shuffle_data_gb to 50.0 GB.")
+            else:
+                try:
+                    r.usage["shuffle_data_gb"] = float(r.usage["shuffle_data_gb"])
+                except (ValueError, TypeError):
+                    r.usage["shuffle_data_gb"] = 50.0
+                    r.assumptions.append("Invalid shuffle_data_gb; defaulted to 50.0 GB.")
+
+        # Apply Dataproc defaults
+        if r.provider == "gcp" and r.service == "dataproc" and r.kind == "dataproc_cluster":
+            if "runtime_hours_per_month" not in r.usage or r.usage.get("runtime_hours_per_month") == 730:
+                if "Defaulted runtime to 730 hours/month." in r.assumptions:
+                    r.assumptions.remove("Defaulted runtime to 730 hours/month.")
+                r.usage["runtime_hours_per_month"] = 100
+                r.assumptions.append("Defaulted runtime to 100 hours/month.")
+            
+            num_m = r.attributes.get("num_master_nodes", 1)
+            num_w = r.attributes.get("num_worker_nodes", 2)
+            num_p = r.attributes.get("num_preemptible_nodes", 0)
+            m_type = r.attributes.get("master_machine_type", "n1-standard-4")
+            w_type = r.attributes.get("worker_machine_type", "n1-standard-4")
+            
+            r.attributes["num_master_nodes"] = int(num_m)
+            r.attributes["num_worker_nodes"] = int(num_w)
+            r.attributes["num_preemptible_nodes"] = int(num_p)
+            r.attributes["master_machine_type"] = m_type
+            r.attributes["worker_machine_type"] = w_type
+
+            from gcp_cost_estimator.core.pricing.gcp.specs import resolve_machine_type_specs
+            m_vcpus, w_vcpus = 4, 4
+            with contextlib.suppress(Exception):
+                m_vcpus, _ = resolve_machine_type_specs(m_type)
+            with contextlib.suppress(Exception):
+                w_vcpus, _ = resolve_machine_type_specs(w_type)
+            
+            if "num_master_vcpus" not in r.usage:
+                r.usage["num_master_vcpus"] = m_vcpus
+            if "num_worker_vcpus" not in r.usage:
+                r.usage["num_worker_vcpus"] = w_vcpus
 
         # Propagate AlloyDB cluster location to instances if missing
         alloydb_cluster_regions = {}

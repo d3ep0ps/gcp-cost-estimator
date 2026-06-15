@@ -113,6 +113,12 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_alloydb_instance":
                 service = "alloydb"
                 kind = "alloydb_instance"
+            elif res_type in (
+                "google_compute_backend_bucket",
+                "google_compute_backend_service",
+            ) and values.get("cdn_policy"):
+                service = "cdn"
+                kind = "cloud_cdn_backend"
             elif res_type == "google_app_engine_application":
                 service = "appengine"
                 kind = "google_app_engine_application"
@@ -138,6 +144,9 @@ class TerraformPlanParser(IaCParser):
 
             attributes: dict[str, Any] = {}
             attached: list[AttachedResource] = []
+
+            if kind == "cloud_cdn_backend":
+                attributes["cdn_enabled"] = True
 
             if res_type == "google_compute_instance":
                 mtype = values.get("machine_type")

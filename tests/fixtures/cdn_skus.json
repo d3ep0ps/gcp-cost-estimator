@@ -1,0 +1,52 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/cdn/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-CDN-TX-USC1",
+    "service": "Cloud CDN",
+    "region": "us-central1",
+    "description": "Cloud CDN Cache Transfer Out US/Europe",
+    "unit": "GiBy",
+    "unit_price": 0.02,
+    "sku_group": "CdnCacheTransferOut"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-CDN-FILL-USC1",
+    "service": "Cloud CDN",
+    "region": "us-central1",
+    "description": "Cloud CDN Cache Fill from origin",
+    "unit": "GiBy",
+    "unit_price": 0.01,
+    "sku_group": "CdnCacheFill"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-CDN-HTTP-REQ",
+    "service": "Cloud CDN",
+    "region": "us-central1",
+    "description": "Cloud CDN HTTP Requests",
+    "unit": "10k request",
+    "unit_price": 0.0075,
+    "sku_group": "CdnRequests"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-CDN-HTTPS-REQ",
+    "service": "Cloud CDN",
+    "region": "us-central1",
+    "description": "Cloud CDN HTTPS Requests",
+    "unit": "10k request",
+    "unit_price": 0.0090,
+    "sku_group": "CdnRequests"
+  }
+]

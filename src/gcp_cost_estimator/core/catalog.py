@@ -3,6 +3,28 @@
 from typing import Any
 
 CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
+    "cdn": {
+        "monthly_cache_transfer_gb": {
+            "value": 100,
+            "unit": "GB/month",
+            "hint": "Override usage.monthly_cache_transfer_gb with expected CDN delivery volume.",
+        },
+        "monthly_cache_fill_gb": {
+            "value": 10,
+            "unit": "GB/month",
+            "hint": "Override usage.monthly_cache_fill_gb with expected origin fill volume.",
+        },
+        "monthly_requests": {
+            "value": 1000000,
+            "unit": "requests/month",
+            "hint": "Override usage.monthly_requests.",
+        },
+        "https_fraction": {
+            "value": 1.0,
+            "unit": "fraction",
+            "hint": "Fraction of requests that are HTTPS (0.0–1.0).",
+        },
+    },
     "compute": {
         "runtime_hours_per_month": {
             "value": 730,
@@ -262,6 +284,10 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
 CATALOG_COVERAGE: dict[str, Any] = {
     "provider": "gcp",
     "services": {
+        "cdn": {
+            "kinds": ["cloud_cdn_backend"],
+            "notes": "Cache transfer-out (regional tiers), cache fill, and HTTP/HTTPS requests.",
+        },
         "compute": {
             "kinds": ["gce_instance"],
             "notes": "vCPU, RAM, standard/custom machine types, attached PD/SSD disks, egress.",
