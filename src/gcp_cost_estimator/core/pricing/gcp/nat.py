@@ -94,7 +94,7 @@ def map_nat_gateway(
         )
         row = cursor.fetchone()
         if row:
-            sku_id, unit, unit_price, desc = row
+            sku_id, unit, unit_price, _desc = row
             mappings.append(
                 {
                     "sku_id": sku_id,

@@ -1,0 +1,32 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/pubsub/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-PUBSUB-THROUGHPUT",
+    "service": "Pub/Sub",
+    "region": "global",
+    "description": "Pub/Sub Message Throughput",
+    "unit": "GB",
+    "unit_price": 0.04,
+    "sku_group": "PubsubThroughput"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-PUBSUB-STORAGE",
+    "service": "Pub/Sub",
+    "region": "global",
+    "description": "Pub/Sub Retained Messages Storage",
+    "unit": "GB-month",
+    "unit_price": 0.27,
+    "sku_group": "PubsubStorage"
+  }
+]

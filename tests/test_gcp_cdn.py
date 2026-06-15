@@ -83,7 +83,9 @@ def test_cloud_cdn_https_fraction_out_of_range_is_error() -> None:
 import json
 import sqlite3
 from pathlib import Path
+
 import pytest
+
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
 
@@ -242,7 +244,7 @@ def test_cdn_known_answer_100gb_transfer_1m_https_requests(populated_cdn_db: str
     mapper = GcpSkuMapper(populated_cdn_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
     assert len(unpriced) == 0
-    
+
     total_cost = sum(m["unit_price"] * m["qty"] for m in mappings)
     assert round(total_cost, 2) == 3.00
 
@@ -250,9 +252,12 @@ def test_cdn_known_answer_100gb_transfer_1m_https_requests(populated_cdn_db: str
 def test_terraform_hcl_parses_backend_bucket_with_cdn_policy() -> None:
     """Verify HCL parser maps google_compute_backend_bucket with cdn_policy to cloud_cdn_backend."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
-    res = next(r for r in model.resources if r.resource_id == "google_compute_backend_bucket.cdn_bucket")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_compute_backend_bucket.cdn_bucket"
+    )
     assert res.provider == "gcp"
     assert res.service == "cdn"
     assert res.kind == "cloud_cdn_backend"
@@ -263,9 +268,12 @@ def test_terraform_hcl_parses_backend_bucket_with_cdn_policy() -> None:
 def test_terraform_hcl_parses_backend_service_with_cdn_policy() -> None:
     """Verify HCL parser maps google_compute_backend_service with cdn_policy to cloud_cdn_backend."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
-    res = next(r for r in model.resources if r.resource_id == "google_compute_backend_service.cdn_service")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_compute_backend_service.cdn_service"
+    )
     assert res.provider == "gcp"
     assert res.service == "cdn"
     assert res.kind == "cloud_cdn_backend"
@@ -276,9 +284,12 @@ def test_terraform_hcl_parses_backend_service_with_cdn_policy() -> None:
 def test_terraform_hcl_backend_without_cdn_policy_produces_unpriced() -> None:
     """Verify HCL parser does not flag cdn_enabled for backend without cdn_policy."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
-    res = next(r for r in model.resources if r.resource_id == "google_compute_backend_bucket.no_cdn")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_compute_backend_bucket.no_cdn"
+    )
     # Should not have cdn_enabled in attributes
     assert not res.attributes.get("cdn_enabled")
 
@@ -286,13 +297,14 @@ def test_terraform_hcl_backend_without_cdn_policy_produces_unpriced() -> None:
 def test_terraform_plan_json_cdn_backend_parsed() -> None:
     """Verify plan JSON parser resolves cloud_cdn_backend correctly."""
     from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
+
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/cdn_plan.json")
-    res = next(r for r in model.resources if r.resource_id == "google_compute_backend_bucket.cdn_bucket")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_compute_backend_bucket.cdn_bucket"
+    )
     assert res.provider == "gcp"
     assert res.service == "cdn"
     assert res.kind == "cloud_cdn_backend"
     assert res.region == "us-central1"
     assert res.attributes.get("cdn_enabled") is True
-
-

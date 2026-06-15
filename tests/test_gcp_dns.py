@@ -3,12 +3,13 @@
 import json
 import sqlite3
 from pathlib import Path
+
 import pytest
 
 from gcp_cost_estimator.core.model import Resource, ResourceModel
-from gcp_cost_estimator.core.validate import validate_resource_model
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
+from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 def test_dns_managed_zone_valid_public() -> None:
@@ -138,6 +139,7 @@ def test_dns_known_answer_1_zone_1m_queries(populated_dns_db: str) -> None:
 def test_terraform_hcl_parses_google_dns_managed_zone() -> None:
     """Verify HCL parser resolves google_dns_managed_zone resource."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
     res = next(r for r in model.resources if r.resource_id == "google_dns_managed_zone.my_zone")
@@ -152,6 +154,7 @@ def test_terraform_hcl_parses_google_dns_managed_zone() -> None:
 def test_terraform_plan_json_dns_managed_zone_parsed() -> None:
     """Verify plan JSON parser resolves dns_managed_zone resource."""
     from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
+
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/dns_plan.json")
     res = next(r for r in model.resources if r.resource_id == "google_dns_managed_zone.my_zone")

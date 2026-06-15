@@ -187,6 +187,18 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_compute_security_policy":
                         service = "armor"
                         kind = "compute_security_policy"
+                    elif res_type_clean == "google_pubsub_topic":
+                        service = "pubsub"
+                        kind = "pubsub_topic"
+                    elif res_type_clean == "google_pubsub_subscription":
+                        service = "pubsub"
+                        kind = "pubsub_subscription"
+                    elif res_type_clean == "google_pubsub_lite_topic":
+                        service = "pubsub"
+                        kind = "pubsub_lite_topic"
+                    elif res_type_clean == "google_pubsub_lite_subscription":
+                        service = "pubsub"
+                        kind = "pubsub_lite_subscription"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -217,7 +229,12 @@ class TerraformHclParser(IaCParser):
                         else:
                             region = raw_location
 
-                    if kind in ("dns_managed_zone", "compute_security_policy"):
+                    if kind in (
+                        "dns_managed_zone",
+                        "compute_security_policy",
+                        "pubsub_topic",
+                        "pubsub_subscription",
+                    ):
                         region = "global"
 
                     quantity = 1
@@ -270,6 +287,11 @@ class TerraformHclParser(IaCParser):
                             attributes["rule_count"] = len(rules)
                         else:
                             attributes["rule_count"] = 0
+
+                    if kind == "pubsub_subscription":
+                        retain = resolve_value(res_config.get("retain_acked_messages"))
+                        if retain is not None:
+                            attributes["retain_acked_messages"] = retain
 
                     if res_type_clean == "google_compute_instance":
                         mtype = resolve_value(res_config.get("machine_type"))

@@ -134,6 +134,18 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_compute_security_policy":
                 service = "armor"
                 kind = "compute_security_policy"
+            elif res_type == "google_pubsub_topic":
+                service = "pubsub"
+                kind = "pubsub_topic"
+            elif res_type == "google_pubsub_subscription":
+                service = "pubsub"
+                kind = "pubsub_subscription"
+            elif res_type == "google_pubsub_lite_topic":
+                service = "pubsub"
+                kind = "pubsub_lite_topic"
+            elif res_type == "google_pubsub_lite_subscription":
+                service = "pubsub"
+                kind = "pubsub_lite_subscription"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -154,7 +166,12 @@ class TerraformPlanParser(IaCParser):
             elif raw_location and isinstance(raw_location, str):
                 region = raw_location
 
-            if kind in ("dns_managed_zone", "compute_security_policy"):
+            if kind in (
+                "dns_managed_zone",
+                "compute_security_policy",
+                "pubsub_topic",
+                "pubsub_subscription",
+            ):
                 region = "global"
 
             attributes: dict[str, Any] = {}
@@ -191,6 +208,11 @@ class TerraformPlanParser(IaCParser):
                     attributes["rule_count"] = len(rules)
                 else:
                     attributes["rule_count"] = 0
+
+            if kind == "pubsub_subscription":
+                retain = values.get("retain_acked_messages")
+                if retain is not None:
+                    attributes["retain_acked_messages"] = retain
 
             if res_type == "google_compute_instance":
                 mtype = values.get("machine_type")

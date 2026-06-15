@@ -316,7 +316,7 @@ def test_firestore_zero_reads_no_reads_sku(populated_firestore_db: str) -> None:
         },
     )
     mapper = GcpSkuMapper(populated_firestore_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert not any(m["component"] == "reads" for m in mappings)
 
 
@@ -337,7 +337,7 @@ def test_firestore_egress_sku_emitted_when_nonzero(populated_firestore_db: str) 
         },
     )
     mapper = GcpSkuMapper(populated_firestore_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert len(mappings) == 1
     assert mappings[0]["sku_id"] == "SKU-FIRESTORE-EGRESS"
     assert mappings[0]["qty"] == 10.0

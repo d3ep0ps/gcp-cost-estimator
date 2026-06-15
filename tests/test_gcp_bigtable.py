@@ -421,7 +421,7 @@ def test_bigtable_node_qty_is_num_nodes_times_runtime_hours(populated_bigtable_d
         usage={"runtime_hours_per_month": 100, "storage_gb_per_cluster": 0},
     )
     mapper = GcpSkuMapper(populated_bigtable_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert mappings[0]["qty"] == 5 * 100
 
 
@@ -446,7 +446,7 @@ def test_bigtable_storage_ssd_sku_emitted_when_nonzero(populated_bigtable_db: st
         usage={"runtime_hours_per_month": 730, "storage_gb_per_cluster": 500},
     )
     mapper = GcpSkuMapper(populated_bigtable_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert len(mappings) == 2
     stor = next(m for m in mappings if m["component"] == "storage")
     assert stor["sku_id"] == "SKU-BIGTABLE-SSD-STORAGE"
@@ -474,7 +474,7 @@ def test_bigtable_storage_hdd_sku_emitted_when_nonzero(populated_bigtable_db: st
         usage={"runtime_hours_per_month": 730, "storage_gb_per_cluster": 1000},
     )
     mapper = GcpSkuMapper(populated_bigtable_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert len(mappings) == 2
     stor = next(m for m in mappings if m["component"] == "storage")
     assert stor["sku_id"] == "SKU-BIGTABLE-HDD-STORAGE"
@@ -502,7 +502,7 @@ def test_bigtable_storage_not_emitted_when_zero(populated_bigtable_db: str) -> N
         usage={"runtime_hours_per_month": 730, "storage_gb_per_cluster": 0},
     )
     mapper = GcpSkuMapper(populated_bigtable_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert not any(m["component"] == "storage" for m in mappings)
 
 
@@ -565,7 +565,7 @@ def test_bigtable_development_instance_1_node_mapped(populated_bigtable_db: str)
         usage={"runtime_hours_per_month": 730, "storage_gb_per_cluster": 0},
     )
     mapper = GcpSkuMapper(populated_bigtable_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert len(mappings) == 1
     assert mappings[0]["qty"] == 1 * 730
 

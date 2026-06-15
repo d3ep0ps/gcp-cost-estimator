@@ -332,7 +332,7 @@ def test_redis_compute_qty_is_memory_gb_times_hours(populated_memorystore_db: st
         usage={"runtime_hours_per_month": 100},
     )
     mapper = GcpSkuMapper(populated_memorystore_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert mappings[0]["qty"] == 4.0 * 100
 
 

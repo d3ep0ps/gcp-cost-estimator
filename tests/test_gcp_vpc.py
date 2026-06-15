@@ -3,12 +3,13 @@
 import json
 import sqlite3
 from pathlib import Path
+
 import pytest
 
 from gcp_cost_estimator.core.model import Resource, ResourceModel
-from gcp_cost_estimator.core.validate import validate_resource_model
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
+from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 def test_compute_address_external_valid() -> None:
@@ -120,7 +121,12 @@ def test_vpc_ip_in_use_standard_vm_rate(populated_vpc_db: str) -> None:
         kind="compute_address",
         region="us-central1",
         attributes={"address_type": "EXTERNAL"},
-        usage={"in_use": True, "on_spot_vm": False, "on_forwarding_rule": False, "runtime_hours_per_month": 730},
+        usage={
+            "in_use": True,
+            "on_spot_vm": False,
+            "on_forwarding_rule": False,
+            "runtime_hours_per_month": 730,
+        },
     )
     mapper = GcpSkuMapper(populated_vpc_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
@@ -139,7 +145,12 @@ def test_vpc_ip_in_use_spot_vm_rate(populated_vpc_db: str) -> None:
         kind="compute_address",
         region="us-central1",
         attributes={"address_type": "EXTERNAL"},
-        usage={"in_use": True, "on_spot_vm": True, "on_forwarding_rule": False, "runtime_hours_per_month": 730},
+        usage={
+            "in_use": True,
+            "on_spot_vm": True,
+            "on_forwarding_rule": False,
+            "runtime_hours_per_month": 730,
+        },
     )
     mapper = GcpSkuMapper(populated_vpc_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
@@ -192,7 +203,12 @@ def test_vpc_ip_known_answer_730h_in_use_standard(populated_vpc_db: str) -> None
         kind="compute_address",
         region="us-central1",
         attributes={"address_type": "EXTERNAL"},
-        usage={"in_use": True, "on_spot_vm": False, "on_forwarding_rule": False, "runtime_hours_per_month": 730},
+        usage={
+            "in_use": True,
+            "on_spot_vm": False,
+            "on_forwarding_rule": False,
+            "runtime_hours_per_month": 730,
+        },
     )
     mapper = GcpSkuMapper(populated_vpc_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
@@ -204,6 +220,7 @@ def test_vpc_ip_known_answer_730h_in_use_standard(populated_vpc_db: str) -> None
 def test_terraform_hcl_parses_google_compute_address_external() -> None:
     """Verify HCL parser resolves google_compute_address external resource."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
     res = next(r for r in model.resources if r.resource_id == "google_compute_address.my_static_ip")
@@ -217,6 +234,7 @@ def test_terraform_hcl_parses_google_compute_address_external() -> None:
 def test_terraform_plan_json_compute_address_parsed() -> None:
     """Verify plan JSON parser resolves google_compute_address resource."""
     from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
+
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/vpc_plan.json")
     res = next(r for r in model.resources if r.resource_id == "google_compute_address.my_static_ip")

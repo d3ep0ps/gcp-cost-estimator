@@ -1,0 +1,30 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_pubsub_topic.my_topic",
+          "type": "google_pubsub_topic",
+          "name": "my_topic",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-topic"
+          }
+        },
+        {
+          "address": "google_pubsub_subscription.my_sub",
+          "type": "google_pubsub_subscription",
+          "name": "my_sub",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-sub",
+            "topic": "projects/my-project/topics/my-topic",
+            "retain_acked_messages": true,
+            "message_retention_duration": "86400s"
+          }
+        }
+      ]
+    }
+  }
+}

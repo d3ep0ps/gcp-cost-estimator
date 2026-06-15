@@ -380,29 +380,37 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                             f"Resource '{r.resource_id}' https_fraction '{https_frac}' "
                             "is out of valid range [0.0, 1.0]."
                         )
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     errors.append(
-                        f"Resource '{r.resource_id}' https_fraction '{https_frac}' "
-                        "must be a float."
+                        f"Resource '{r.resource_id}' https_fraction '{https_frac}' must be a float."
                     )
 
         # GCP Dataflow checks
         if r.provider == "gcp" and r.service == "dataflow" and r.kind == "dataflow_job":
             job_type = r.usage.get("job_type", "batch")
             if job_type not in {"batch", "streaming"}:
-                errors.append(
-                    f"Resource '{r.resource_id}' has unrecognized job_type '{job_type}'."
-                )
+                errors.append(f"Resource '{r.resource_id}' has unrecognized job_type '{job_type}'.")
 
     normalized = None
     if not errors:
         normalized = normalize_resource_model(model)
+
+    unpriced: list[dict[str, Any]] = []
+    for r in model.resources:
+        if r.provider == "gcp" and r.service == "pubsub" and "lite" in str(r.kind).lower():
+            unpriced.append(
+                {
+                    "resource_id": r.resource_id,
+                    "reason": "Pub/Sub Lite was deprecated on 2026-03-18",
+                }
+            )
 
     return {
         "valid": len(errors) == 0,
         "errors": errors,
         "warnings": warnings,
         "normalized_model": normalized,
+        "unpriced": unpriced,
     }
 
 
@@ -1125,21 +1133,25 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
 
         # Apply CDN defaults
         if r.provider == "gcp" and r.service == "cdn" and r.kind == "cloud_cdn_backend":
-            for field, val in [
+            for cdn_field, cdn_val in [
                 ("monthly_cache_transfer_gb", 100.0),
                 ("monthly_cache_fill_gb", 10.0),
-                ("monthly_requests", 1000000),
+                ("monthly_requests", 1000000.0),
                 ("https_fraction", 1.0),
             ]:
-                if field not in r.usage:
-                    r.usage[field] = val
-                    r.assumptions.append(f"Defaulted {field} to {val}.")
+                if cdn_field not in r.usage:
+                    r.usage[cdn_field] = cdn_val
+                    r.assumptions.append(f"Defaulted {cdn_field} to {cdn_val}.")
                 else:
                     try:
-                        r.usage[field] = float(r.usage[field]) if field == "https_fraction" else int(float(r.usage[field]))
-                    except (ValueError, TypeError):
-                        r.usage[field] = val
-                        r.assumptions.append(f"Invalid {field}; defaulted to {val}.")
+                        r.usage[cdn_field] = (
+                            float(r.usage[cdn_field])
+                            if cdn_field == "https_fraction"
+                            else int(float(r.usage[cdn_field]))
+                        )
+                    except ValueError, TypeError:
+                        r.usage[cdn_field] = cdn_val
+                        r.assumptions.append(f"Invalid {cdn_field}; defaulted to {cdn_val}.")
 
         # Apply DNS defaults
         if r.provider == "gcp" and r.service == "dns" and r.kind == "dns_managed_zone":
@@ -1148,14 +1160,14 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                 r.assumptions.append("Defaulted visibility to public.")
             else:
                 r.attributes["visibility"] = str(r.attributes["visibility"]).lower()
-            
+
             if "monthly_queries" not in r.usage:
                 r.usage["monthly_queries"] = 1000000
                 r.assumptions.append("Defaulted monthly_queries to 1000000.")
             else:
                 try:
                     r.usage["monthly_queries"] = int(float(r.usage["monthly_queries"]))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     r.usage["monthly_queries"] = 1000000
                     r.assumptions.append("Invalid monthly_queries; defaulted to 1000000.")
 
@@ -1172,7 +1184,7 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                 else:
                     try:
                         r.usage[field] = int(float(r.usage[field]))
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         r.usage[field] = val
                         r.assumptions.append(f"Invalid {field}; defaulted to {val}.")
 
@@ -1180,7 +1192,7 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
         if r.provider == "gcp" and r.service == "vpc" and r.kind == "compute_address":
             addr_type = r.attributes.get("address_type", "EXTERNAL")
             r.attributes["address_type"] = str(addr_type).upper()
-            
+
             for field, val in [
                 ("in_use", True),
                 ("on_spot_vm", False),
@@ -1202,16 +1214,16 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
             else:
                 try:
                     r.attributes["rule_count"] = int(r.attributes["rule_count"])
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     r.attributes["rule_count"] = 0
-            
+
             if "monthly_requests" not in r.usage:
                 r.usage["monthly_requests"] = 1000000
                 r.assumptions.append("Defaulted monthly_requests to 1000000.")
             else:
                 try:
                     r.usage["monthly_requests"] = int(float(r.usage["monthly_requests"]))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     r.usage["monthly_requests"] = 1000000
                     r.assumptions.append("Invalid monthly_requests; defaulted to 1000000.")
 
@@ -1223,56 +1235,73 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                     r.assumptions.append("Defaulted monthly_message_throughput_gb to 10.0 GB.")
                 else:
                     try:
-                        r.usage["monthly_message_throughput_gb"] = float(r.usage["monthly_message_throughput_gb"])
-                    except (ValueError, TypeError):
+                        r.usage["monthly_message_throughput_gb"] = float(
+                            r.usage["monthly_message_throughput_gb"]
+                        )
+                    except ValueError, TypeError:
                         r.usage["monthly_message_throughput_gb"] = 10.0
-                        r.assumptions.append("Invalid monthly_message_throughput_gb; defaulted to 10.0 GB.")
+                        r.assumptions.append(
+                            "Invalid monthly_message_throughput_gb; defaulted to 10.0 GB."
+                        )
+                r.assumptions.append("First 10 GiB/month free is not applied.")
             elif r.kind == "pubsub_subscription":
                 if "retain_acked_messages" not in r.attributes:
                     r.attributes["retain_acked_messages"] = False
                 else:
                     if isinstance(r.attributes["retain_acked_messages"], str):
-                        r.attributes["retain_acked_messages"] = r.attributes["retain_acked_messages"].lower() in {"true", "1", "yes"}
+                        r.attributes["retain_acked_messages"] = r.attributes[
+                            "retain_acked_messages"
+                        ].lower() in {"true", "1", "yes"}
                     else:
-                        r.attributes["retain_acked_messages"] = bool(r.attributes["retain_acked_messages"])
+                        r.attributes["retain_acked_messages"] = bool(
+                            r.attributes["retain_acked_messages"]
+                        )
 
                 if "subscription_storage_gb" not in r.usage:
                     r.usage["subscription_storage_gb"] = 0.0
                     r.assumptions.append("Defaulted subscription_storage_gb to 0.0 GB.")
                 else:
                     try:
-                        r.usage["subscription_storage_gb"] = float(r.usage["subscription_storage_gb"])
-                    except (ValueError, TypeError):
+                        r.usage["subscription_storage_gb"] = float(
+                            r.usage["subscription_storage_gb"]
+                        )
+                    except ValueError, TypeError:
                         r.usage["subscription_storage_gb"] = 0.0
-                        r.assumptions.append("Invalid subscription_storage_gb; defaulted to 0.0 GB.")
+                        r.assumptions.append(
+                            "Invalid subscription_storage_gb; defaulted to 0.0 GB."
+                        )
 
         # Apply Dataflow defaults
         if r.provider == "gcp" and r.service == "dataflow" and r.kind == "dataflow_job":
-            if "runtime_hours_per_month" not in r.usage or r.usage.get("runtime_hours_per_month") == 730:
+            if (
+                "runtime_hours_per_month" not in r.usage
+                or r.usage.get("runtime_hours_per_month") == 730
+            ):
                 if "Defaulted runtime to 730 hours/month." in r.assumptions:
                     r.assumptions.remove("Defaulted runtime to 730 hours/month.")
                 r.usage["runtime_hours_per_month"] = 100
                 r.assumptions.append("Defaulted runtime to 100 hours/month.")
-            
+
             mtype = r.attributes.get("machine_type", "n1-standard-4")
             from gcp_cost_estimator.core.pricing.gcp.specs import resolve_machine_type_specs
+
             with contextlib.suppress(Exception):
                 vcpus, ram = resolve_machine_type_specs(mtype)
                 r.attributes["vcpus"] = vcpus
                 r.attributes["ram_gb"] = ram
-            
+
             if "num_vcpus" not in r.usage:
                 r.usage["num_vcpus"] = r.attributes.get("vcpus", 4)
             if "memory_gb" not in r.usage:
                 r.usage["memory_gb"] = r.attributes.get("ram_gb", 15.0)
-            
+
             if "max_workers" not in r.attributes:
                 r.attributes["max_workers"] = 1
                 r.assumptions.append("Defaulted max_workers to 1.")
             else:
                 try:
                     r.attributes["max_workers"] = int(r.attributes["max_workers"])
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     r.attributes["max_workers"] = 1
                     r.assumptions.append("Invalid max_workers; defaulted to 1.")
 
@@ -1288,24 +1317,27 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
             else:
                 try:
                     r.usage["shuffle_data_gb"] = float(r.usage["shuffle_data_gb"])
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     r.usage["shuffle_data_gb"] = 50.0
                     r.assumptions.append("Invalid shuffle_data_gb; defaulted to 50.0 GB.")
 
         # Apply Dataproc defaults
         if r.provider == "gcp" and r.service == "dataproc" and r.kind == "dataproc_cluster":
-            if "runtime_hours_per_month" not in r.usage or r.usage.get("runtime_hours_per_month") == 730:
+            if (
+                "runtime_hours_per_month" not in r.usage
+                or r.usage.get("runtime_hours_per_month") == 730
+            ):
                 if "Defaulted runtime to 730 hours/month." in r.assumptions:
                     r.assumptions.remove("Defaulted runtime to 730 hours/month.")
                 r.usage["runtime_hours_per_month"] = 100
                 r.assumptions.append("Defaulted runtime to 100 hours/month.")
-            
+
             num_m = r.attributes.get("num_master_nodes", 1)
             num_w = r.attributes.get("num_worker_nodes", 2)
             num_p = r.attributes.get("num_preemptible_nodes", 0)
             m_type = r.attributes.get("master_machine_type", "n1-standard-4")
             w_type = r.attributes.get("worker_machine_type", "n1-standard-4")
-            
+
             r.attributes["num_master_nodes"] = int(num_m)
             r.attributes["num_worker_nodes"] = int(num_w)
             r.attributes["num_preemptible_nodes"] = int(num_p)
@@ -1313,12 +1345,13 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
             r.attributes["worker_machine_type"] = w_type
 
             from gcp_cost_estimator.core.pricing.gcp.specs import resolve_machine_type_specs
+
             m_vcpus, w_vcpus = 4, 4
             with contextlib.suppress(Exception):
                 m_vcpus, _ = resolve_machine_type_specs(m_type)
             with contextlib.suppress(Exception):
                 w_vcpus, _ = resolve_machine_type_specs(w_type)
-            
+
             if "num_master_vcpus" not in r.usage:
                 r.usage["num_master_vcpus"] = m_vcpus
             if "num_worker_vcpus" not in r.usage:

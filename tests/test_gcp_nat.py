@@ -3,12 +3,13 @@
 import json
 import sqlite3
 from pathlib import Path
+
 import pytest
 
 from gcp_cost_estimator.core.model import Resource, ResourceModel
-from gcp_cost_estimator.core.validate import validate_resource_model
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
+from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 def test_nat_gateway_valid() -> None:
@@ -140,7 +141,7 @@ def test_nat_data_processed_priced(populated_nat_db: str) -> None:
         },
     )
     mapper = GcpSkuMapper(populated_nat_db)
-    mappings, unpriced = mapper.map_resource_to_skus(r)
+    mappings, _unpriced = mapper.map_resource_to_skus(r)
     data_map = next(m for m in mappings if m["component"] == "data_processed")
     assert data_map["sku_id"] == "SKU-NAT-DATA"
     assert data_map["qty"] == 150.0
@@ -162,7 +163,7 @@ def test_nat_ip_uptime_priced(populated_nat_db: str) -> None:
         },
     )
     mapper = GcpSkuMapper(populated_nat_db)
-    mappings, unpriced = mapper.map_resource_to_skus(r)
+    mappings, _unpriced = mapper.map_resource_to_skus(r)
     ip_map = next(m for m in mappings if m["component"] == "ip_uptime")
     assert ip_map["sku_id"] == "SKU-NAT-IP"
     assert ip_map["qty"] == 3.0 * 730.0
@@ -193,6 +194,7 @@ def test_nat_known_answer_1_vm_730h_10gb_1ip(populated_nat_db: str) -> None:
 def test_terraform_hcl_parses_google_compute_router_nat() -> None:
     """Verify HCL parser resolves google_compute_router_nat resource."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
     res = next(r for r in model.resources if r.resource_id == "google_compute_router_nat.my_nat")
@@ -206,6 +208,7 @@ def test_terraform_hcl_parses_google_compute_router_nat() -> None:
 def test_terraform_plan_json_compute_router_nat_parsed() -> None:
     """Verify plan JSON parser resolves google_compute_router_nat resource."""
     from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
+
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/nat_plan.json")
     res = next(r for r in model.resources if r.resource_id == "google_compute_router_nat.my_nat")

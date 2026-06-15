@@ -381,7 +381,7 @@ def test_spanner_compute_qty_is_processing_units_times_hours(populated_spanner_d
         usage={"runtime_hours_per_month": 100, "storage_gb": 0},
     )
     mapper = GcpSkuMapper(populated_spanner_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert mappings[0]["qty"] == 200 * 100
 
 
@@ -401,7 +401,7 @@ def test_spanner_storage_sku_emitted_when_nonzero(populated_spanner_db: str) -> 
         usage={"runtime_hours_per_month": 730, "storage_gb": 50},
     )
     mapper = GcpSkuMapper(populated_spanner_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert len(mappings) == 2
     stor_map = next(m for m in mappings if m["component"] == "storage")
     assert stor_map["sku_id"] == "SKU-SPANNER-STORAGE"
@@ -424,7 +424,7 @@ def test_spanner_storage_not_emitted_when_zero(populated_spanner_db: str) -> Non
         usage={"runtime_hours_per_month": 730, "storage_gb": 0},
     )
     mapper = GcpSkuMapper(populated_spanner_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert not any(m["component"] == "storage" for m in mappings)
 
 
@@ -444,7 +444,7 @@ def test_spanner_multi_region_storage_qty_multiplied(populated_spanner_db: str) 
         usage={"runtime_hours_per_month": 730, "storage_gb": 50},
     )
     mapper = GcpSkuMapper(populated_spanner_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     stor_map = next(m for m in mappings if m["component"] == "storage")
     # nam6 is multi-region -> multiplier is 3
     assert stor_map["qty"] == 50 * 3
@@ -466,7 +466,7 @@ def test_spanner_dual_region_storage_qty_doubled(populated_spanner_db: str) -> N
         usage={"runtime_hours_per_month": 730, "storage_gb": 50},
     )
     mapper = GcpSkuMapper(populated_spanner_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     stor_map = next(m for m in mappings if m["component"] == "storage")
     # nam4 is dual-region -> multiplier is 2
     assert stor_map["qty"] == 50 * 2
@@ -488,7 +488,7 @@ def test_spanner_egress_sku_emitted_when_nonzero(populated_spanner_db: str) -> N
         usage={"runtime_hours_per_month": 730, "storage_gb": 0, "monthly_egress_gb": 10},
     )
     mapper = GcpSkuMapper(populated_spanner_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     eg_map = next(m for m in mappings if m["component"] == "egress")
     assert eg_map["sku_id"] == "SKU-SPANNER-EGRESS"
     assert eg_map["qty"] == 10
@@ -510,7 +510,7 @@ def test_spanner_egress_not_emitted_when_zero(populated_spanner_db: str) -> None
         usage={"runtime_hours_per_month": 730, "storage_gb": 0, "monthly_egress_gb": 0},
     )
     mapper = GcpSkuMapper(populated_spanner_db)
-    mappings, unpriced = mapper.map_resource_to_skus(res)
+    mappings, _unpriced = mapper.map_resource_to_skus(res)
     assert not any(m["component"] == "egress" for m in mappings)
 
 

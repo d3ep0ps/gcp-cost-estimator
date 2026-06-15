@@ -25,10 +25,7 @@ def map_compute_address(
 
     # Extract usage values
     in_use = resource.usage.get("in_use", True)
-    if isinstance(in_use, str):
-        in_use = in_use.lower() in {"true", "1", "yes"}
-    else:
-        in_use = bool(in_use)
+    in_use = in_use.lower() in {"true", "1", "yes"} if isinstance(in_use, str) else bool(in_use)
 
     on_spot_vm = resource.usage.get("on_spot_vm", False)
     if isinstance(on_spot_vm, str):
@@ -71,7 +68,7 @@ def map_compute_address(
     )
     row = cursor.fetchone()
     if row:
-        sku_id, unit, unit_price, desc = row
+        sku_id, unit, unit_price, _desc = row
         mappings.append(
             {
                 "sku_id": sku_id,

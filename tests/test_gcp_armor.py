@@ -3,12 +3,13 @@
 import json
 import sqlite3
 from pathlib import Path
+
 import pytest
 
 from gcp_cost_estimator.core.model import Resource, ResourceModel
-from gcp_cost_estimator.core.validate import validate_resource_model
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
+from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 def test_compute_security_policy_valid() -> None:
@@ -92,7 +93,7 @@ def test_armor_rules_cost_priced(populated_armor_db: str) -> None:
         usage={"monthly_requests": 0},
     )
     mapper = GcpSkuMapper(populated_armor_db)
-    mappings, unpriced = mapper.map_resource_to_skus(r)
+    mappings, _unpriced = mapper.map_resource_to_skus(r)
     rule_map = next(m for m in mappings if m["component"] == "security_rules")
     assert rule_map["sku_id"] == "SKU-ARMOR-RULE"
     assert rule_map["qty"] == 3.0
@@ -110,7 +111,7 @@ def test_armor_requests_cost_priced(populated_armor_db: str) -> None:
         usage={"monthly_requests": 5000000},
     )
     mapper = GcpSkuMapper(populated_armor_db)
-    mappings, unpriced = mapper.map_resource_to_skus(r)
+    mappings, _unpriced = mapper.map_resource_to_skus(r)
     req_map = next(m for m in mappings if m["component"] == "requests")
     assert req_map["sku_id"] == "SKU-ARMOR-REQUESTS"
     assert req_map["qty"] == 5.0
@@ -155,9 +156,12 @@ def test_armor_known_answer_1_policy_3_rules_1m_requests(populated_armor_db: str
 def test_terraform_hcl_parses_google_compute_security_policy() -> None:
     """Verify HCL parser resolves google_compute_security_policy resource."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
-    res = next(r for r in model.resources if r.resource_id == "google_compute_security_policy.my_policy")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_compute_security_policy.my_policy"
+    )
     assert res.provider == "gcp"
     assert res.service == "armor"
     assert res.kind == "compute_security_policy"
@@ -167,18 +171,24 @@ def test_terraform_hcl_parses_google_compute_security_policy() -> None:
 def test_terraform_hcl_rule_count_extracted_correctly() -> None:
     """Verify HCL parser extracts the correct rule count from security policy."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
-    res = next(r for r in model.resources if r.resource_id == "google_compute_security_policy.my_policy")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_compute_security_policy.my_policy"
+    )
     assert res.attributes.get("rule_count") == 2
 
 
 def test_terraform_plan_json_security_policy_parsed() -> None:
     """Verify plan JSON parser resolves google_compute_security_policy resource."""
     from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
+
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/armor_plan.json")
-    res = next(r for r in model.resources if r.resource_id == "google_compute_security_policy.my_policy")
+    res = next(
+        r for r in model.resources if r.resource_id == "google_compute_security_policy.my_policy"
+    )
     assert res.provider == "gcp"
     assert res.service == "armor"
     assert res.kind == "compute_security_policy"

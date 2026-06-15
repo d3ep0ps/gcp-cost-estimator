@@ -11,18 +11,23 @@ from gcp_cost_estimator.core.pricing.gcp.appengine import (
     map_app_engine_flexible_version,
     map_app_engine_standard_version,
 )
+from gcp_cost_estimator.core.pricing.gcp.armor import map_compute_security_policy
 from gcp_cost_estimator.core.pricing.gcp.bigquery import map_bigquery_dataset
 from gcp_cost_estimator.core.pricing.gcp.bigtable import map_bigtable_instance
+from gcp_cost_estimator.core.pricing.gcp.cdn import map_cloud_cdn_backend
 from gcp_cost_estimator.core.pricing.gcp.compute import (
     map_gce_compute,
     map_gke_cluster,
     map_gke_node_pool,
 )
+from gcp_cost_estimator.core.pricing.gcp.dns import map_dns_managed_zone
 from gcp_cost_estimator.core.pricing.gcp.firestore import map_firestore_database
 from gcp_cost_estimator.core.pricing.gcp.memorystore import (
     map_memorystore_instance,
     map_redis_instance,
 )
+from gcp_cost_estimator.core.pricing.gcp.nat import map_nat_gateway
+from gcp_cost_estimator.core.pricing.gcp.pubsub import map_pubsub_subscription, map_pubsub_topic
 from gcp_cost_estimator.core.pricing.gcp.serverless import (
     map_cloud_function,
     map_cloud_run_job,
@@ -31,11 +36,7 @@ from gcp_cost_estimator.core.pricing.gcp.serverless import (
 from gcp_cost_estimator.core.pricing.gcp.spanner import map_spanner_instance
 from gcp_cost_estimator.core.pricing.gcp.sql import map_cloud_sql
 from gcp_cost_estimator.core.pricing.gcp.storage import map_gcs_bucket
-from gcp_cost_estimator.core.pricing.gcp.cdn import map_cloud_cdn_backend
-from gcp_cost_estimator.core.pricing.gcp.dns import map_dns_managed_zone
-from gcp_cost_estimator.core.pricing.gcp.nat import map_nat_gateway
 from gcp_cost_estimator.core.pricing.gcp.vpc import map_compute_address
-from gcp_cost_estimator.core.pricing.gcp.armor import map_compute_security_policy
 from gcp_cost_estimator.core.registries import SkuMapper, register_sku_mapper
 
 
@@ -140,6 +141,16 @@ class GcpSkuMapper(SkuMapper):
         self, resource: Resource, cursor: sqlite3.Cursor
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         return map_compute_security_policy(resource, cursor)
+
+    def _map_pubsub_topic(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_pubsub_topic(resource, cursor)
+
+    def _map_pubsub_subscription(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_pubsub_subscription(resource, cursor)
 
     def _map_bigquery_dataset(
         self, resource: Resource, cursor: sqlite3.Cursor
@@ -342,6 +353,14 @@ class GcpSkuMapper(SkuMapper):
                 armor_mappings, armor_unpriced = self._map_compute_security_policy(resource, cursor)
                 mappings.extend(armor_mappings)
                 unpriced.extend(armor_unpriced)
+            elif resource.service == "pubsub" and resource.kind == "pubsub_topic":
+                ps_mappings, ps_unpriced = self._map_pubsub_topic(resource, cursor)
+                mappings.extend(ps_mappings)
+                unpriced.extend(ps_unpriced)
+            elif resource.service == "pubsub" and resource.kind == "pubsub_subscription":
+                ps_mappings, ps_unpriced = self._map_pubsub_subscription(resource, cursor)
+                mappings.extend(ps_mappings)
+                unpriced.extend(ps_unpriced)
             elif resource.service == "bigquery" and resource.kind == "bigquery_dataset":
                 bq_mappings, bq_unpriced = self._map_bigquery_dataset(resource, cursor)
                 mappings.extend(bq_mappings)
