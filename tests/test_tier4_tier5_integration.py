@@ -3,6 +3,7 @@
 import json
 import sqlite3
 from pathlib import Path
+
 import pytest
 
 from gcp_cost_estimator.core.model import ResourceModel
@@ -66,8 +67,8 @@ def test_tier4_tier5_full_plan_all_services_priced(
 ) -> None:
     """Verify that all standard Tier 4/5 resources are priced correctly in the integration test."""
     est = estimate_infrastructure(populated_tier4_tier5_db, tier4_tier5_combined_model)
-    # CDN: 3.00, DNS: 0.60, NAT: 4.862, VPC: 3.65, Armor: 7.75, PubSub: 0.40, Dataflow: 58.3085, Dataproc: 97.35
-    # Total = 175.9205
+    # CDN cost is 3.00, DNS is 0.60, NAT is 4.862, VPC is 3.65, Armor is 7.75, PubSub is 0.40, Dataflow is 58.3085, Dataproc is 97.35
+    # The expected total cost is 175.9205
     assert pytest.approx(est.monthly_total, abs=1e-4) == 175.9205
 
 

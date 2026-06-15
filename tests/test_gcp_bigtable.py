@@ -710,9 +710,9 @@ def test_estimate_bigtable_combined_with_gce_instance(populated_bigtable_db: str
     }
     model = ResourceModel(**data)
     est = estimate_infrastructure(populated_bigtable_db, model)
-    # GCE: CPU (0.0475 * 4 * 730 = 138.7) + RAM (0.0063 * 16 = 0.1008) = 138.8008
-    # Bigtable: 1440.50
-    # Expected: 138.8008 + 1440.50 = 1579.3008
+    # GCE CPU is 0.0475 * 4 * 730 = 138.7. GCE RAM is 0.0063 * 16 = 0.1008. Total GCE is 138.8008
+    # Bigtable cost is 1440.50
+    # The expected total cost is 1579.3008
     assert pytest.approx(est.monthly_total, abs=1e-4) == 1579.3008
     assert len(est.line_items) == 4
 

@@ -1,6 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import json
+import sqlite3
+from pathlib import Path
+
+import pytest
+
 from gcp_cost_estimator.core.model import Resource, ResourceModel
+from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
+from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
 from gcp_cost_estimator.core.validate import validate_resource_model
 
 
@@ -79,15 +87,6 @@ def test_cloud_cdn_https_fraction_out_of_range_is_error() -> None:
     assert res["valid"] is False
     assert any("https_fraction" in e for e in res["errors"])
 
-
-import json
-import sqlite3
-from pathlib import Path
-
-import pytest
-
-from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
-from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
 
 
 @pytest.fixture

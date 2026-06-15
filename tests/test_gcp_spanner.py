@@ -698,9 +698,9 @@ def test_estimate_spanner_combined_with_gce_instance(populated_spanner_db: str) 
     }
     model = ResourceModel(**data)
     est = estimate_infrastructure(populated_spanner_db, model)
-    # GCE: CPU (0.0475 * 4 * 730 = 138.7) + RAM (0.0063 * 16 = 0.1008) = 138.8008
-    # Spanner: compute (6.57) + storage (3.00) = 9.57
-    # Expected: 138.8008 + 9.57 = 148.3708
+    # GCE CPU is 138.7. GCE RAM is 0.1008. Total GCE is 138.8008
+    # Spanner compute cost is 6.57 and storage is 3.00, totaling 9.57
+    # The expected total cost is 148.3708
     assert pytest.approx(est.monthly_total, abs=1e-4) == 148.3708
     assert len(est.line_items) == 4
 

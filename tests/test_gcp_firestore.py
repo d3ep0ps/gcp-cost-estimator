@@ -531,9 +531,9 @@ def test_estimate_firestore_combined_with_gce_instance(populated_firestore_db: s
     }
     model = ResourceModel(**data)
     est = estimate_infrastructure(populated_firestore_db, model)
-    # GCE: CPU (0.0475 * 4 * 730 = 138.7) + RAM (0.0063 * 16 = 0.1008) = 138.8008
-    # Firestore: 0.3972
-    # Expected: 138.8008 + 0.3972 = 139.198
+    # GCE CPU is 138.7. GCE RAM is 0.1008. Total GCE is 138.8008
+    # Firestore cost is 0.3972
+    # The expected total cost is 139.198
     assert pytest.approx(est.monthly_total, abs=1e-4) == 139.198
     assert len(est.line_items) == 6
 

@@ -540,9 +540,9 @@ def test_estimate_redis_combined_with_gce_instance(populated_memorystore_db: str
     }
     model = ResourceModel(**data)
     est = estimate_infrastructure(populated_memorystore_db, model)
-    # GCE: CPU (0.0475 * 4 * 730 = 138.7) + RAM (0.0063 * 16 = 0.1008) = 138.8008
-    # Redis Basic: 49.275
-    # Expected: 138.8008 + 49.275 = 188.0758
+    # GCE CPU is 138.7. GCE RAM is 0.1008. Total GCE is 138.8008
+    # Redis Basic cost is 49.275
+    # The expected total cost is 188.0758
     assert pytest.approx(est.monthly_total, abs=1e-4) == 188.0758
     assert len(est.line_items) == 3
 
