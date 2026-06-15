@@ -81,7 +81,7 @@ These five services dominate the bill for the vast majority of GCP customers.
 |---|---|---|---|
 | Filestore | planned | [filestore/pricing](https://cloud.google.com/filestore/pricing) | `google_filestore_instance` |
 | Persistent Disk (standalone) | done | [compute/all-pricing#disk](https://cloud.google.com/compute/all-pricing#disk) | `google_compute_disk` |
-| Vertex AI | planned | [vertex-ai/pricing](https://cloud.google.com/vertex-ai/pricing) | `google_vertex_ai_endpoint`, `google_vertex_ai_featurestore` |
+| Vertex AI (inference endpoints) | planned | [vertex-ai/pricing](https://cloud.google.com/vertex-ai/pricing) | `google_vertex_ai_endpoint` |
 | Artifact Registry | planned | [artifact-registry/pricing](https://cloud.google.com/artifact-registry/pricing) | `google_artifact_registry_repository` |
 
 ---
@@ -129,15 +129,13 @@ These services have pricing but are below the threshold or require specialist bi
 
 Work Tier 1 → Tier 2 → Tier 3 in order. Within each tier, pick the highest-spend service first. Tiers 4–6 can be parallelised once Tiers 1–3 are complete.
 
-**Tiers 1–3 complete. Tier 4 + Tier 5 plan drafted ([`plan5.md`](plan5.md)); implementation order:**
-1. Cloud CDN (steps CDN-1–CDN-3)
-2. Cloud DNS (step DNS-1)
-3. Cloud NAT (steps NAT-1–NAT-3)
-4. VPC Static IPs (steps VPC-1–VPC-2)
-5. Cloud Armor (steps ARM-1–ARM-3)
-6. Pub/Sub (steps PS-1–PS-4)
-7. Dataflow (steps DF-1–DF-4)
-8. Dataproc (steps DP-1–DP-3)
+**Tiers 1–5 complete. Tier 6 plan drafted ([`plan6.md`](plan6.md)); implementation order:**
+1. Filestore (steps FS-1–FS-3)
+2. Vertex AI inference endpoints (steps VAI-1–VAI-3)
+3. Artifact Registry (steps AR-1–AR-3)
+4. Tier 6 integration test (step T6-1)
+
+**Note on Vertex AI Featurestore:** `google_vertex_ai_featurestore` (Legacy Featurestore v1) is deprecated as of 2024 and has been removed from the scope. New Feature Store workloads are billed via BigQuery or Bigtable, which are already covered.
 
 ---
 
