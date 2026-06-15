@@ -1,0 +1,20 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_address.my_static_ip",
+          "type": "google_compute_address",
+          "name": "my_static_ip",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-static-ip",
+            "region": "us-central1",
+            "address_type": "EXTERNAL"
+          }
+        }
+      ]
+    }
+  }
+}

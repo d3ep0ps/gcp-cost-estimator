@@ -462,7 +462,7 @@ def test_suggest_alloydb_never_recommends_under_spec(temp_db_path: str) -> None:
 
     from gcp_cost_estimator.core.estimate import Estimate
 
-    def mock_estimate_infra(_db_path, model):
+    def mock_estimate_infra(_db_path, _model):
         return Estimate(
             pricing_snapshot="2026-06-03",
             line_items=[],
@@ -494,12 +494,12 @@ def test_suggest_alloydb_read_pool_considers_total_capacity(temp_db_path: str) -
             "node_count": 2,
         },
     )
-    # Capacity = 8.
+    # The total capacity is 8
     from unittest.mock import patch
 
     from gcp_cost_estimator.core.estimate import Estimate
 
-    def mock_estimate_infra(_db_path, model):
+    def mock_estimate_infra(_db_path, _model):
         # make all candidate estimates return a cheap cost so they are considered
         return Estimate(
             pricing_snapshot="2026-06-03",

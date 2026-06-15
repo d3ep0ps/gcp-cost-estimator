@@ -1,0 +1,163 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_backend_bucket.cdn_bucket",
+          "type": "google_compute_backend_bucket",
+          "name": "cdn_bucket",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "cdn-bucket",
+            "region": "us-central1",
+            "cdn_policy": [
+              {
+                "cache_mode": "CACHE_ALL_STATIC"
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_dns_managed_zone.my_dns",
+          "type": "google_dns_managed_zone",
+          "name": "my_dns",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-dns",
+            "visibility": "public"
+          }
+        },
+        {
+          "address": "google_compute_router_nat.my_nat",
+          "type": "google_compute_router_nat",
+          "name": "my_nat",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-nat",
+            "region": "us-central1",
+            "nat_ip_allocate_option": "AUTO_ONLY"
+          }
+        },
+        {
+          "address": "google_compute_address.my_external_ip",
+          "type": "google_compute_address",
+          "name": "my_external_ip",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-external-ip",
+            "region": "us-central1",
+            "address_type": "EXTERNAL"
+          }
+        },
+        {
+          "address": "google_compute_address.my_internal_ip",
+          "type": "google_compute_address",
+          "name": "my_internal_ip",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-internal-ip",
+            "region": "us-central1",
+            "address_type": "INTERNAL"
+          }
+        },
+        {
+          "address": "google_compute_security_policy.my_policy",
+          "type": "google_compute_security_policy",
+          "name": "my_policy",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-policy",
+            "rule": [
+              {
+                "action": "allow",
+                "priority": 1000
+              },
+              {
+                "action": "deny(403)",
+                "priority": 2147483647
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_pubsub_topic.my_topic",
+          "type": "google_pubsub_topic",
+          "name": "my_topic",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-topic"
+          }
+        },
+        {
+          "address": "google_pubsub_subscription.my_sub",
+          "type": "google_pubsub_subscription",
+          "name": "my_sub",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-sub",
+            "retain_acked_messages": true
+          }
+        },
+        {
+          "address": "google_pubsub_lite_topic.my_lite_topic",
+          "type": "google_pubsub_lite_topic",
+          "name": "my_lite_topic",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-lite-topic"
+          }
+        },
+        {
+          "address": "google_dataflow_job.my_job",
+          "type": "google_dataflow_job",
+          "name": "my_job",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-job",
+            "region": "us-central1",
+            "machine_type": "n1-standard-4",
+            "max_workers": 2
+          }
+        },
+        {
+          "address": "google_dataproc_cluster.my_cluster",
+          "type": "google_dataproc_cluster",
+          "name": "my_cluster",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-cluster",
+            "region": "us-central1",
+            "master_config": [
+              {
+                "num_instances": 1,
+                "machine_type": "n1-standard-4"
+              }
+            ],
+            "worker_config": [
+              {
+                "num_instances": 2,
+                "machine_type": "n1-standard-4"
+              }
+            ],
+            "preemptible_worker_config": [
+              {
+                "num_instances": 0
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_dataproc_serverless_batch.my_batch",
+          "type": "google_dataproc_serverless_batch",
+          "name": "my_batch",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-batch",
+            "region": "us-central1"
+          }
+        }
+      ]
+    }
+  }
+}

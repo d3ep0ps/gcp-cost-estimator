@@ -166,9 +166,48 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_alloydb_instance":
                         service = "alloydb"
                         kind = "alloydb_instance"
+                    elif res_type_clean in (
+                        "google_compute_backend_bucket",
+                        "google_compute_backend_service",
+                    ) and res_config.get("cdn_policy"):
+                        service = "cdn"
+                        kind = "cloud_cdn_backend"
                     elif res_type_clean == "google_app_engine_application":
                         service = "appengine"
                         kind = "google_app_engine_application"
+                    elif res_type_clean == "google_dns_managed_zone":
+                        service = "dns"
+                        kind = "dns_managed_zone"
+                    elif res_type_clean == "google_compute_router_nat":
+                        service = "nat"
+                        kind = "nat_gateway"
+                    elif res_type_clean == "google_compute_address":
+                        service = "vpc"
+                        kind = "compute_address"
+                    elif res_type_clean == "google_compute_security_policy":
+                        service = "armor"
+                        kind = "compute_security_policy"
+                    elif res_type_clean == "google_pubsub_topic":
+                        service = "pubsub"
+                        kind = "pubsub_topic"
+                    elif res_type_clean == "google_pubsub_subscription":
+                        service = "pubsub"
+                        kind = "pubsub_subscription"
+                    elif res_type_clean == "google_pubsub_lite_topic":
+                        service = "pubsub"
+                        kind = "pubsub_lite_topic"
+                    elif res_type_clean == "google_pubsub_lite_subscription":
+                        service = "pubsub"
+                        kind = "pubsub_lite_subscription"
+                    elif res_type_clean == "google_dataflow_job":
+                        service = "dataflow"
+                        kind = "dataflow_job"
+                    elif res_type_clean == "google_dataproc_cluster":
+                        service = "dataproc"
+                        kind = "dataproc_cluster"
+                    elif res_type_clean == "google_dataproc_serverless_batch":
+                        service = "dataproc"
+                        kind = "dataproc_serverless_batch"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -199,6 +238,14 @@ class TerraformHclParser(IaCParser):
                         else:
                             region = raw_location
 
+                    if kind in (
+                        "dns_managed_zone",
+                        "compute_security_policy",
+                        "pubsub_topic",
+                        "pubsub_subscription",
+                    ):
+                        region = "global"
+
                     quantity = 1
                     raw_count = resolve_value(res_config.get("count"))
                     if raw_count is not None:
@@ -217,6 +264,91 @@ class TerraformHclParser(IaCParser):
 
                     attributes: dict[str, Any] = {}
                     attached: list[AttachedResource] = []
+
+                    if kind == "cloud_cdn_backend":
+                        attributes["cdn_enabled"] = True
+
+                    if kind == "dns_managed_zone":
+                        visibility = resolve_value(res_config.get("visibility"))
+                        if visibility:
+                            attributes["visibility"] = visibility
+                        else:
+                            attributes["visibility"] = "public"
+
+                    if kind == "nat_gateway":
+                        allocate_option = resolve_value(res_config.get("nat_ip_allocate_option"))
+                        if allocate_option:
+                            attributes["nat_ip_allocate_option"] = allocate_option
+
+                    if kind == "compute_address":
+                        addr_type = resolve_value(res_config.get("address_type"))
+                        if addr_type:
+                            attributes["address_type"] = addr_type
+                        purpose = resolve_value(res_config.get("purpose"))
+                        if purpose:
+                            attributes["purpose"] = purpose
+
+                    if kind == "compute_security_policy":
+                        rules = res_config.get("rule", [])
+                        if isinstance(rules, dict):
+                            attributes["rule_count"] = 1
+                        elif isinstance(rules, list):
+                            attributes["rule_count"] = len(rules)
+                        else:
+                            attributes["rule_count"] = 0
+
+                    if kind == "pubsub_subscription":
+                        retain = resolve_value(res_config.get("retain_acked_messages"))
+                        if retain is not None:
+                            attributes["retain_acked_messages"] = retain
+
+                    if kind == "dataflow_job":
+                        mtype = resolve_value(res_config.get("machine_type"))
+                        if mtype:
+                            attributes["machine_type"] = mtype
+                        max_w = resolve_value(res_config.get("max_workers"))
+                        if max_w is not None:
+                            attributes["max_workers"] = max_w
+
+                    if kind == "dataproc_cluster":
+                        # Master config
+                        master_configs = res_config.get("master_config", [])
+                        if isinstance(master_configs, dict):
+                            master_configs = [master_configs]
+                        if isinstance(master_configs, list) and master_configs:
+                            mc = master_configs[0]
+                            if isinstance(mc, dict):
+                                num_inst = mc.get("num_instances")
+                                m_type = mc.get("machine_type")
+                                if num_inst is not None:
+                                    attributes["num_master_nodes"] = resolve_value(num_inst)
+                                if m_type is not None:
+                                    attributes["master_machine_type"] = resolve_value(m_type)
+
+                        # Worker config
+                        worker_configs = res_config.get("worker_config", [])
+                        if isinstance(worker_configs, dict):
+                            worker_configs = [worker_configs]
+                        if isinstance(worker_configs, list) and worker_configs:
+                            wc = worker_configs[0]
+                            if isinstance(wc, dict):
+                                num_inst = wc.get("num_instances")
+                                w_type = wc.get("machine_type")
+                                if num_inst is not None:
+                                    attributes["num_worker_nodes"] = resolve_value(num_inst)
+                                if w_type is not None:
+                                    attributes["worker_machine_type"] = resolve_value(w_type)
+
+                        # Preemptible worker config
+                        preempt_configs = res_config.get("preemptible_worker_config", [])
+                        if isinstance(preempt_configs, dict):
+                            preempt_configs = [preempt_configs]
+                        if isinstance(preempt_configs, list) and preempt_configs:
+                            pc = preempt_configs[0]
+                            if isinstance(pc, dict):
+                                num_inst = pc.get("num_instances")
+                                if num_inst is not None:
+                                    attributes["num_preemptible_nodes"] = resolve_value(num_inst)
 
                     if res_type_clean == "google_compute_instance":
                         mtype = resolve_value(res_config.get("machine_type"))

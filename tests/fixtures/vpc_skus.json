@@ -1,0 +1,42 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/vpc/network-pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-VPC-STATIC-IP-UNUSED",
+    "service": "Compute Engine",
+    "region": "us-central1",
+    "description": "Static IP Reserved but Unused",
+    "unit": "hour",
+    "unit_price": 0.01,
+    "sku_group": "VpcStaticIpUnused"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-VPC-STATIC-IP-INUSE",
+    "service": "Compute Engine",
+    "region": "us-central1",
+    "description": "Static IP In Use (Standard VM)",
+    "unit": "hour",
+    "unit_price": 0.005,
+    "sku_group": "VpcStaticIpInUse"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-VPC-STATIC-IP-SPOT",
+    "service": "Compute Engine",
+    "region": "us-central1",
+    "description": "Static IP In Use (Spot VM)",
+    "unit": "hour",
+    "unit_price": 0.0025,
+    "sku_group": "VpcStaticIpInUseSpot"
+  }
+]

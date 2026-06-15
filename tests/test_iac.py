@@ -83,7 +83,7 @@ def test_unsupported_resource_type_reported(tmp_path) -> None:
     This allows Downstream SkuMapper to flag them as unpriced.
     """
     hcl_content = """
-    resource "google_pubsub_topic" "topic" {
+    resource "google_pubsub_unsupported" "topic" {
       name = "my-topic"
     }
     """
@@ -96,9 +96,9 @@ def test_unsupported_resource_type_reported(tmp_path) -> None:
     assert len(model.resources) == 1
     resource = model.resources[0]
     assert resource.provider == "gcp"
-    assert resource.resource_id == "google_pubsub_topic.topic"
+    assert resource.resource_id == "google_pubsub_unsupported.topic"
     assert resource.service == "pubsub"
-    assert resource.kind == "google_pubsub_topic"
+    assert resource.kind == "google_pubsub_unsupported"
 
 
 def test_plan_json_resolves_count_and_vars(tmp_path) -> None:

@@ -113,9 +113,48 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_alloydb_instance":
                 service = "alloydb"
                 kind = "alloydb_instance"
+            elif res_type in (
+                "google_compute_backend_bucket",
+                "google_compute_backend_service",
+            ) and values.get("cdn_policy"):
+                service = "cdn"
+                kind = "cloud_cdn_backend"
             elif res_type == "google_app_engine_application":
                 service = "appengine"
                 kind = "google_app_engine_application"
+            elif res_type == "google_dns_managed_zone":
+                service = "dns"
+                kind = "dns_managed_zone"
+            elif res_type == "google_compute_router_nat":
+                service = "nat"
+                kind = "nat_gateway"
+            elif res_type == "google_compute_address":
+                service = "vpc"
+                kind = "compute_address"
+            elif res_type == "google_compute_security_policy":
+                service = "armor"
+                kind = "compute_security_policy"
+            elif res_type == "google_pubsub_topic":
+                service = "pubsub"
+                kind = "pubsub_topic"
+            elif res_type == "google_pubsub_subscription":
+                service = "pubsub"
+                kind = "pubsub_subscription"
+            elif res_type == "google_pubsub_lite_topic":
+                service = "pubsub"
+                kind = "pubsub_lite_topic"
+            elif res_type == "google_pubsub_lite_subscription":
+                service = "pubsub"
+                kind = "pubsub_lite_subscription"
+            elif res_type == "google_dataflow_job":
+                service = "dataflow"
+                kind = "dataflow_job"
+            elif res_type == "google_dataproc_cluster":
+                service = "dataproc"
+                kind = "dataproc_cluster"
+            elif res_type == "google_dataproc_serverless_batch":
+                service = "dataproc"
+                kind = "dataproc_serverless_batch"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -136,8 +175,98 @@ class TerraformPlanParser(IaCParser):
             elif raw_location and isinstance(raw_location, str):
                 region = raw_location
 
+            if kind in (
+                "dns_managed_zone",
+                "compute_security_policy",
+                "pubsub_topic",
+                "pubsub_subscription",
+            ):
+                region = "global"
+
             attributes: dict[str, Any] = {}
             attached: list[AttachedResource] = []
+
+            if kind == "cloud_cdn_backend":
+                attributes["cdn_enabled"] = True
+
+            if kind == "dns_managed_zone":
+                visibility = values.get("visibility")
+                if visibility:
+                    attributes["visibility"] = visibility
+                else:
+                    attributes["visibility"] = "public"
+
+            if kind == "nat_gateway":
+                allocate_option = values.get("nat_ip_allocate_option")
+                if allocate_option:
+                    attributes["nat_ip_allocate_option"] = allocate_option
+
+            if kind == "compute_address":
+                addr_type = values.get("address_type")
+                if addr_type:
+                    attributes["address_type"] = addr_type
+                purpose = values.get("purpose")
+                if purpose:
+                    attributes["purpose"] = purpose
+
+            if kind == "compute_security_policy":
+                rules = values.get("rule", [])
+                if isinstance(rules, dict):
+                    attributes["rule_count"] = 1
+                elif isinstance(rules, list):
+                    attributes["rule_count"] = len(rules)
+                else:
+                    attributes["rule_count"] = 0
+
+            if kind == "pubsub_subscription":
+                retain = values.get("retain_acked_messages")
+                if retain is not None:
+                    attributes["retain_acked_messages"] = retain
+
+            if kind == "dataflow_job":
+                mtype = values.get("machine_type")
+                if mtype:
+                    attributes["machine_type"] = mtype
+                max_w = values.get("max_workers")
+                if max_w is not None:
+                    attributes["max_workers"] = max_w
+
+            if kind == "dataproc_cluster":
+                master_configs = values.get("master_config", [])
+                if isinstance(master_configs, dict):
+                    master_configs = [master_configs]
+                if isinstance(master_configs, list) and master_configs:
+                    mc = master_configs[0]
+                    if isinstance(mc, dict):
+                        num_inst = mc.get("num_instances")
+                        m_type = mc.get("machine_type")
+                        if num_inst is not None:
+                            attributes["num_master_nodes"] = num_inst
+                        if m_type is not None:
+                            attributes["master_machine_type"] = m_type
+
+                worker_configs = values.get("worker_config", [])
+                if isinstance(worker_configs, dict):
+                    worker_configs = [worker_configs]
+                if isinstance(worker_configs, list) and worker_configs:
+                    wc = worker_configs[0]
+                    if isinstance(wc, dict):
+                        num_inst = wc.get("num_instances")
+                        w_type = wc.get("machine_type")
+                        if num_inst is not None:
+                            attributes["num_worker_nodes"] = num_inst
+                        if w_type is not None:
+                            attributes["worker_machine_type"] = w_type
+
+                preempt_configs = values.get("preemptible_worker_config", [])
+                if isinstance(preempt_configs, dict):
+                    preempt_configs = [preempt_configs]
+                if isinstance(preempt_configs, list) and preempt_configs:
+                    pc = preempt_configs[0]
+                    if isinstance(pc, dict):
+                        num_inst = pc.get("num_instances")
+                        if num_inst is not None:
+                            attributes["num_preemptible_nodes"] = num_inst
 
             if res_type == "google_compute_instance":
                 mtype = values.get("machine_type")

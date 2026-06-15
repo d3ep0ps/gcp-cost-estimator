@@ -11,18 +11,25 @@ from gcp_cost_estimator.core.pricing.gcp.appengine import (
     map_app_engine_flexible_version,
     map_app_engine_standard_version,
 )
+from gcp_cost_estimator.core.pricing.gcp.armor import map_compute_security_policy
 from gcp_cost_estimator.core.pricing.gcp.bigquery import map_bigquery_dataset
 from gcp_cost_estimator.core.pricing.gcp.bigtable import map_bigtable_instance
+from gcp_cost_estimator.core.pricing.gcp.cdn import map_cloud_cdn_backend
 from gcp_cost_estimator.core.pricing.gcp.compute import (
     map_gce_compute,
     map_gke_cluster,
     map_gke_node_pool,
 )
+from gcp_cost_estimator.core.pricing.gcp.dataflow import map_dataflow_job
+from gcp_cost_estimator.core.pricing.gcp.dataproc import map_dataproc_cluster
+from gcp_cost_estimator.core.pricing.gcp.dns import map_dns_managed_zone
 from gcp_cost_estimator.core.pricing.gcp.firestore import map_firestore_database
 from gcp_cost_estimator.core.pricing.gcp.memorystore import (
     map_memorystore_instance,
     map_redis_instance,
 )
+from gcp_cost_estimator.core.pricing.gcp.nat import map_nat_gateway
+from gcp_cost_estimator.core.pricing.gcp.pubsub import map_pubsub_subscription, map_pubsub_topic
 from gcp_cost_estimator.core.pricing.gcp.serverless import (
     map_cloud_function,
     map_cloud_run_job,
@@ -31,6 +38,7 @@ from gcp_cost_estimator.core.pricing.gcp.serverless import (
 from gcp_cost_estimator.core.pricing.gcp.spanner import map_spanner_instance
 from gcp_cost_estimator.core.pricing.gcp.sql import map_cloud_sql
 from gcp_cost_estimator.core.pricing.gcp.storage import map_gcs_bucket
+from gcp_cost_estimator.core.pricing.gcp.vpc import map_compute_address
 from gcp_cost_estimator.core.registries import SkuMapper, register_sku_mapper
 
 
@@ -42,6 +50,13 @@ class GcpSkuMapper(SkuMapper):
         """Return the list of official billing service display names required by this provider."""
         return [
             "Compute Engine",
+            "Cloud CDN",
+            "Cloud DNS",
+            "Cloud NAT",
+            "Cloud Armor",
+            "Pub/Sub",
+            "Dataflow",
+            "Dataproc",
             "Cloud SQL",
             "Cloud Storage",
             "Kubernetes Engine",
@@ -103,6 +118,51 @@ class GcpSkuMapper(SkuMapper):
         self, resource: Resource, cursor: sqlite3.Cursor
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         return map_gcs_bucket(resource, cursor)
+
+    def _map_cloud_cdn_backend(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_cloud_cdn_backend(resource, cursor)
+
+    def _map_dns_managed_zone(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_dns_managed_zone(resource, cursor)
+
+    def _map_nat_gateway(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_nat_gateway(resource, cursor)
+
+    def _map_compute_address(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_compute_address(resource, cursor)
+
+    def _map_compute_security_policy(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_compute_security_policy(resource, cursor)
+
+    def _map_pubsub_topic(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_pubsub_topic(resource, cursor)
+
+    def _map_pubsub_subscription(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_pubsub_subscription(resource, cursor)
+
+    def _map_dataflow_job(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_dataflow_job(resource, cursor)
+
+    def _map_dataproc_cluster(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_dataproc_cluster(resource, cursor)
 
     def _map_bigquery_dataset(
         self, resource: Resource, cursor: sqlite3.Cursor
@@ -285,6 +345,42 @@ class GcpSkuMapper(SkuMapper):
                 gcs_mappings, gcs_unpriced = self._map_gcs_bucket(resource, cursor)
                 mappings.extend(gcs_mappings)
                 unpriced.extend(gcs_unpriced)
+            elif resource.service == "cdn" and resource.kind == "cloud_cdn_backend":
+                cdn_mappings, cdn_unpriced = self._map_cloud_cdn_backend(resource, cursor)
+                mappings.extend(cdn_mappings)
+                unpriced.extend(cdn_unpriced)
+            elif resource.service == "dns" and resource.kind == "dns_managed_zone":
+                dns_mappings, dns_unpriced = self._map_dns_managed_zone(resource, cursor)
+                mappings.extend(dns_mappings)
+                unpriced.extend(dns_unpriced)
+            elif resource.service == "nat" and resource.kind == "nat_gateway":
+                nat_mappings, nat_unpriced = self._map_nat_gateway(resource, cursor)
+                mappings.extend(nat_mappings)
+                unpriced.extend(nat_unpriced)
+            elif resource.service == "vpc" and resource.kind == "compute_address":
+                vpc_mappings, vpc_unpriced = self._map_compute_address(resource, cursor)
+                mappings.extend(vpc_mappings)
+                unpriced.extend(vpc_unpriced)
+            elif resource.service == "armor" and resource.kind == "compute_security_policy":
+                armor_mappings, armor_unpriced = self._map_compute_security_policy(resource, cursor)
+                mappings.extend(armor_mappings)
+                unpriced.extend(armor_unpriced)
+            elif resource.service == "pubsub" and resource.kind == "pubsub_topic":
+                ps_mappings, ps_unpriced = self._map_pubsub_topic(resource, cursor)
+                mappings.extend(ps_mappings)
+                unpriced.extend(ps_unpriced)
+            elif resource.service == "pubsub" and resource.kind == "pubsub_subscription":
+                ps_mappings, ps_unpriced = self._map_pubsub_subscription(resource, cursor)
+                mappings.extend(ps_mappings)
+                unpriced.extend(ps_unpriced)
+            elif resource.service == "dataflow" and resource.kind == "dataflow_job":
+                df_mappings, df_unpriced = self._map_dataflow_job(resource, cursor)
+                mappings.extend(df_mappings)
+                unpriced.extend(df_unpriced)
+            elif resource.service == "dataproc" and resource.kind == "dataproc_cluster":
+                dp_mappings, dp_unpriced = self._map_dataproc_cluster(resource, cursor)
+                mappings.extend(dp_mappings)
+                unpriced.extend(dp_unpriced)
             elif resource.service == "bigquery" and resource.kind == "bigquery_dataset":
                 bq_mappings, bq_unpriced = self._map_bigquery_dataset(resource, cursor)
                 mappings.extend(bq_mappings)

@@ -53,6 +53,19 @@ def estimate_infrastructure(
             # Gather resource-level assumptions (e.g. defaulted runtime)
             all_assumptions.extend(r.assumptions)
 
+            # Check if this resource has a specific validation-level unpriced reason
+            val_unpriced_reason = None
+            for item in val_res.get("unpriced", []):
+                if item["resource_id"] == r.resource_id:
+                    val_unpriced_reason = item["reason"]
+                    break
+
+            if val_unpriced_reason:
+                unpriced_items.append(
+                    UnpricedItem(resource_id=r.resource_id, reason=val_unpriced_reason)
+                )
+                continue
+
             try:
                 # Resolve mapper for the resource provider
                 mapper = get_sku_mapper(r.provider, db_path)

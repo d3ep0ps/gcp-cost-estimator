@@ -1,0 +1,82 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/dataflow/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DF-BATCH-CPU",
+    "service": "Dataflow",
+    "region": "us-central1",
+    "description": "Dataflow Batch vCPU",
+    "unit": "h",
+    "unit_price": 0.056,
+    "sku_group": "DataflowBatchVcpu"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DF-BATCH-RAM",
+    "service": "Dataflow",
+    "region": "us-central1",
+    "description": "Dataflow Batch Memory",
+    "unit": "GiBy.h",
+    "unit_price": 0.003557,
+    "sku_group": "DataflowBatchMemory"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DF-STREAMING-CPU",
+    "service": "Dataflow",
+    "region": "us-central1",
+    "description": "Dataflow Streaming vCPU",
+    "unit": "h",
+    "unit_price": 0.069,
+    "sku_group": "DataflowStreamingVcpu"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DF-STREAMING-RAM",
+    "service": "Dataflow",
+    "region": "us-central1",
+    "description": "Dataflow Streaming Memory",
+    "unit": "GiBy.h",
+    "unit_price": 0.003557,
+    "sku_group": "DataflowStreamingMemory"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DF-SHUFFLE",
+    "service": "Dataflow",
+    "region": "us-central1",
+    "description": "Dataflow Shuffle Data Processed",
+    "unit": "GB",
+    "unit_price": 0.011,
+    "sku_group": "DataflowShuffle"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DF-STREAMING-ENGINE",
+    "service": "Dataflow",
+    "region": "us-central1",
+    "description": "Dataflow Streaming Engine Compute Unit",
+    "unit": "h",
+    "unit_price": 0.089,
+    "sku_group": "DataflowStreamingEngine"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DF-STORAGE",
+    "service": "Dataflow",
+    "region": "us-central1",
+    "description": "Dataflow PD Standard Storage",
+    "unit": "GiBy.h",
+    "unit_price": 0.000054,
+    "sku_group": "DataflowStorage"
+  }
+]
