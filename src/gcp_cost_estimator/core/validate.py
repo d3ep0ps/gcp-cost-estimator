@@ -404,6 +404,14 @@ def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
                     "reason": "Pub/Sub Lite was deprecated on 2026-03-18",
                 }
             )
+        if r.provider == "gcp" and r.service == "dataflow" and r.kind == "dataflow_job":
+            if r.region in ("unknown-region", "invalid-region") or not r.region:
+                unpriced.append(
+                    {
+                        "resource_id": r.resource_id,
+                        "reason": f"Region '{r.region}' not supported or missing pricing data for Dataflow",
+                    }
+                )
 
     return {
         "valid": len(errors) == 0,

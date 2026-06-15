@@ -199,6 +199,9 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_pubsub_lite_subscription":
                         service = "pubsub"
                         kind = "pubsub_lite_subscription"
+                    elif res_type_clean == "google_dataflow_job":
+                        service = "dataflow"
+                        kind = "dataflow_job"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -292,6 +295,14 @@ class TerraformHclParser(IaCParser):
                         retain = resolve_value(res_config.get("retain_acked_messages"))
                         if retain is not None:
                             attributes["retain_acked_messages"] = retain
+
+                    if kind == "dataflow_job":
+                        mtype = resolve_value(res_config.get("machine_type"))
+                        if mtype:
+                            attributes["machine_type"] = mtype
+                        max_w = resolve_value(res_config.get("max_workers"))
+                        if max_w is not None:
+                            attributes["max_workers"] = max_w
 
                     if res_type_clean == "google_compute_instance":
                         mtype = resolve_value(res_config.get("machine_type"))

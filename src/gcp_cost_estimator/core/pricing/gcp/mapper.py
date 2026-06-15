@@ -28,6 +28,7 @@ from gcp_cost_estimator.core.pricing.gcp.memorystore import (
 )
 from gcp_cost_estimator.core.pricing.gcp.nat import map_nat_gateway
 from gcp_cost_estimator.core.pricing.gcp.pubsub import map_pubsub_subscription, map_pubsub_topic
+from gcp_cost_estimator.core.pricing.gcp.dataflow import map_dataflow_job
 from gcp_cost_estimator.core.pricing.gcp.serverless import (
     map_cloud_function,
     map_cloud_run_job,
@@ -151,6 +152,11 @@ class GcpSkuMapper(SkuMapper):
         self, resource: Resource, cursor: sqlite3.Cursor
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         return map_pubsub_subscription(resource, cursor)
+
+    def _map_dataflow_job(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_dataflow_job(resource, cursor)
 
     def _map_bigquery_dataset(
         self, resource: Resource, cursor: sqlite3.Cursor
@@ -361,6 +367,10 @@ class GcpSkuMapper(SkuMapper):
                 ps_mappings, ps_unpriced = self._map_pubsub_subscription(resource, cursor)
                 mappings.extend(ps_mappings)
                 unpriced.extend(ps_unpriced)
+            elif resource.service == "dataflow" and resource.kind == "dataflow_job":
+                df_mappings, df_unpriced = self._map_dataflow_job(resource, cursor)
+                mappings.extend(df_mappings)
+                unpriced.extend(df_unpriced)
             elif resource.service == "bigquery" and resource.kind == "bigquery_dataset":
                 bq_mappings, bq_unpriced = self._map_bigquery_dataset(resource, cursor)
                 mappings.extend(bq_mappings)
