@@ -5,7 +5,7 @@ import sqlite3
 from typing import Any
 
 from gcp_cost_estimator.core.model import Resource
-from gcp_cost_estimator.core.validate import parse_k8s_quantity
+from gcp_cost_estimator.core.validation.utils import parse_k8s_quantity
 
 
 def map_cloud_run_service(
