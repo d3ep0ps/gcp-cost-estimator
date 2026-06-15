@@ -279,6 +279,120 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
             "hint": "Override attributes.node_count (READ_POOL instances only).",
         },
     },
+    "dns": {
+        "monthly_queries": {
+            "value": 1000000,
+            "unit": "queries/month",
+            "hint": "Override usage.monthly_queries with expected DNS query volume.",
+        },
+    },
+    "nat": {
+        "num_vms": {
+            "value": 1,
+            "unit": "VMs",
+            "hint": "Override usage.num_vms with the number of VMs routed through this NAT gateway.",
+        },
+        "num_nat_ips": {
+            "value": 1,
+            "unit": "IPs",
+            "hint": "Override usage.num_nat_ips with the number of external IPs allocated.",
+        },
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": "Override for non-24/7 gateways.",
+        },
+        "monthly_data_processed_gb": {
+            "value": 10,
+            "unit": "GB/month",
+            "hint": "Override usage.monthly_data_processed_gb with expected throughput.",
+        },
+    },
+    "vpc": {
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": "Override usage.runtime_hours_per_month for the IP reservation duration.",
+        },
+        "in_use": {
+            "value": True,
+            "unit": "bool",
+            "hint": "Set to false if IP is reserved but not yet attached.",
+        },
+        "on_spot_vm": {
+            "value": False,
+            "unit": "bool",
+            "hint": "Set to true if IP is attached to a Spot/preemptible VM.",
+        },
+        "on_forwarding_rule": {
+            "value": False,
+            "unit": "bool",
+            "hint": "Set to true if IP is attached to a forwarding rule or VPN tunnel (no charge).",
+        },
+    },
+    "armor": {
+        "monthly_requests": {
+            "value": 1000000,
+            "unit": "requests/month",
+            "hint": "Override usage.monthly_requests with expected request volume to the policy.",
+        },
+    },
+    "pubsub": {
+        "monthly_message_throughput_gb": {
+            "value": 10.0,
+            "unit": "GB/month",
+            "hint": "Override usage.monthly_message_throughput_gb with expected total message volume.",
+        },
+        "subscription_storage_gb": {
+            "value": 0.0,
+            "unit": "GB",
+            "hint": "Override usage.subscription_storage_gb when retain_acked_messages is enabled.",
+        },
+    },
+    "dataflow": {
+        "num_vcpus": {
+            "value": 4,
+            "unit": "vCPUs",
+            "hint": "Derived from machine_type if set; override otherwise.",
+        },
+        "memory_gb": {
+            "value": 15.0,
+            "unit": "GB",
+            "hint": "Derived from machine_type if set; override otherwise.",
+        },
+        "runtime_hours_per_month": {
+            "value": 100,
+            "unit": "hours",
+            "hint": "Override usage.runtime_hours_per_month with job frequency x duration.",
+        },
+        "job_type": {
+            "value": "batch",
+            "unit": "string",
+            "hint": "Set to 'streaming' for long-running streaming jobs.",
+        },
+        "shuffle_data_gb": {
+            "value": 50.0,
+            "unit": "GB",
+            "hint": "Override usage.shuffle_data_gb for batch jobs.",
+        },
+    },
+    "dataproc": {
+        "num_master_vcpus": {
+            "value": 4,
+            "unit": "vCPUs",
+            "hint": "n1-standard-4 master",
+        },
+        "num_worker_vcpus": {
+            "value": 8,
+            "unit": "vCPUs",
+            "hint": "2 x n1-standard-4 workers",
+        },
+        "runtime_hours_per_month": {
+            "value": 100,
+            "unit": "hours",
+            "hint": "~3 hours/day jobs",
+        },
+    },
 }
 
 CATALOG_COVERAGE: dict[str, Any] = {
@@ -363,6 +477,34 @@ CATALOG_COVERAGE: dict[str, Any] = {
                 "Primary/read-pool instance compute (vCPU & RAM), "
                 "automated storage, and backup billing."
             ),
+        },
+        "dns": {
+            "kinds": ["dns_managed_zone"],
+            "notes": "Managed zones (per zone/month) and DNS query volume.",
+        },
+        "nat": {
+            "kinds": ["nat_gateway"],
+            "notes": "Gateway hourly uptime (per VM capped at 32+ VMs), data processed, and NAT IP uptime.",
+        },
+        "vpc": {
+            "kinds": ["compute_address"],
+            "notes": "Static external IP addresses (reserved but unused vs in-use on standard/Spot VMs).",
+        },
+        "armor": {
+            "kinds": ["compute_security_policy"],
+            "notes": "Security policies, rules, and requests processed.",
+        },
+        "pubsub": {
+            "kinds": ["pubsub_topic", "pubsub_subscription"],
+            "notes": "Message throughput (excluding first 10 GiB free tier) and retained message storage.",
+        },
+        "dataflow": {
+            "kinds": ["dataflow_job"],
+            "notes": "Batch/streaming jobs compute (vCPU & memory), Shuffle data volume, and Streaming Engine compute units.",
+        },
+        "dataproc": {
+            "kinds": ["dataproc_cluster"],
+            "notes": "Dataproc premium management fee on master/worker node vCPUs (VM compute estimated separately).",
         },
     },
 }

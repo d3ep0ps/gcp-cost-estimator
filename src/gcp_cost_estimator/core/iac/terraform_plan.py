@@ -125,6 +125,9 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_dns_managed_zone":
                 service = "dns"
                 kind = "dns_managed_zone"
+            elif res_type == "google_compute_router_nat":
+                service = "nat"
+                kind = "nat_gateway"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -160,6 +163,11 @@ class TerraformPlanParser(IaCParser):
                     attributes["visibility"] = visibility
                 else:
                     attributes["visibility"] = "public"
+
+            if kind == "nat_gateway":
+                allocate_option = values.get("nat_ip_allocate_option")
+                if allocate_option:
+                    attributes["nat_ip_allocate_option"] = allocate_option
 
             if res_type == "google_compute_instance":
                 mtype = values.get("machine_type")

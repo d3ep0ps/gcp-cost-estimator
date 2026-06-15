@@ -1,0 +1,21 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_router_nat.my_nat",
+          "type": "google_compute_router_nat",
+          "name": "my_nat",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "my-nat",
+            "router": "my-router",
+            "region": "us-central1",
+            "nat_ip_allocate_option": "AUTO_ONLY"
+          }
+        }
+      ]
+    }
+  }
+}

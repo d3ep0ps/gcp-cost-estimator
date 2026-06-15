@@ -1,0 +1,42 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/nat/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-NAT-GATEWAY",
+    "service": "Cloud NAT",
+    "region": "us-central1",
+    "description": "Cloud NAT Gateway Uptime (per VM-hour)",
+    "unit": "hour",
+    "unit_price": 0.0014,
+    "sku_group": "NatGatewayUptime"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-NAT-DATA",
+    "service": "Cloud NAT",
+    "region": "us-central1",
+    "description": "Cloud NAT Data Processed",
+    "unit": "GB",
+    "unit_price": 0.019,
+    "sku_group": "NatDataProcessed"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-NAT-IP",
+    "service": "Cloud NAT",
+    "region": "us-central1",
+    "description": "Cloud NAT IP Address Uptime",
+    "unit": "hour",
+    "unit_price": 0.005,
+    "sku_group": "NatIpUptime"
+  }
+]
