@@ -82,7 +82,10 @@ def map_compute_address(
         unpriced.append(
             {
                 "resource_id": resource.resource_id,
-                "reason": f"No matching SKU found for VPC Static IP under group {sku_group} in region {region}",
+                "reason": (
+                    f"No matching SKU found for VPC Static IP under group "
+                    f"{sku_group} in region {region}"
+                ),
             }
         )
 

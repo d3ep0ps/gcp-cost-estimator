@@ -202,6 +202,12 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_dataflow_job":
                         service = "dataflow"
                         kind = "dataflow_job"
+                    elif res_type_clean == "google_dataproc_cluster":
+                        service = "dataproc"
+                        kind = "dataproc_cluster"
+                    elif res_type_clean == "google_dataproc_serverless_batch":
+                        service = "dataproc"
+                        kind = "dataproc_serverless_batch"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -303,6 +309,46 @@ class TerraformHclParser(IaCParser):
                         max_w = resolve_value(res_config.get("max_workers"))
                         if max_w is not None:
                             attributes["max_workers"] = max_w
+
+                    if kind == "dataproc_cluster":
+                        # Master config
+                        master_configs = res_config.get("master_config", [])
+                        if isinstance(master_configs, dict):
+                            master_configs = [master_configs]
+                        if isinstance(master_configs, list) and master_configs:
+                            mc = master_configs[0]
+                            if isinstance(mc, dict):
+                                num_inst = mc.get("num_instances")
+                                m_type = mc.get("machine_type")
+                                if num_inst is not None:
+                                    attributes["num_master_nodes"] = resolve_value(num_inst)
+                                if m_type is not None:
+                                    attributes["master_machine_type"] = resolve_value(m_type)
+
+                        # Worker config
+                        worker_configs = res_config.get("worker_config", [])
+                        if isinstance(worker_configs, dict):
+                            worker_configs = [worker_configs]
+                        if isinstance(worker_configs, list) and worker_configs:
+                            wc = worker_configs[0]
+                            if isinstance(wc, dict):
+                                num_inst = wc.get("num_instances")
+                                w_type = wc.get("machine_type")
+                                if num_inst is not None:
+                                    attributes["num_worker_nodes"] = resolve_value(num_inst)
+                                if w_type is not None:
+                                    attributes["worker_machine_type"] = resolve_value(w_type)
+
+                        # Preemptible worker config
+                        preempt_configs = res_config.get("preemptible_worker_config", [])
+                        if isinstance(preempt_configs, dict):
+                            preempt_configs = [preempt_configs]
+                        if isinstance(preempt_configs, list) and preempt_configs:
+                            pc = preempt_configs[0]
+                            if isinstance(pc, dict):
+                                num_inst = pc.get("num_instances")
+                                if num_inst is not None:
+                                    attributes["num_preemptible_nodes"] = resolve_value(num_inst)
 
                     if res_type_clean == "google_compute_instance":
                         mtype = resolve_value(res_config.get("machine_type"))

@@ -3,13 +3,14 @@
 import json
 import sqlite3
 from pathlib import Path
+
 import pytest
 
 from gcp_cost_estimator.core.model import Resource, ResourceModel
-from gcp_cost_estimator.core.validate import validate_resource_model
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 from gcp_cost_estimator.core.pricing.gcp import GcpSkuMapper
 from gcp_cost_estimator.core.service import estimate_infrastructure
+from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 def test_dataflow_job_valid_batch() -> None:
@@ -264,7 +265,9 @@ def test_dataflow_pd_storage_priced(populated_dataflow_db: str) -> None:
     assert item["unit_price"] == 0.000054
 
 
-def test_dataflow_known_answer_batch_4vcpu_15gb_100h_50gb_shuffle(populated_dataflow_db: str) -> None:
+def test_dataflow_known_answer_batch_4vcpu_15gb_100h_50gb_shuffle(
+    populated_dataflow_db: str,
+) -> None:
     """Verify known-answer calculation for a batch Dataflow job."""
     # CPU: 4 vCPU * 100 hrs * 1 worker = 400 hrs * 0.056 = $22.40
     # Memory: 15 GB * 100 hrs * 1 worker = 1500 hrs * 0.003557 = $5.3355
@@ -278,7 +281,13 @@ def test_dataflow_known_answer_batch_4vcpu_15gb_100h_50gb_shuffle(populated_data
         kind="dataflow_job",
         region="us-central1",
         attributes={"max_workers": 1, "disk_size_gb": 250},
-        usage={"job_type": "batch", "num_vcpus": 4, "memory_gb": 15, "runtime_hours_per_month": 100, "shuffle_data_gb": 50},
+        usage={
+            "job_type": "batch",
+            "num_vcpus": 4,
+            "memory_gb": 15,
+            "runtime_hours_per_month": 100,
+            "shuffle_data_gb": 50,
+        },
     )
     mapper = GcpSkuMapper(populated_dataflow_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
@@ -301,7 +310,12 @@ def test_dataflow_known_answer_streaming_4vcpu_15gb_730h(populated_dataflow_db: 
         kind="dataflow_job",
         region="us-central1",
         attributes={"max_workers": 1, "disk_size_gb": 250},
-        usage={"job_type": "streaming", "num_vcpus": 4, "memory_gb": 15, "runtime_hours_per_month": 730},
+        usage={
+            "job_type": "streaming",
+            "num_vcpus": 4,
+            "memory_gb": 15,
+            "runtime_hours_per_month": 730,
+        },
     )
     mapper = GcpSkuMapper(populated_dataflow_db)
     mappings, unpriced = mapper.map_resource_to_skus(r)
@@ -313,6 +327,7 @@ def test_dataflow_known_answer_streaming_4vcpu_15gb_730h(populated_dataflow_db: 
 def test_terraform_hcl_parses_google_dataflow_job() -> None:
     """Verify HCL parser resolves google_dataflow_job resource."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
     res = next(r for r in model.resources if r.resource_id == "google_dataflow_job.my_job")
@@ -325,6 +340,7 @@ def test_terraform_hcl_parses_google_dataflow_job() -> None:
 def test_terraform_hcl_max_workers_extracted() -> None:
     """Verify HCL parser extracts max_workers parameter."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
     res = next(r for r in model.resources if r.resource_id == "google_dataflow_job.my_job")
@@ -334,6 +350,7 @@ def test_terraform_hcl_max_workers_extracted() -> None:
 def test_terraform_hcl_machine_type_extracted() -> None:
     """Verify HCL parser extracts machine_type parameter."""
     from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
     res = next(r for r in model.resources if r.resource_id == "google_dataflow_job.my_job")
@@ -343,6 +360,7 @@ def test_terraform_hcl_machine_type_extracted() -> None:
 def test_terraform_plan_json_dataflow_job_parsed() -> None:
     """Verify plan JSON parser resolves dataflow_job resource."""
     from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
+
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/dataflow_plan.json")
     res = next(r for r in model.resources if r.resource_id == "google_dataflow_job.my_job")

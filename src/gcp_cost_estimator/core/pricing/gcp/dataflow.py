@@ -33,7 +33,10 @@ def map_dataflow_job(
         unpriced.append(
             {
                 "resource_id": resource.resource_id,
-                "reason": f"Region '{region}' not supported or missing pricing data for Dataflow",
+                "reason": (
+                    f"Region '{region}' not supported or "
+                    "missing pricing data for Dataflow"
+                ),
             }
         )
         return mappings, unpriced
@@ -112,7 +115,9 @@ def map_dataflow_job(
         shuffle_row = cursor.fetchone()
         if shuffle_row:
             raw_shuffle = float(resource.usage.get("shuffle_data_gb", 50.0))
-            # First 250 GiB -> 75% reduction (pay 25%); next 4870 GiB -> 50% reduction (pay 50%); above -> no reduction
+            # First 250 GiB -> 75% reduction (pay 25%)
+            # next 4870 GiB -> 50% reduction (pay 50%)
+            # above -> no reduction
             if raw_shuffle <= 250.0:
                 billable_shuffle = raw_shuffle * 0.25
             elif raw_shuffle <= 5120.0:
@@ -141,8 +146,9 @@ def map_dataflow_job(
         )
         engine_row = cursor.fetchone()
         if engine_row:
+            default_units = max(1.0, num_vcpus / 4.0)
             num_units = float(
-                resource.usage.get("num_streaming_engine_units", max(1.0, num_vcpus / 4.0))
+                resource.usage.get("num_streaming_engine_units", default_units)
             )
             total_engine_hours = num_units * runtime_hours
             mappings.append(

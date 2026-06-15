@@ -1,0 +1,42 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/dataproc/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DATAPROC-PREMIUM",
+    "service": "Dataproc",
+    "region": "us-central1",
+    "description": "Dataproc Premium Fee",
+    "unit": "h",
+    "unit_price": 0.010,
+    "sku_group": "DataprocPremium"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-N1-CPU",
+    "service": "Compute Engine",
+    "region": "us-central1",
+    "description": "N1 CPU",
+    "unit": "h",
+    "unit_price": 0.0475,
+    "sku_group": "CPU"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-N1-RAM",
+    "service": "Compute Engine",
+    "region": "us-central1",
+    "description": "N1 RAM",
+    "unit": "GiBy.h",
+    "unit_price": 0.0063,
+    "sku_group": "RAM"
+  }
+]

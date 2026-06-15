@@ -31,7 +31,7 @@ def map_nat_gateway(
     )
     row = cursor.fetchone()
     if row:
-        sku_id, unit, unit_price, desc = row
+        sku_id, unit, unit_price, _desc = row
         hourly_rate_per_vm = float(unit_price)
         if hourly_rate_per_vm > 0:
             effective_vms = min(num_vms, 0.044 / hourly_rate_per_vm)
@@ -49,7 +49,10 @@ def map_nat_gateway(
         unpriced.append(
             {
                 "resource_id": resource.resource_id,
-                "reason": f"No matching SKU found for Cloud NAT Gateway Uptime in region {region}",
+                "reason": (
+                    f"No matching SKU found for Cloud NAT Gateway Uptime "
+                    f"in region {region}"
+                ),
             }
         )
 
@@ -64,7 +67,7 @@ def map_nat_gateway(
     )
     row = cursor.fetchone()
     if row:
-        sku_id, unit, unit_price, desc = row
+        sku_id, unit, unit_price, _ = row
         mappings.append(
             {
                 "sku_id": sku_id,
@@ -78,7 +81,10 @@ def map_nat_gateway(
         unpriced.append(
             {
                 "resource_id": resource.resource_id,
-                "reason": f"No matching SKU found for Cloud NAT Data Processed in region {region}",
+                "reason": (
+                    f"No matching SKU found for Cloud NAT Data Processed "
+                    f"in region {region}"
+                ),
             }
         )
 
@@ -108,7 +114,10 @@ def map_nat_gateway(
             unpriced.append(
                 {
                     "resource_id": resource.resource_id,
-                    "reason": f"No matching SKU found for Cloud NAT IP Address Uptime in region {region}",
+                    "reason": (
+                        f"No matching SKU found for Cloud NAT IP Address Uptime "
+                        f"in region {region}"
+                    ),
                 }
             )
 

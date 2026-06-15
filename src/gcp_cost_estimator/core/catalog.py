@@ -22,7 +22,7 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
         "https_fraction": {
             "value": 1.0,
             "unit": "fraction",
-            "hint": "Fraction of requests that are HTTPS (0.0–1.0).",
+            "hint": "Fraction of requests that are HTTPS (0.0-1.0).",
         },
     },
     "compute": {
@@ -290,7 +290,10 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
         "num_vms": {
             "value": 1,
             "unit": "VMs",
-            "hint": "Override usage.num_vms with the number of VMs routed through this NAT gateway.",
+            "hint": (
+                "Override usage.num_vms with the number of VMs routed "
+                "through this NAT gateway."
+            ),
         },
         "num_nat_ips": {
             "value": 1,
@@ -341,7 +344,10 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
         "monthly_message_throughput_gb": {
             "value": 10.0,
             "unit": "GB/month",
-            "hint": "Override usage.monthly_message_throughput_gb with expected total message volume.",
+            "hint": (
+                "Override usage.monthly_message_throughput_gb with "
+                "expected total message volume."
+            ),
         },
         "subscription_storage_gb": {
             "value": 0.0,
@@ -484,11 +490,17 @@ CATALOG_COVERAGE: dict[str, Any] = {
         },
         "nat": {
             "kinds": ["nat_gateway"],
-            "notes": "Gateway hourly uptime (per VM capped at 32+ VMs), data processed, and NAT IP uptime.",
+            "notes": (
+                "Gateway hourly uptime (per VM capped at 32+ VMs), "
+                "data processed, and NAT IP uptime."
+            ),
         },
         "vpc": {
             "kinds": ["compute_address"],
-            "notes": "Static external IP addresses (reserved but unused vs in-use on standard/Spot VMs).",
+            "notes": (
+                "Static external IP addresses (reserved but unused vs "
+                "in-use on standard/Spot VMs)."
+            ),
         },
         "armor": {
             "kinds": ["compute_security_policy"],
@@ -496,15 +508,24 @@ CATALOG_COVERAGE: dict[str, Any] = {
         },
         "pubsub": {
             "kinds": ["pubsub_topic", "pubsub_subscription"],
-            "notes": "Message throughput (excluding first 10 GiB free tier) and retained message storage.",
+            "notes": (
+                "Message throughput (excluding first 10 GiB free tier) "
+                "and retained message storage."
+            ),
         },
         "dataflow": {
             "kinds": ["dataflow_job"],
-            "notes": "Batch/streaming jobs compute (vCPU & memory), Shuffle data volume, and Streaming Engine compute units.",
+            "notes": (
+                "Batch/streaming jobs compute (vCPU & memory), Shuffle "
+                "data volume, and Streaming Engine compute units."
+            ),
         },
         "dataproc": {
             "kinds": ["dataproc_cluster"],
-            "notes": "Dataproc premium management fee on master/worker node vCPUs (VM compute estimated separately).",
+            "notes": (
+                "Dataproc premium management fee on master/worker node "
+                "vCPUs (VM compute estimated separately)."
+            ),
         },
     },
 }

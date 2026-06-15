@@ -58,7 +58,10 @@ def map_cloud_cdn_backend(
             unpriced.append(
                 {
                     "resource_id": resource.resource_id,
-                    "reason": f"No matching Cloud CDN Cache Transfer Out SKU found for region '{region}'",
+                    "reason": (
+                        f"No matching Cloud CDN Cache Transfer Out SKU "
+                        f"found for region '{region}'"
+                    ),
                 }
             )
 
@@ -88,7 +91,10 @@ def map_cloud_cdn_backend(
             unpriced.append(
                 {
                     "resource_id": resource.resource_id,
-                    "reason": f"No matching Cloud CDN Cache Fill SKU found for region '{region}'",
+                    "reason": (
+                        f"No matching Cloud CDN Cache Fill SKU "
+                        f"found for region '{region}'"
+                    ),
                 }
             )
 
@@ -105,7 +111,8 @@ def map_cloud_cdn_backend(
                 SELECT sku_id, unit, unit_price, description
                 FROM pricing_cache
                 WHERE provider = 'gcp' AND region = ? AND sku_group = 'CdnRequests'
-                AND (description LIKE '%HTTP %' OR description LIKE '%HTTP Requests%' or description = 'Cloud CDN HTTP Requests')
+                AND (description LIKE '%HTTP %' OR description LIKE '%HTTP Requests%'
+                     OR description = 'Cloud CDN HTTP Requests')
                 """,
                 (region,),
             )
@@ -124,7 +131,10 @@ def map_cloud_cdn_backend(
                 unpriced.append(
                     {
                         "resource_id": resource.resource_id,
-                        "reason": f"No matching Cloud CDN HTTP Requests SKU found for region '{region}'",
+                        "reason": (
+                            f"No matching Cloud CDN HTTP Requests SKU "
+                            f"found for region '{region}'"
+                        ),
                     }
                 )
 
@@ -153,7 +163,10 @@ def map_cloud_cdn_backend(
                 unpriced.append(
                     {
                         "resource_id": resource.resource_id,
-                        "reason": f"No matching Cloud CDN HTTPS Requests SKU found for region '{region}'",
+                        "reason": (
+                            f"No matching Cloud CDN HTTPS Requests SKU "
+                            f"found for region '{region}'"
+                        ),
                     }
                 )
 
