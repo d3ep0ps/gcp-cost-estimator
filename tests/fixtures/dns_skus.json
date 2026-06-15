@@ -1,0 +1,32 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/dns/pricing Verified: 2026-06-10",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DNS-ZONE",
+    "service": "Cloud DNS",
+    "region": "global",
+    "description": "Cloud DNS Managed Zones",
+    "unit": "month",
+    "unit_price": 0.20,
+    "sku_group": "DnsZones"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-DNS-QUERIES",
+    "service": "Cloud DNS",
+    "region": "global",
+    "description": "Cloud DNS Queries",
+    "unit": "1M request",
+    "unit_price": 0.40,
+    "sku_group": "DnsQueries"
+  }
+]

@@ -122,6 +122,9 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_app_engine_application":
                 service = "appengine"
                 kind = "google_app_engine_application"
+            elif res_type == "google_dns_managed_zone":
+                service = "dns"
+                kind = "dns_managed_zone"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -142,11 +145,21 @@ class TerraformPlanParser(IaCParser):
             elif raw_location and isinstance(raw_location, str):
                 region = raw_location
 
+            if kind == "dns_managed_zone":
+                region = "global"
+
             attributes: dict[str, Any] = {}
             attached: list[AttachedResource] = []
 
             if kind == "cloud_cdn_backend":
                 attributes["cdn_enabled"] = True
+
+            if kind == "dns_managed_zone":
+                visibility = values.get("visibility")
+                if visibility:
+                    attributes["visibility"] = visibility
+                else:
+                    attributes["visibility"] = "public"
 
             if res_type == "google_compute_instance":
                 mtype = values.get("machine_type")

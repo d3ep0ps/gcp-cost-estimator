@@ -32,6 +32,7 @@ from gcp_cost_estimator.core.pricing.gcp.spanner import map_spanner_instance
 from gcp_cost_estimator.core.pricing.gcp.sql import map_cloud_sql
 from gcp_cost_estimator.core.pricing.gcp.storage import map_gcs_bucket
 from gcp_cost_estimator.core.pricing.gcp.cdn import map_cloud_cdn_backend
+from gcp_cost_estimator.core.pricing.gcp.dns import map_dns_managed_zone
 from gcp_cost_estimator.core.registries import SkuMapper, register_sku_mapper
 
 
@@ -116,6 +117,11 @@ class GcpSkuMapper(SkuMapper):
         self, resource: Resource, cursor: sqlite3.Cursor
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         return map_cloud_cdn_backend(resource, cursor)
+
+    def _map_dns_managed_zone(
+        self, resource: Resource, cursor: sqlite3.Cursor
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return map_dns_managed_zone(resource, cursor)
 
     def _map_bigquery_dataset(
         self, resource: Resource, cursor: sqlite3.Cursor
@@ -302,6 +308,10 @@ class GcpSkuMapper(SkuMapper):
                 cdn_mappings, cdn_unpriced = self._map_cloud_cdn_backend(resource, cursor)
                 mappings.extend(cdn_mappings)
                 unpriced.extend(cdn_unpriced)
+            elif resource.service == "dns" and resource.kind == "dns_managed_zone":
+                dns_mappings, dns_unpriced = self._map_dns_managed_zone(resource, cursor)
+                mappings.extend(dns_mappings)
+                unpriced.extend(dns_unpriced)
             elif resource.service == "bigquery" and resource.kind == "bigquery_dataset":
                 bq_mappings, bq_unpriced = self._map_bigquery_dataset(resource, cursor)
                 mappings.extend(bq_mappings)

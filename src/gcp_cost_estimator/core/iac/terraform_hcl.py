@@ -175,6 +175,9 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_app_engine_application":
                         service = "appengine"
                         kind = "google_app_engine_application"
+                    elif res_type_clean == "google_dns_managed_zone":
+                        service = "dns"
+                        kind = "dns_managed_zone"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -205,6 +208,9 @@ class TerraformHclParser(IaCParser):
                         else:
                             region = raw_location
 
+                    if kind == "dns_managed_zone":
+                        region = "global"
+
                     quantity = 1
                     raw_count = resolve_value(res_config.get("count"))
                     if raw_count is not None:
@@ -226,6 +232,13 @@ class TerraformHclParser(IaCParser):
 
                     if kind == "cloud_cdn_backend":
                         attributes["cdn_enabled"] = True
+
+                    if kind == "dns_managed_zone":
+                        visibility = resolve_value(res_config.get("visibility"))
+                        if visibility:
+                            attributes["visibility"] = visibility
+                        else:
+                            attributes["visibility"] = "public"
 
                     if res_type_clean == "google_compute_instance":
                         mtype = resolve_value(res_config.get("machine_type"))
