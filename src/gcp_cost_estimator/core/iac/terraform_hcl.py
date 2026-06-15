@@ -181,6 +181,9 @@ class TerraformHclParser(IaCParser):
                     elif res_type_clean == "google_compute_router_nat":
                         service = "nat"
                         kind = "nat_gateway"
+                    elif res_type_clean == "google_compute_address":
+                        service = "vpc"
+                        kind = "compute_address"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"
@@ -247,6 +250,14 @@ class TerraformHclParser(IaCParser):
                         allocate_option = resolve_value(res_config.get("nat_ip_allocate_option"))
                         if allocate_option:
                             attributes["nat_ip_allocate_option"] = allocate_option
+
+                    if kind == "compute_address":
+                        addr_type = resolve_value(res_config.get("address_type"))
+                        if addr_type:
+                            attributes["address_type"] = addr_type
+                        purpose = resolve_value(res_config.get("purpose"))
+                        if purpose:
+                            attributes["purpose"] = purpose
 
                     if res_type_clean == "google_compute_instance":
                         mtype = resolve_value(res_config.get("machine_type"))
