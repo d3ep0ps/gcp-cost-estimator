@@ -5,7 +5,7 @@ from typing import Any
 
 from gcp_cost_estimator.core.model import ResourceModel
 from gcp_cost_estimator.core.validation.gcp import NORMALIZERS, VALIDATORS
-from gcp_cost_estimator.core.validation.utils import parse_k8s_quantity
+from gcp_cost_estimator.core.validation.utils import parse_k8s_quantity as parse_k8s_quantity
 
 
 def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
