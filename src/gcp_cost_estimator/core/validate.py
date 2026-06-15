@@ -1299,7 +1299,8 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
 
         # Apply Dataflow defaults
         if r.provider == "gcp" and r.service == "dataflow" and r.kind == "dataflow_job":
-            if (
+            job_type = r.usage.get("job_type", "batch")
+            if job_type == "batch" and (
                 "runtime_hours_per_month" not in r.usage
                 or r.usage.get("runtime_hours_per_month") == 730
             ):

@@ -163,7 +163,7 @@ def test_dataflow_batch_vcpu_priced(populated_dataflow_db: str) -> None:
     assert len(unpriced) == 0
     item = next(m for m in mappings if m["component"] == "vcpu")
     assert item["sku_id"] == "SKU-DF-BATCH-CPU"
-    assert item["qty"] == 4 * 100 * 2
+    assert item["qty"] == 4 * 2
     assert item["unit_price"] == 0.056
 
 
@@ -183,7 +183,7 @@ def test_dataflow_batch_memory_priced(populated_dataflow_db: str) -> None:
     assert len(unpriced) == 0
     item = next(m for m in mappings if m["component"] == "ram")
     assert item["sku_id"] == "SKU-DF-BATCH-RAM"
-    assert item["qty"] == 15 * 100 * 2
+    assert item["qty"] == 15 * 2
     assert item["unit_price"] == 0.003557
 
 
@@ -289,11 +289,10 @@ def test_dataflow_known_answer_batch_4vcpu_15gb_100h_50gb_shuffle(
             "shuffle_data_gb": 50,
         },
     )
-    mapper = GcpSkuMapper(populated_dataflow_db)
-    mappings, unpriced = mapper.map_resource_to_skus(r)
-    assert len(unpriced) == 0
-    total = sum(m["qty"] * m["unit_price"] for m in mappings)
-    assert pytest.approx(total, abs=1e-4) == 29.223
+    model = ResourceModel(resources=[r])
+    est = estimate_infrastructure(populated_dataflow_db, model)
+    assert len(est.unpriced) == 0
+    assert pytest.approx(est.monthly_total, abs=1e-4) == 29.223
 
 
 def test_dataflow_known_answer_streaming_4vcpu_15gb_730h(populated_dataflow_db: str) -> None:
@@ -317,11 +316,10 @@ def test_dataflow_known_answer_streaming_4vcpu_15gb_730h(populated_dataflow_db: 
             "runtime_hours_per_month": 730,
         },
     )
-    mapper = GcpSkuMapper(populated_dataflow_db)
-    mappings, unpriced = mapper.map_resource_to_skus(r)
-    assert len(unpriced) == 0
-    total = sum(m["qty"] * m["unit_price"] for m in mappings)
-    assert pytest.approx(total, abs=1e-4) == 315.25415
+    model = ResourceModel(resources=[r])
+    est = estimate_infrastructure(populated_dataflow_db, model)
+    assert len(est.unpriced) == 0
+    assert pytest.approx(est.monthly_total, abs=1e-4) == 315.25415
 
 
 def test_terraform_hcl_parses_google_dataflow_job() -> None:

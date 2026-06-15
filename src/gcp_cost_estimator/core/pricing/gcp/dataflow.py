@@ -43,14 +43,13 @@ def map_dataflow_job(
 
     # 1. vCPU cost
     num_vcpus = float(resource.usage.get("num_vcpus", 4.0))
-    total_vcpu_hours = num_vcpus * runtime_hours * max_workers
     mappings.append(
         {
             "sku_id": cpu_row[0],
             "component": "vcpu",
             "unit": cpu_row[1],
             "unit_price": cpu_row[2],
-            "qty": total_vcpu_hours,
+            "qty": num_vcpus * max_workers,
         }
     )
 
@@ -67,14 +66,13 @@ def map_dataflow_job(
     ram_row = cursor.fetchone()
     if ram_row:
         memory_gb = float(resource.usage.get("memory_gb", 15.0))
-        total_ram_hours = memory_gb * runtime_hours * max_workers
         mappings.append(
             {
                 "sku_id": ram_row[0],
                 "component": "ram",
                 "unit": ram_row[1],
                 "unit_price": ram_row[2],
-                "qty": total_ram_hours,
+                "qty": memory_gb * max_workers,
             }
         )
 
