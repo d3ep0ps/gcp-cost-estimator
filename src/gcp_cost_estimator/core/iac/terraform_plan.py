@@ -155,6 +155,15 @@ class TerraformPlanParser(IaCParser):
             elif res_type == "google_dataproc_serverless_batch":
                 service = "dataproc"
                 kind = "dataproc_serverless_batch"
+            elif res_type == "google_filestore_instance":
+                service = "filestore"
+                kind = "google_filestore_instance"
+            elif res_type == "google_vertex_ai_endpoint":
+                service = "vertex"
+                kind = "google_vertex_ai_endpoint"
+            elif res_type == "google_artifact_registry_repository":
+                service = "artifact"
+                kind = "google_artifact_registry_repository"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"
@@ -583,6 +592,33 @@ class TerraformPlanParser(IaCParser):
                             region = loc_part
                     else:
                         attributes["cluster_ref"] = cluster
+            elif res_type == "google_filestore_instance":
+                tier_val = values.get("tier")
+                if tier_val is not None:
+                    attributes["tier"] = tier_val
+                
+                file_shares = values.get("file_shares", [])
+                if isinstance(file_shares, list) and file_shares:
+                    fs = file_shares[0]
+                    if isinstance(fs, dict):
+                        cap = fs.get("capacity_gb")
+                        if cap is not None:
+                            attributes["capacity_gb"] = cap
+                elif isinstance(file_shares, dict):
+                    cap = file_shares.get("capacity_gb")
+                    if cap is not None:
+                        attributes["capacity_gb"] = cap
+
+                if region and len(region.split("-")) == 3 and len(region.split("-")[-1]) == 1:
+                    region = "-".join(region.split("-")[:-1])
+            elif res_type == "google_vertex_ai_endpoint":
+                ded = values.get("dedicated_endpoint_enabled")
+                if ded is not None:
+                    attributes["dedicated_endpoint_enabled"] = ded
+            elif res_type == "google_artifact_registry_repository":
+                fmt = values.get("format")
+                if fmt is not None:
+                    attributes["format"] = fmt
 
             else:
                 for k, v in values.items():

@@ -1,0 +1,26 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_filestore_instance.nfs",
+          "type": "google_filestore_instance",
+          "name": "nfs",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "name": "nfs-share",
+            "location": "us-central1-a",
+            "tier": "BASIC_HDD",
+            "file_shares": [
+              {
+                "capacity_gb": 1024,
+                "name": "vol1"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

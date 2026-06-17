@@ -23,6 +23,10 @@ from gcp_cost_estimator.core.pricing.gcp.compute import (
 from gcp_cost_estimator.core.pricing.gcp.dataflow import map_dataflow_job
 from gcp_cost_estimator.core.pricing.gcp.dataproc import map_dataproc_cluster
 from gcp_cost_estimator.core.pricing.gcp.dns import map_dns_managed_zone
+from gcp_cost_estimator.core.pricing.gcp.filestore import map_filestore_instance
+from gcp_cost_estimator.core.pricing.gcp.vertex_ai import map_vertex_ai_endpoint
+from gcp_cost_estimator.core.pricing.gcp.artifact_registry import map_artifact_registry_repository
+
 from gcp_cost_estimator.core.pricing.gcp.firestore import map_firestore_database
 from gcp_cost_estimator.core.pricing.gcp.memorystore import (
     map_memorystore_instance,
@@ -75,6 +79,9 @@ class GcpSkuMapper(SkuMapper):
             "Memorystore for Redis",
             "Memorystore for Valkey",
             "Memorystore",
+            "Filestore",
+            "Vertex AI",
+            "Artifact Registry",
         ]
 
     def _map_gce_compute(
@@ -433,6 +440,18 @@ class GcpSkuMapper(SkuMapper):
                 adi_mappings, adi_unpriced = self._map_alloydb_instance(resource, cursor)
                 mappings.extend(adi_mappings)
                 unpriced.extend(adi_unpriced)
+            elif resource.kind == "google_filestore_instance":
+                fs_mappings, fs_unpriced = map_filestore_instance(resource, cursor)
+                mappings.extend(fs_mappings)
+                unpriced.extend(fs_unpriced)
+            elif resource.kind == "google_vertex_ai_endpoint":
+                vai_mappings, vai_unpriced = map_vertex_ai_endpoint(resource, cursor)
+                mappings.extend(vai_mappings)
+                unpriced.extend(vai_unpriced)
+            elif resource.kind == "google_artifact_registry_repository":
+                ar_mappings, ar_unpriced = map_artifact_registry_repository(resource, cursor)
+                mappings.extend(ar_mappings)
+                unpriced.extend(ar_unpriced)
             else:
                 unpriced.append(
                     {

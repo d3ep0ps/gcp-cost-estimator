@@ -11,6 +11,10 @@ from gcp_cost_estimator.core.validation.gcp.container import normalize_container
 from gcp_cost_estimator.core.validation.gcp.dataflow import normalize_dataflow, validate_dataflow
 from gcp_cost_estimator.core.validation.gcp.dataproc import normalize_dataproc, validate_dataproc
 from gcp_cost_estimator.core.validation.gcp.dns import normalize_dns, validate_dns
+from gcp_cost_estimator.core.validation.gcp.filestore import (
+    normalize_filestore,
+    validate_filestore,
+)
 from gcp_cost_estimator.core.validation.gcp.firestore import normalize_firestore, validate_firestore
 from gcp_cost_estimator.core.validation.gcp.functions import normalize_functions, validate_functions
 from gcp_cost_estimator.core.validation.gcp.memorystore import (
@@ -47,6 +51,7 @@ VALIDATORS = {
     "vpc": validate_vpc,
     "armor": validate_armor,
     "pubsub": validate_pubsub,
+    "filestore": validate_filestore,
 }
 
 NORMALIZERS = {
@@ -71,4 +76,5 @@ NORMALIZERS = {
     "vpc": normalize_vpc,
     "armor": normalize_armor,
     "pubsub": normalize_pubsub,
+    "filestore": normalize_filestore,
 }
