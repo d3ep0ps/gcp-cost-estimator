@@ -34,6 +34,7 @@ def populated_vertex_ai_db(temp_db_path: str) -> str:
 # Validation & Normalisation Tests
 # ==========================================
 
+
 def test_validate_vertex_ai_endpoint_shared_adds_unpriced() -> None:
     data = {
         "resources": [
@@ -106,6 +107,7 @@ def test_validate_vertex_ai_endpoint_normalises_location() -> None:
 # SKU Mapping & Cost Calculation Tests
 # ==========================================
 
+
 def test_vertex_ai_dedicated_endpoint_cost(populated_vertex_ai_db: str) -> None:
     # Default n1-standard-2: 1 node * $0.1095 * 730 hr = $79.935
     res = Resource(
@@ -177,7 +179,7 @@ def test_estimate_vertex_ai_dedicated_e2e(populated_vertex_ai_db: str) -> None:
                 },
                 "usage": {
                     "runtime_hours_per_month": 730,
-                }
+                },
             }
         ]
     }

@@ -4,6 +4,7 @@
 Pricing source: https://cloud.google.com/filestore/pricing (verified 2026-06-15)
 Rates shown are us-central1. The mapper reads actual rates from the SKU cache.
 """
+
 from __future__ import annotations
 
 import sqlite3
@@ -14,7 +15,7 @@ from gcp_cost_estimator.core.model import Resource
 HOURS_PER_MONTH = 730
 
 # Fallback rates (us-central1) — verified 2026-06-15 from https://cloud.google.com/filestore/pricing
-# Stored as $/GiB-hour; converted to $/GiB-month = rate × HOURS_PER_MONTH
+# Stored as $/GiB-hour; converted to $/GiB-month = rate * HOURS_PER_MONTH
 _FALLBACK_GIB_HOUR: dict[str, float] = {
     "BASIC_HDD": 0.000219178,
     "BASIC_SSD": 0.000410959,
@@ -67,15 +68,17 @@ def map_filestore_instance(
         unit = "GiB-hour"
         unit_price = _FALLBACK_GIB_HOUR.get(tier, _FALLBACK_GIB_HOUR["ZONAL"])
 
-    # Quantity is capacity_gb * runtime_hours (billed in GiB-hours)
+    # Compute billed quantity in GiB-hours (capacity_gb * runtime_hours)
     qty = capacity_gb * hours * resource.quantity
-    mappings.append({
-        "sku_id": sku_id,
-        "component": "storage",
-        "unit": unit,
-        "unit_price": unit_price,
-        "qty": qty,
-    })
+    mappings.append(
+        {
+            "sku_id": sku_id,
+            "component": "storage",
+            "unit": unit,
+            "unit_price": unit_price,
+            "qty": qty,
+        }
+    )
 
     # Basic HDD per-instance charge (waived if capacity >= 1 TiB = 1024 GiB)
     if tier == "BASIC_HDD" and capacity_gb < 1024.0:
@@ -83,7 +86,8 @@ def map_filestore_instance(
             """
             SELECT sku_id, unit, unit_price
             FROM pricing_cache
-            WHERE provider = 'gcp' AND region = ? AND description LIKE '%Filestore Basic HDD Instance Fee%'
+            WHERE provider = 'gcp' AND region = ?
+              AND description LIKE '%Filestore Basic HDD Instance Fee%'
             """,
             (region,),
         )
@@ -98,24 +102,30 @@ def map_filestore_instance(
 
         # Billed per hour
         fee_qty = hours * resource.quantity
-        mappings.append({
-            "sku_id": fee_sku_id,
-            "component": "compute",
-            "unit": fee_unit,
-            "unit_price": fee_unit_price,
-            "qty": fee_qty,
-        })
+        mappings.append(
+            {
+                "sku_id": fee_sku_id,
+                "component": "compute",
+                "unit": fee_unit,
+                "unit_price": fee_unit_price,
+                "qty": fee_qty,
+            }
+        )
 
     # Add backup unpriced detail
-    unpriced.append({
-        "resource_id": resource.resource_id,
-        "reason": "Filestore backup storage pricing not modelled",
-    })
+    unpriced.append(
+        {
+            "resource_id": resource.resource_id,
+            "reason": "Filestore backup storage pricing not modelled",
+        }
+    )
 
     if attrs.get("custom_performance_enabled"):
-        unpriced.append({
-            "resource_id": resource.resource_id,
-            "reason": "Filestore Custom Performance (provisioned IOPS) pricing not modelled",
-        })
+        unpriced.append(
+            {
+                "resource_id": resource.resource_id,
+                "reason": "Filestore Custom Performance (provisioned IOPS) pricing not modelled",
+            }
+        )
 
     return mappings, unpriced

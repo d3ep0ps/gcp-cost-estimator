@@ -30,7 +30,7 @@ def validate_bigtable(
                                     "DEVELOPMENT instance but num_nodes is not 1."
                                 )
                                 errors.append(msg)
-                        except (ValueError, TypeError):
+                        except ValueError, TypeError:
                             msg = (
                                 f"Resource '{r.resource_id}' is a "
                                 "DEVELOPMENT instance but num_nodes is not 1."
@@ -44,7 +44,7 @@ def validate_bigtable(
                                 "fewer than 3 nodes (recommended minimum for production)."
                             )
                             warnings.append(msg)
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         pass
 
 
@@ -98,7 +98,7 @@ def normalize_bigtable(r: Resource) -> None:
                 else:
                     try:
                         cl["num_nodes"] = int(cl["num_nodes"])
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         is_dev = r.attributes["instance_type"] == "DEVELOPMENT"
                         cl["num_nodes"] = 1 if is_dev else 3
 
@@ -114,6 +114,6 @@ def normalize_bigtable(r: Resource) -> None:
         else:
             try:
                 r.usage["storage_gb_per_cluster"] = float(r.usage["storage_gb_per_cluster"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["storage_gb_per_cluster"] = 0
                 r.assumptions.append("Invalid storage_gb_per_cluster; defaulted to 0.")

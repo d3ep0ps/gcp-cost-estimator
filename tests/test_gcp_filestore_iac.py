@@ -2,8 +2,6 @@
 
 from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
 from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
-from gcp_cost_estimator.core.model import ResourceModel
-from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 def test_hcl_parses_google_filestore_instance() -> None:

@@ -8,7 +8,6 @@ import pytest
 
 from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
 from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
-from gcp_cost_estimator.core.model import ResourceModel
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 from gcp_cost_estimator.core.service import estimate_infrastructure
 
@@ -32,7 +31,11 @@ def test_hcl_parses_google_artifact_registry_repository() -> None:
     parser = TerraformHclParser()
     model = parser.parse("tests/fixtures/terraform")
 
-    res = next(r for r in model.resources if r.resource_id == "google_artifact_registry_repository.docker_repo")
+    res = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_artifact_registry_repository.docker_repo"
+    )
     assert res.provider == "gcp"
     assert res.service == "artifact"
     assert res.kind == "google_artifact_registry_repository"
@@ -44,7 +47,11 @@ def test_plan_json_resolves_google_artifact_registry_repository() -> None:
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/artifact_registry_plan.json")
 
-    res = next(r for r in model.resources if r.resource_id == "google_artifact_registry_repository.docker_repo")
+    res = next(
+        r
+        for r in model.resources
+        if r.resource_id == "google_artifact_registry_repository.docker_repo"
+    )
     assert res.provider == "gcp"
     assert res.service == "artifact"
     assert res.kind == "google_artifact_registry_repository"
@@ -55,13 +62,11 @@ def test_plan_json_resolves_google_artifact_registry_repository() -> None:
 def test_artifact_registry_roundtrip_plan_to_estimate(populated_artifact_registry_db: str) -> None:
     parser = TerraformPlanParser()
     model = parser.parse("tests/fixtures/terraform/artifact_registry_plan.json")
-    
+
     # Estimate infrastructure (will apply default 10 GB storage -> (10.0 - 0.5) * 0.10 = $0.95)
     est = estimate_infrastructure(populated_artifact_registry_db, model)
-    
+
     # Check that the specific line item for Artifact Registry exists
     ar_items = [li for li in est.line_items if li.sku_id == "SKU-ARTIFACT-REGISTRY-STORAGE"]
     assert len(ar_items) == 1
     assert ar_items[0].monthly_cost == pytest.approx(0.95, abs=1e-3)
-
-

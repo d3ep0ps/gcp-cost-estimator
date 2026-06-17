@@ -4,6 +4,7 @@
 Pricing source: https://cloud.google.com/vertex-ai/pricing (verified 2026-06-15)
 Scope: google_vertex_ai_endpoint only.
 """
+
 from __future__ import annotations
 
 import sqlite3
@@ -47,23 +48,29 @@ def map_vertex_ai_endpoint(
     dedicated = attrs.get("dedicated_endpoint_enabled", False)
 
     # Both dedicated and shared endpoints have traffic-dependent inference costs that are unpriced
-    unpriced.append({
-        "resource_id": resource.resource_id,
-        "reason": (
-            "Vertex AI inference traffic costs (per-prediction) are not estimable "
-            "from Terraform IaC; depends on deployed model and request volume. "
-            "Source: https://cloud.google.com/vertex-ai/pricing#prediction-and-explanation"
-        ),
-    })
-
-    if not dedicated:
-        unpriced.insert(0, {
+    unpriced.append(
+        {
             "resource_id": resource.resource_id,
             "reason": (
-                "Vertex AI shared endpoint: no idle infrastructure cost. "
-                "Inference billed per request based on deployed model machine type (not in IaC)."
+                "Vertex AI inference traffic costs (per-prediction) are not estimable "
+                "from Terraform IaC; depends on deployed model and request volume. "
+                "Source: https://cloud.google.com/vertex-ai/pricing#prediction-and-explanation"
             ),
-        })
+        }
+    )
+
+    if not dedicated:
+        unpriced.insert(
+            0,
+            {
+                "resource_id": resource.resource_id,
+                "reason": (
+                    "Vertex AI shared endpoint: no idle infrastructure cost. "
+                    "Inference billed per request based on deployed model machine type "
+                    "(not in IaC)."
+                ),
+            },
+        )
         return mappings, unpriced
 
     # Dedicated endpoint: compute node hours cost
@@ -86,15 +93,19 @@ def map_vertex_ai_endpoint(
     else:
         sku_id = f"SKU-VERTEXAI-PREDICTION-{machine_type.upper()}"
         unit = "node-hour"
-        unit_price = _N1_PREDICTION_RATES.get(machine_type, _N1_PREDICTION_RATES[_DEFAULT_MACHINE_TYPE])
+        unit_price = _N1_PREDICTION_RATES.get(
+            machine_type, _N1_PREDICTION_RATES[_DEFAULT_MACHINE_TYPE]
+        )
 
     qty = node_count * hours * resource.quantity
-    mappings.append({
-        "sku_id": sku_id,
-        "component": "compute",
-        "unit": unit,
-        "unit_price": unit_price,
-        "qty": qty,
-    })
+    mappings.append(
+        {
+            "sku_id": sku_id,
+            "component": "compute",
+            "unit": unit,
+            "unit_price": unit_price,
+            "qty": qty,
+        }
+    )
 
     return mappings, unpriced

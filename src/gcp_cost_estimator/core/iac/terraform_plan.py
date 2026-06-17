@@ -596,7 +596,7 @@ class TerraformPlanParser(IaCParser):
                 tier_val = values.get("tier")
                 if tier_val is not None:
                     attributes["tier"] = tier_val
-                
+
                 file_shares = values.get("file_shares", [])
                 if isinstance(file_shares, list) and file_shares:
                     fs = file_shares[0]

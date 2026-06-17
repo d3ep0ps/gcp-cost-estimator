@@ -88,7 +88,6 @@ def test_cloud_cdn_https_fraction_out_of_range_is_error() -> None:
     assert any("https_fraction" in e for e in res["errors"])
 
 
-
 @pytest.fixture
 def populated_cdn_db(temp_db_path: str) -> str:
     """Pre-populate a temporary cache database with static CDN SKU fixtures."""

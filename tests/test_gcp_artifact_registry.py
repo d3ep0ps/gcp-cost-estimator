@@ -34,6 +34,7 @@ def populated_artifact_registry_db(temp_db_path: str) -> str:
 # Validation & Normalisation Tests
 # ==========================================
 
+
 def test_validate_artifact_registry_unknown_format_warns() -> None:
     data = {
         "resources": [
@@ -87,6 +88,7 @@ def test_validate_artifact_registry_normalises_format_and_location() -> None:
 # SKU Mapping & Cost Calculation Tests
 # ==========================================
 
+
 def test_artifact_registry_10gb_storage_cost(populated_artifact_registry_db: str) -> None:
     # 10 GB: (10.0 - 0.5) GB * $0.10/GB-month = $0.95
     res = Resource(
@@ -138,10 +140,10 @@ def test_artifact_registry_egress_included_in_cost(populated_artifact_registry_d
     mapper = GcpSkuMapper(populated_artifact_registry_db)
     mappings, _ = mapper.map_resource_to_skus(res)
     assert len(mappings) == 2
-    
+
     storage = next(m for m in mappings if m["sku_id"] == "SKU-ARTIFACT-REGISTRY-STORAGE")
     egress = next(m for m in mappings if m["sku_id"] == "SKU-ARTIFACT-REGISTRY-EGRESS")
-    
+
     assert storage["qty"] == 9.5
     assert egress["qty"] == 50.0
 

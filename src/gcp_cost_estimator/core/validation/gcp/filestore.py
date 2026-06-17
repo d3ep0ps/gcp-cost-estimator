@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 """Validation and normalisation for google_filestore_instance resources."""
+
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 from gcp_cost_estimator.core.model import Resource
@@ -38,8 +40,10 @@ def validate_filestore(
     if capacity_gb is not None:
         try:
             gb = float(capacity_gb)
-        except (TypeError, ValueError):
-            errors.append(f"Resource '{r.resource_id}' capacity_gb must be a number; got {capacity_gb!r}")
+        except TypeError, ValueError:
+            errors.append(
+                f"Resource '{r.resource_id}' capacity_gb must be a number; got {capacity_gb!r}"
+            )
             gb = None
         if gb is not None and tier in TIER_MIN_GB and gb < TIER_MIN_GB[tier]:
             warnings.append(
@@ -48,13 +52,15 @@ def validate_filestore(
             )
 
     if r.attributes.get("custom_performance_enabled"):
-        unpriced.append({
-            "resource_id": r.resource_id,
-            "reason": (
-                "Filestore Custom Performance (provisioned IOPS) pricing not modelled; "
-                "see https://cloud.google.com/filestore/docs/custom-performance"
-            ),
-        })
+        unpriced.append(
+            {
+                "resource_id": r.resource_id,
+                "reason": (
+                    "Filestore Custom Performance (provisioned IOPS) pricing not modelled; "
+                    "see https://cloud.google.com/filestore/docs/custom-performance"
+                ),
+            }
+        )
 
 
 def normalize_filestore(r: Resource) -> None:
@@ -66,10 +72,8 @@ def normalize_filestore(r: Resource) -> None:
         r.assumptions.append("Defaulted tier to BASIC_HDD.")
 
     if "capacity_gb" in r.attributes:
-        try:
+        with contextlib.suppress(TypeError, ValueError):
             r.attributes["capacity_gb"] = float(r.attributes["capacity_gb"])
-        except (TypeError, ValueError):
-            pass
     else:
         r.attributes["capacity_gb"] = 1024.0
         r.assumptions.append("Defaulted capacity_gb to 1024 GiB.")

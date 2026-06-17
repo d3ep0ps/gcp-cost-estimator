@@ -79,10 +79,10 @@ These five services dominate the bill for the vast majority of GCP customers.
 
 | Service | Status | Pricing page | Terraform resource(s) |
 |---|---|---|---|
-| Filestore | planned | [filestore/pricing](https://cloud.google.com/filestore/pricing) | `google_filestore_instance` |
+| Filestore | done | [filestore/pricing](https://cloud.google.com/filestore/pricing) | `google_filestore_instance` |
 | Persistent Disk (standalone) | done | [compute/all-pricing#disk](https://cloud.google.com/compute/all-pricing#disk) | `google_compute_disk` |
-| Vertex AI (inference endpoints) | planned | [vertex-ai/pricing](https://cloud.google.com/vertex-ai/pricing) | `google_vertex_ai_endpoint` |
-| Artifact Registry | planned | [artifact-registry/pricing](https://cloud.google.com/artifact-registry/pricing) | `google_artifact_registry_repository` |
+| Vertex AI (inference endpoints) | done | [vertex-ai/pricing](https://cloud.google.com/vertex-ai/pricing) | `google_vertex_ai_endpoint` |
+| Artifact Registry | done | [artifact-registry/pricing](https://cloud.google.com/artifact-registry/pricing) | `google_artifact_registry_repository` |
 
 ---
 
@@ -119,9 +119,9 @@ These services have pricing but are below the threshold or require specialist bi
 | Tier 3 — Databases | ~8% | 5/5 done ✅ |
 | Tier 4 — Networking | ~5% | 7/7 done ✅ |
 | Tier 5 — Data & analytics | ~5% | 3/3 done ✅ |
-| Tier 6 — Storage & AI | ~4% | 1/4 done; 3 planned |
+| Tier 6 — Storage & AI | ~4% | 4/4 done ✅ |
 | **Total at plan completion** | **~97%** | — |
-| **Total currently done** | **~93%** | Tiers 1–5 complete |
+| **Total currently done** | **~97%** | Tiers 1–6 complete |
 
 ---
 

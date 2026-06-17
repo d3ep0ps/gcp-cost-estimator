@@ -34,6 +34,7 @@ def populated_filestore_db(temp_db_path: str) -> str:
 # Validation & Normalisation Tests
 # ==========================================
 
+
 def test_validate_filestore_valid_instance() -> None:
     data = {
         "resources": [
@@ -156,6 +157,7 @@ def test_validate_filestore_custom_performance_adds_unpriced() -> None:
 # SKU Mapping & Cost Calculation Tests
 # ==========================================
 
+
 def test_filestore_basic_hdd_1tib_cost(populated_filestore_db: str) -> None:
     # 1024 GiB * $0.000219178 * 730 hr = $163.854...
     # Waived instance fee because capacity >= 1024 GiB
@@ -192,7 +194,7 @@ def test_filestore_basic_hdd_under_1tib_includes_instance_fee(populated_filestor
     mapper = GcpSkuMapper(populated_filestore_db)
     mappings, _ = mapper.map_resource_to_skus(res)
     assert len(mappings) == 2
-    
+
     storage_map = next(m for m in mappings if m["component"] == "storage")
     assert storage_map["sku_id"] == "SKU-FILESTORE-BASIC-HDD-CAPACITY"
     assert storage_map["qty"] == 500 * 730
@@ -252,7 +254,7 @@ def test_estimate_filestore_e2e(populated_filestore_db: str) -> None:
                 },
                 "usage": {
                     "runtime_hours_per_month": 730,
-                }
+                },
             }
         ]
     }

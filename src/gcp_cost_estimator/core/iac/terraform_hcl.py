@@ -836,7 +836,7 @@ class TerraformHclParser(IaCParser):
                         tier_val = resolve_value(res_config.get("tier"))
                         if tier_val is not None:
                             attributes["tier"] = tier_val
-                        
+
                         file_shares = res_config.get("file_shares", [])
                         if isinstance(file_shares, list) and file_shares:
                             fs = file_shares[0]
@@ -849,7 +849,11 @@ class TerraformHclParser(IaCParser):
                             if cap is not None:
                                 attributes["capacity_gb"] = cap
 
-                        if region and len(region.split("-")) == 3 and len(region.split("-")[-1]) == 1:
+                        if (
+                            region
+                            and len(region.split("-")) == 3
+                            and len(region.split("-")[-1]) == 1
+                        ):
                             region = "-".join(region.split("-")[:-1])
                     elif res_type_clean == "google_vertex_ai_endpoint":
                         ded = resolve_value(res_config.get("dedicated_endpoint_enabled"))

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """Validation and normalisation for google_artifact_registry_repository resources."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -11,9 +12,9 @@ VALID_FORMATS = {"DOCKER", "MAVEN", "NPM", "PYTHON", "APT", "YUM", "HELM", "GO",
 
 def validate_artifact_registry(
     r: Resource,
-    errors: list[str],
+    _errors: list[str],
     warnings: list[str],
-    unpriced: list[dict[str, Any]],
+    _unpriced: list[dict[str, Any]],
 ) -> None:
     """Validate a google_artifact_registry_repository resource."""
     fmt = str(r.attributes.get("format", "DOCKER")).upper()

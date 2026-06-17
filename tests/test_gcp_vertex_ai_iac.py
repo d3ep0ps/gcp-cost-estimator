@@ -2,8 +2,6 @@
 
 from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
 from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
-from gcp_cost_estimator.core.model import ResourceModel
-from gcp_cost_estimator.core.validate import validate_resource_model
 
 
 def test_hcl_parses_google_vertex_ai_endpoint() -> None:
@@ -11,7 +9,9 @@ def test_hcl_parses_google_vertex_ai_endpoint() -> None:
     model = parser.parse("tests/fixtures/terraform")
 
     # Dedicated endpoint
-    dedicated = next(r for r in model.resources if r.resource_id == "google_vertex_ai_endpoint.dedicated")
+    dedicated = next(
+        r for r in model.resources if r.resource_id == "google_vertex_ai_endpoint.dedicated"
+    )
     assert dedicated.provider == "gcp"
     assert dedicated.service == "vertex"
     assert dedicated.kind == "google_vertex_ai_endpoint"
@@ -32,7 +32,9 @@ def test_plan_json_resolves_google_vertex_ai_endpoint() -> None:
     model = parser.parse("tests/fixtures/terraform/vertex_ai_plan.json")
 
     # Dedicated endpoint
-    dedicated = next(r for r in model.resources if r.resource_id == "google_vertex_ai_endpoint.dedicated")
+    dedicated = next(
+        r for r in model.resources if r.resource_id == "google_vertex_ai_endpoint.dedicated"
+    )
     assert dedicated.provider == "gcp"
     assert dedicated.service == "vertex"
     assert dedicated.kind == "google_vertex_ai_endpoint"

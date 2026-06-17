@@ -27,6 +27,6 @@ def normalize_dns(r: Resource) -> None:
         else:
             try:
                 r.usage["monthly_queries"] = int(float(r.usage["monthly_queries"]))
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["monthly_queries"] = 1000000
                 r.assumptions.append("Invalid monthly_queries; defaulted to 1000000.")

@@ -51,6 +51,7 @@ def populated_tier4_tier5_db(temp_db_path: str) -> str:
 def tier4_tier5_combined_model() -> ResourceModel:
     """Load the combined Tier 4 + 5 ResourceModel from the test plan JSON fixture."""
     from gcp_cost_estimator.core.iac.terraform_plan import TerraformPlanParser
+
     parser = TerraformPlanParser()
     return parser.parse("tests/fixtures/tier4_tier5_plan.json")
 
@@ -85,7 +86,9 @@ def test_tier4_tier5_pubsub_lite_resource_in_unpriced(
 ) -> None:
     """Verify that the Pub/Sub Lite topic resource is flagged in the unpriced list with a deprecation reason."""
     est = estimate_infrastructure(populated_tier4_tier5_db, tier4_tier5_combined_model)
-    item = next(u for u in est.unpriced if u.resource_id == "google_pubsub_lite_topic.my_lite_topic")
+    item = next(
+        u for u in est.unpriced if u.resource_id == "google_pubsub_lite_topic.my_lite_topic"
+    )
     assert "deprecated" in item.reason.lower()
 
 
@@ -94,7 +97,9 @@ def test_tier4_tier5_dataproc_serverless_in_unpriced(
 ) -> None:
     """Verify that the Dataproc Serverless batch resource is flagged in the unpriced list."""
     est = estimate_infrastructure(populated_tier4_tier5_db, tier4_tier5_combined_model)
-    item = next(u for u in est.unpriced if u.resource_id == "google_dataproc_serverless_batch.my_batch")
+    item = next(
+        u for u in est.unpriced if u.resource_id == "google_dataproc_serverless_batch.my_batch"
+    )
     assert "serverless" in item.reason.lower()
 
 
