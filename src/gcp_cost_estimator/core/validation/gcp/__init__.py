@@ -3,6 +3,10 @@
 from gcp_cost_estimator.core.validation.gcp.alloydb import normalize_alloydb, validate_alloydb
 from gcp_cost_estimator.core.validation.gcp.appengine import normalize_appengine, validate_appengine
 from gcp_cost_estimator.core.validation.gcp.armor import normalize_armor, validate_armor
+from gcp_cost_estimator.core.validation.gcp.artifact_registry import (
+    normalize_artifact_registry,
+    validate_artifact_registry,
+)
 from gcp_cost_estimator.core.validation.gcp.bigquery import normalize_bigquery, validate_bigquery
 from gcp_cost_estimator.core.validation.gcp.bigtable import normalize_bigtable, validate_bigtable
 from gcp_cost_estimator.core.validation.gcp.cdn import normalize_cdn, validate_cdn
@@ -27,6 +31,10 @@ from gcp_cost_estimator.core.validation.gcp.run import normalize_run, validate_r
 from gcp_cost_estimator.core.validation.gcp.spanner import normalize_spanner, validate_spanner
 from gcp_cost_estimator.core.validation.gcp.sql import normalize_sql, validate_sql
 from gcp_cost_estimator.core.validation.gcp.storage import normalize_storage, validate_storage
+from gcp_cost_estimator.core.validation.gcp.vertex_ai import (
+    normalize_vertex_ai_endpoint,
+    validate_vertex_ai_endpoint,
+)
 from gcp_cost_estimator.core.validation.gcp.vpc import normalize_vpc, validate_vpc
 
 VALIDATORS = {
@@ -52,6 +60,8 @@ VALIDATORS = {
     "armor": validate_armor,
     "pubsub": validate_pubsub,
     "filestore": validate_filestore,
+    "vertex": validate_vertex_ai_endpoint,
+    "artifact": validate_artifact_registry,
 }
 
 NORMALIZERS = {
@@ -77,4 +87,6 @@ NORMALIZERS = {
     "armor": normalize_armor,
     "pubsub": normalize_pubsub,
     "filestore": normalize_filestore,
+    "vertex": normalize_vertex_ai_endpoint,
+    "artifact": normalize_artifact_registry,
 }
