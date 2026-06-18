@@ -2,6 +2,15 @@
 
 from collections.abc import Callable
 
+from gcp_cost_estimator.core.iac.gcp.analytics import (
+    parse_dataflow_job,
+    parse_dataproc_cluster,
+    parse_dataproc_serverless_batch,
+    parse_pubsub_lite_subscription,
+    parse_pubsub_lite_topic,
+    parse_pubsub_subscription,
+    parse_pubsub_topic,
+)
 from gcp_cost_estimator.core.iac.gcp.bigquery import parse_bigquery_dataset
 from gcp_cost_estimator.core.iac.gcp.compute import (
     parse_compute_disk,
@@ -71,4 +80,11 @@ RESOURCE_TYPE_MAP: dict[str, ParserFunc] = {
     "google_compute_security_policy": parse_compute_security_policy,
     "google_compute_backend_bucket": parse_compute_backend,
     "google_compute_backend_service": parse_compute_backend,
+    "google_pubsub_topic": parse_pubsub_topic,
+    "google_pubsub_subscription": parse_pubsub_subscription,
+    "google_pubsub_lite_topic": parse_pubsub_lite_topic,
+    "google_pubsub_lite_subscription": parse_pubsub_lite_subscription,
+    "google_dataflow_job": parse_dataflow_job,
+    "google_dataproc_cluster": parse_dataproc_cluster,
+    "google_dataproc_serverless_batch": parse_dataproc_serverless_batch,
 }
