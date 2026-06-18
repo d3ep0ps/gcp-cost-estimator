@@ -47,7 +47,7 @@ disallow_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
-addopts = "--cov=gcp_cost_estimator --cov-branch"
+addopts = "--cov=gcp_cost_estimator --cov-branch -m \"not integration\""
 markers = [
     "integration: marks tests as integration tests",
 ]

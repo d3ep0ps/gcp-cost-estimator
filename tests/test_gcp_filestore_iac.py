@@ -11,7 +11,7 @@ def test_hcl_parses_google_filestore_instance() -> None:
     res = next(r for r in model.resources if r.resource_id == "google_filestore_instance.nfs")
     assert res.provider == "gcp"
     assert res.service == "filestore"
-    assert res.kind == "google_filestore_instance"
+    assert res.kind == "filestore_instance"
     assert res.region == "us-central1"  # "us-central1-a" zone normalized to region
     assert res.attributes["tier"] == "BASIC_HDD"
     assert float(res.attributes["capacity_gb"]) == 1024.0
@@ -24,7 +24,7 @@ def test_plan_json_resolves_google_filestore_instance() -> None:
     res = next(r for r in model.resources if r.resource_id == "google_filestore_instance.nfs")
     assert res.provider == "gcp"
     assert res.service == "filestore"
-    assert res.kind == "google_filestore_instance"
+    assert res.kind == "filestore_instance"
     assert res.region == "us-central1"
     assert res.attributes["tier"] == "BASIC_HDD"
     assert float(res.attributes["capacity_gb"]) == 1024.0

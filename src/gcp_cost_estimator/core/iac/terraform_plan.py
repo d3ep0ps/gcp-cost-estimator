@@ -56,20 +56,114 @@ class TerraformPlanParser(IaCParser):
                     )
                 continue
 
-            ctx = ParserContext(
-                attrs=values,
-                resolve=lambda x: x,
-                is_unresolved=lambda _: False,
-                assumptions=[],
-            )
-            labels = values.get("labels") or {}
-            if not isinstance(labels, dict):
-                labels = {}
-
-            parser_fn = RESOURCE_TYPE_MAP.get(res_type)
-            if parser_fn:
-                res = parser_fn(address, ctx, labels)
-                resources.append(res)
+            if res_type == "google_compute_instance":
+                service = "compute"
+                kind = "gce_instance"
+            elif res_type == "google_sql_database_instance":
+                service = "sql"
+                kind = "cloud_sql_instance"
+            elif res_type == "google_storage_bucket":
+                service = "storage"
+                kind = "gcs_bucket"
+            elif res_type == "google_container_cluster":
+                service = "container"
+                kind = "gke_cluster"
+            elif res_type == "google_container_node_pool":
+                service = "container"
+                kind = "gke_node_pool"
+            elif res_type == "google_bigquery_dataset":
+                service = "bigquery"
+                kind = "bigquery_dataset"
+            elif res_type == "google_cloud_run_v2_service":
+                service = "run"
+                kind = "cloud_run_service"
+            elif res_type == "google_cloud_run_v2_job":
+                service = "run"
+                kind = "cloud_run_job"
+            elif res_type in (
+                "google_cloudfunctions_function",
+                "google_cloudfunctions2_function",
+            ):
+                service = "functions"
+                kind = "cloud_function"
+            elif res_type == "google_app_engine_standard_app_version":
+                service = "appengine"
+                kind = "app_engine_standard_version"
+            elif res_type == "google_app_engine_flexible_app_version":
+                service = "appengine"
+                kind = "app_engine_flexible_version"
+            elif res_type == "google_spanner_instance":
+                service = "spanner"
+                kind = "spanner_instance"
+            elif res_type == "google_firestore_database":
+                service = "firestore"
+                kind = "firestore_database"
+            elif res_type == "google_redis_instance":
+                service = "memorystore"
+                kind = "redis_instance"
+            elif res_type == "google_memorystore_instance":
+                service = "memorystore"
+                kind = "memorystore_instance"
+            elif res_type == "google_bigtable_instance":
+                service = "bigtable"
+                kind = "bigtable_instance"
+            elif res_type == "google_alloydb_cluster":
+                service = "alloydb"
+                kind = "alloydb_cluster"
+            elif res_type == "google_alloydb_instance":
+                service = "alloydb"
+                kind = "alloydb_instance"
+            elif res_type in (
+                "google_compute_backend_bucket",
+                "google_compute_backend_service",
+            ) and values.get("cdn_policy"):
+                service = "cdn"
+                kind = "cloud_cdn_backend"
+            elif res_type == "google_app_engine_application":
+                service = "appengine"
+                kind = "google_app_engine_application"
+            elif res_type == "google_dns_managed_zone":
+                service = "dns"
+                kind = "dns_managed_zone"
+            elif res_type == "google_compute_router_nat":
+                service = "nat"
+                kind = "nat_gateway"
+            elif res_type == "google_compute_address":
+                service = "vpc"
+                kind = "compute_address"
+            elif res_type == "google_compute_security_policy":
+                service = "armor"
+                kind = "compute_security_policy"
+            elif res_type == "google_pubsub_topic":
+                service = "pubsub"
+                kind = "pubsub_topic"
+            elif res_type == "google_pubsub_subscription":
+                service = "pubsub"
+                kind = "pubsub_subscription"
+            elif res_type == "google_pubsub_lite_topic":
+                service = "pubsub"
+                kind = "pubsub_lite_topic"
+            elif res_type == "google_pubsub_lite_subscription":
+                service = "pubsub"
+                kind = "pubsub_lite_subscription"
+            elif res_type == "google_dataflow_job":
+                service = "dataflow"
+                kind = "dataflow_job"
+            elif res_type == "google_dataproc_cluster":
+                service = "dataproc"
+                kind = "dataproc_cluster"
+            elif res_type == "google_dataproc_serverless_batch":
+                service = "dataproc"
+                kind = "dataproc_serverless_batch"
+            elif res_type == "google_filestore_instance":
+                service = "filestore"
+                kind = "filestore_instance"
+            elif res_type == "google_vertex_ai_endpoint":
+                service = "vertex_ai"
+                kind = "vertex_ai_endpoint"
+            elif res_type == "google_artifact_registry_repository":
+                service = "artifact_registry"
+                kind = "artifact_registry_repository"
             else:
                 parts = res_type.split("_")
                 service = parts[1] if len(parts) > 1 else "other"

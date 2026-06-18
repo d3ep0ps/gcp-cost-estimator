@@ -13,16 +13,16 @@ def test_hcl_parses_google_vertex_ai_endpoint() -> None:
         r for r in model.resources if r.resource_id == "google_vertex_ai_endpoint.dedicated"
     )
     assert dedicated.provider == "gcp"
-    assert dedicated.service == "vertex"
-    assert dedicated.kind == "google_vertex_ai_endpoint"
+    assert dedicated.service == "vertex_ai"
+    assert dedicated.kind == "vertex_ai_endpoint"
     assert dedicated.region == "us-central1"
     assert dedicated.attributes["dedicated_endpoint_enabled"] is True
 
     # Shared endpoint
     shared = next(r for r in model.resources if r.resource_id == "google_vertex_ai_endpoint.shared")
     assert shared.provider == "gcp"
-    assert shared.service == "vertex"
-    assert shared.kind == "google_vertex_ai_endpoint"
+    assert shared.service == "vertex_ai"
+    assert shared.kind == "vertex_ai_endpoint"
     assert shared.region == "us-central1"
     assert shared.attributes.get("dedicated_endpoint_enabled", False) is False
 
@@ -36,15 +36,15 @@ def test_plan_json_resolves_google_vertex_ai_endpoint() -> None:
         r for r in model.resources if r.resource_id == "google_vertex_ai_endpoint.dedicated"
     )
     assert dedicated.provider == "gcp"
-    assert dedicated.service == "vertex"
-    assert dedicated.kind == "google_vertex_ai_endpoint"
+    assert dedicated.service == "vertex_ai"
+    assert dedicated.kind == "vertex_ai_endpoint"
     assert dedicated.region == "us-central1"
     assert dedicated.attributes["dedicated_endpoint_enabled"] is True
 
     # Shared endpoint
     shared = next(r for r in model.resources if r.resource_id == "google_vertex_ai_endpoint.shared")
     assert shared.provider == "gcp"
-    assert shared.service == "vertex"
-    assert shared.kind == "google_vertex_ai_endpoint"
+    assert shared.service == "vertex_ai"
+    assert shared.kind == "vertex_ai_endpoint"
     assert shared.region == "us-central1"
     assert shared.attributes.get("dedicated_endpoint_enabled", False) is False

@@ -37,8 +37,8 @@ def test_hcl_parses_google_artifact_registry_repository() -> None:
         if r.resource_id == "google_artifact_registry_repository.docker_repo"
     )
     assert res.provider == "gcp"
-    assert res.service == "artifact"
-    assert res.kind == "google_artifact_registry_repository"
+    assert res.service == "artifact_registry"
+    assert res.kind == "artifact_registry_repository"
     assert res.region == "us-central1"
     assert res.attributes["format"] == "DOCKER"
 
@@ -53,8 +53,8 @@ def test_plan_json_resolves_google_artifact_registry_repository() -> None:
         if r.resource_id == "google_artifact_registry_repository.docker_repo"
     )
     assert res.provider == "gcp"
-    assert res.service == "artifact"
-    assert res.kind == "google_artifact_registry_repository"
+    assert res.service == "artifact_registry"
+    assert res.kind == "artifact_registry_repository"
     assert res.region == "us-central1"
     assert res.attributes["format"] == "DOCKER"
 

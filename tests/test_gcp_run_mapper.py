@@ -200,3 +200,45 @@ def test_cloud_run_region_outside_known_tier_list_surfaced_as_unpriced(
         "no pricing data" in u["reason"].lower() or "no matching" in u["reason"].lower()
         for u in unpriced
     )
+
+
+def test_cloud_run_missing_idle_sku_causes_unpriced(temp_db_path: str) -> None:
+    # Set up DB with only active SKUs, no idle SKUs
+    conn = sqlite3.connect(temp_db_path)
+    init_db(conn)
+    conn.close()
+
+    with Path("tests/fixtures/run_skus.json").open() as f:
+        mock_skus = json.load(f)
+
+    # Filter out idle SKUs and metadata
+    mock_skus = [
+        s for s in mock_skus
+        if s["sku_id"] != "METADATA-CITATION" and "idle" not in s.get("description", "").lower()
+    ]
+
+    update_cache(temp_db_path, "gcp", mock_skus, "2026-06-08T12:00:00Z")
+
+    resource = Resource(
+        provider="gcp",
+        resource_id="service-req-based",
+        service="run",
+        kind="cloud_run_service",
+        region="us-central1",
+        attributes={
+            "cpu": "1",
+            "memory": "2.0",
+            "cpu_idle": True,
+            "min_instance_count": 1,
+        },
+        usage={
+            "runtime_seconds_per_invocation": 2.5,
+            "invocations_per_month": 100000,
+        },
+    )
+    mapper = GcpSkuMapper(temp_db_path)
+    _, unpriced = mapper.map_resource_to_skus(resource)
+
+    # Since idle SKUs are missing but min_instance_count > 0, we expect unpriced entries
+    assert len(unpriced) > 0
+    assert any("CPU idle SKU" in u["reason"] or "RAM idle SKU" in u["reason"] for u in unpriced)

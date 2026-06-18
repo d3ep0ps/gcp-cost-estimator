@@ -60,8 +60,8 @@ VALIDATORS = {
     "armor": validate_armor,
     "pubsub": validate_pubsub,
     "filestore": validate_filestore,
-    "vertex": validate_vertex_ai_endpoint,
-    "artifact": validate_artifact_registry,
+    "vertex_ai": validate_vertex_ai_endpoint,
+    "artifact_registry": validate_artifact_registry,
 }
 
 NORMALIZERS = {
@@ -87,6 +87,6 @@ NORMALIZERS = {
     "armor": normalize_armor,
     "pubsub": normalize_pubsub,
     "filestore": normalize_filestore,
-    "vertex": normalize_vertex_ai_endpoint,
-    "artifact": normalize_artifact_registry,
+    "vertex_ai": normalize_vertex_ai_endpoint,
+    "artifact_registry": normalize_artifact_registry,
 }
