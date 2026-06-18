@@ -447,7 +447,10 @@ class GcpSkuMapper(SkuMapper):
                 vai_mappings, vai_unpriced = map_vertex_ai_endpoint(resource, cursor)
                 mappings.extend(vai_mappings)
                 unpriced.extend(vai_unpriced)
-            elif resource.service == "artifact_registry" and resource.kind == "artifact_registry_repository":
+            elif (
+                resource.service == "artifact_registry"
+                and resource.kind == "artifact_registry_repository"
+            ):
                 ar_mappings, ar_unpriced = map_artifact_registry_repository(resource, cursor)
                 mappings.extend(ar_mappings)
                 unpriced.extend(ar_unpriced)

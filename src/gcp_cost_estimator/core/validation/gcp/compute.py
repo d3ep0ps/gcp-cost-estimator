@@ -22,7 +22,10 @@ def normalize_compute(r: Resource) -> None:
     """Normalize GCP compute resources."""
     if r.kind == "gce_instance":
         # Outer loop in validate.py defaults runtime_hours_per_month. We check if it was defaulted.
-        if "Defaulted runtime to 730 hours/month." in r.assumptions or "runtime_hours_per_month" not in r.usage:
+        if (
+            "Defaulted runtime to 730 hours/month." in r.assumptions
+            or "runtime_hours_per_month" not in r.usage
+        ):
             r.usage["runtime_hours_per_month"] = 730
             msg = "Defaulted runtime_hours_per_month to 730."
             if msg not in r.assumptions:

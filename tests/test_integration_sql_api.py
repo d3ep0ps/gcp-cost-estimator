@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import os
 import sqlite3
 
 import httpx
 import pytest
-
-import os
 
 from gcp_cost_estimator.core.pricing.cache import get_cache_status
 from gcp_cost_estimator.core.pricing.gcp_fetch import refresh_pricing_cache

@@ -6,7 +6,7 @@ from gcp_cost_estimator.core.model import Resource
 
 
 def validate_nat(
-    r: Resource, errors: list[str], warnings: list[str], unpriced: list[dict[str, Any]]
+    r: Resource, errors: list[str], warnings: list[str], _unpriced: list[dict[str, Any]]
 ) -> None:
     """Validate GCP NAT resources."""
     if r.kind == "nat_gateway":
