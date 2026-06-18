@@ -6,10 +6,26 @@ from gcp_cost_estimator.core.model import Resource
 
 
 def validate_dns(
-    r: Resource, _errors: list[str], _warnings: list[str], _unpriced: list[dict[str, Any]]
+    r: Resource, errors: list[str], warnings: list[str], unpriced: list[dict[str, Any]]
 ) -> None:
     """Validate GCP DNS resources."""
-    pass
+    if r.kind == "dns_managed_zone":
+        visibility = r.attributes.get("visibility", "public")
+        if visibility:
+            visibility_lower = str(visibility).lower()
+            if visibility_lower not in ("public", "private"):
+                errors.append(f"Unrecognized visibility '{visibility}' for dns_managed_zone.")
+            elif visibility_lower == "private":
+                unpriced.append({
+                    "resource_id": r.resource_id,
+                    "reason": "Private DNS zones are free; no billing line item."
+                })
+
+        queries = r.usage.get("monthly_queries", 1000000)
+        if queries < 0:
+            errors.append("monthly_queries must be non-negative.")
+        elif queries == 0:
+            warnings.append("monthly_queries is 0; cost will be $0.")
 
 
 def normalize_dns(r: Resource) -> None:
