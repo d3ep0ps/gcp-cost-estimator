@@ -63,7 +63,7 @@ def test_validate_vpc_mutual_exclusion_warning() -> None:
                 "usage": {
                     "on_spot_vm": True,
                     "on_forwarding_rule": True,
-                }
+                },
             }
         ]
     }
@@ -176,7 +176,7 @@ def test_validate_dns_zero_queries_warns() -> None:
                 },
                 "usage": {
                     "monthly_queries": 0,
-                }
+                },
             }
         ]
     }

@@ -11,7 +11,9 @@ from gcp_cost_estimator.core.pricing.gcp_fetch import refresh_pricing_cache
 
 @pytest.fixture(autouse=True)
 def require_gcp_credentials() -> None:
-    if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") or not os.environ.get("GCP_BILLING_PROJECT"):
+    if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") or not os.environ.get(
+        "GCP_BILLING_PROJECT"
+    ):
         pytest.skip("GCP integration credentials not set.")
 
 

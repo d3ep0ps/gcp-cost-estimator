@@ -16,10 +16,12 @@ def validate_dns(
             if visibility_lower not in ("public", "private"):
                 errors.append(f"Unrecognized visibility '{visibility}' for dns_managed_zone.")
             elif visibility_lower == "private":
-                unpriced.append({
-                    "resource_id": r.resource_id,
-                    "reason": "Private DNS zones are free; no billing line item."
-                })
+                unpriced.append(
+                    {
+                        "resource_id": r.resource_id,
+                        "reason": "Private DNS zones are free; no billing line item.",
+                    }
+                )
 
         queries = r.usage.get("monthly_queries", 1000000)
         if queries < 0:

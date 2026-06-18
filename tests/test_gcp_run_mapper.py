@@ -213,7 +213,8 @@ def test_cloud_run_missing_idle_sku_causes_unpriced(temp_db_path: str) -> None:
 
     # Filter out idle SKUs and metadata
     mock_skus = [
-        s for s in mock_skus
+        s
+        for s in mock_skus
         if s["sku_id"] != "METADATA-CITATION" and "idle" not in s.get("description", "").lower()
     ]
 

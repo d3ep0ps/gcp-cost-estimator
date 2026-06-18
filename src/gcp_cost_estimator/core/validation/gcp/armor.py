@@ -16,10 +16,12 @@ def validate_armor(
 
         policy_type = r.attributes.get("type") or r.attributes.get("policy_type")
         if policy_type == "CLOUD_ARMOR_EDGE":
-            unpriced.append({
-                "resource_id": r.resource_id,
-                "reason": "Edge Security policies have different pricing not yet modelled."
-            })
+            unpriced.append(
+                {
+                    "resource_id": r.resource_id,
+                    "reason": "Edge Security policies have different pricing not yet modelled.",
+                }
+            )
 
         monthly_requests = r.usage.get("monthly_requests", 1000000)
         if monthly_requests > 1_000_000_000:
