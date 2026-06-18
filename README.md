@@ -298,7 +298,8 @@ uv run ruff format .
 To run integration tests that query the live GCP Cloud Billing API (requires network and active GCP credentials):
 
 ```bash
-uv run pytest -m integration
+# Set credentials and project, then run integration tests explicitly
+GOOGLE_APPLICATION_CREDENTIALS="path/to/key.json" GCP_BILLING_PROJECT="my-project" uv run pytest -m integration
 ```
 
 ---
