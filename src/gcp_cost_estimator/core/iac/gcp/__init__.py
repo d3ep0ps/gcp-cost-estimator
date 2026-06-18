@@ -48,6 +48,11 @@ from gcp_cost_estimator.core.iac.gcp.serverless import (
 )
 from gcp_cost_estimator.core.iac.gcp.sql import parse_sql_database_instance
 from gcp_cost_estimator.core.iac.gcp.storage import parse_storage_bucket
+from gcp_cost_estimator.core.iac.gcp.storage_ai import (
+    parse_artifact_registry_repository,
+    parse_filestore_instance,
+    parse_vertex_ai_endpoint,
+)
 from gcp_cost_estimator.core.model import Resource
 
 ParserFunc = Callable[[str, ParserContext, dict[str, str]], Resource]
@@ -87,4 +92,7 @@ RESOURCE_TYPE_MAP: dict[str, ParserFunc] = {
     "google_dataflow_job": parse_dataflow_job,
     "google_dataproc_cluster": parse_dataproc_cluster,
     "google_dataproc_serverless_batch": parse_dataproc_serverless_batch,
+    "google_filestore_instance": parse_filestore_instance,
+    "google_vertex_ai_endpoint": parse_vertex_ai_endpoint,
+    "google_artifact_registry_repository": parse_artifact_registry_repository,
 }
