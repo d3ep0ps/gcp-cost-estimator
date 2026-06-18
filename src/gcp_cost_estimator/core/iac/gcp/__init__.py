@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 
+from gcp_cost_estimator.core.iac.gcp.bigquery import parse_bigquery_dataset
 from gcp_cost_estimator.core.iac.gcp.compute import (
     parse_compute_disk,
     parse_compute_instance,
@@ -24,4 +25,5 @@ RESOURCE_TYPE_MAP: dict[str, ParserFunc] = {
     "google_storage_bucket": parse_storage_bucket,
     "google_container_cluster": parse_container_cluster,
     "google_container_node_pool": parse_container_node_pool,
+    "google_bigquery_dataset": parse_bigquery_dataset,
 }
