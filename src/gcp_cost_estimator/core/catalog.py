@@ -291,8 +291,7 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
             "value": 1,
             "unit": "VMs",
             "hint": (
-                "Override usage.num_vms with the number of VMs routed "
-                "through this NAT gateway."
+                "Override usage.num_vms with the number of VMs routed through this NAT gateway."
             ),
         },
         "num_nat_ips": {
@@ -345,8 +344,7 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
             "value": 10.0,
             "unit": "GB/month",
             "hint": (
-                "Override usage.monthly_message_throughput_gb with "
-                "expected total message volume."
+                "Override usage.monthly_message_throughput_gb with expected total message volume."
             ),
         },
         "subscription_storage_gb": {
@@ -397,6 +395,59 @@ CATALOG_DEFAULTS: dict[str, dict[str, Any]] = {
             "value": 100,
             "unit": "hours",
             "hint": "~3 hours/day jobs",
+        },
+    },
+    "filestore": {
+        "capacity_gb": {
+            "value": 1024,
+            "unit": "GB",
+            "hint": "Override attributes.capacity_gb (minimum capacity varies by tier).",
+        },
+        "tier": {
+            "value": "BASIC_HDD",
+            "unit": None,
+            "hint": (
+                "Override attributes.tier (BASIC_HDD | BASIC_SSD | ZONAL | "
+                "REGIONAL | ENTERPRISE | HIGH_SCALE_SSD)."
+            ),
+        },
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": "Override usage.runtime_hours_per_month for non-24/7 instances.",
+        },
+    },
+    "vertex": {
+        "machine_type": {
+            "value": "n1-standard-2",
+            "unit": None,
+            "hint": "Override attributes.machine_type for dedicated endpoint inference node.",
+        },
+        "node_count": {
+            "value": 1,
+            "unit": "nodes",
+            "hint": "Override attributes.node_count for dedicated endpoint inference nodes.",
+        },
+        "runtime_hours_per_month": {
+            "value": 730,
+            "unit": "hours",
+            "hint": (
+                "Override usage.runtime_hours_per_month for dedicated endpoint active duration."
+            ),
+        },
+    },
+    "artifact": {
+        "storage_gb": {
+            "value": 10.0,
+            "unit": "GB",
+            "hint": ("Override attributes.storage_gb with expected image/package storage volume."),
+        },
+        "monthly_egress_gb": {
+            "value": 0.0,
+            "unit": "GB/month",
+            "hint": (
+                "Override attributes.monthly_egress_gb with expected cross-region data transfer."
+            ),
         },
     },
 }
@@ -498,8 +549,7 @@ CATALOG_COVERAGE: dict[str, Any] = {
         "vpc": {
             "kinds": ["compute_address"],
             "notes": (
-                "Static external IP addresses (reserved but unused vs "
-                "in-use on standard/Spot VMs)."
+                "Static external IP addresses (reserved but unused vs in-use on standard/Spot VMs)."
             ),
         },
         "armor": {
@@ -525,6 +575,27 @@ CATALOG_COVERAGE: dict[str, Any] = {
             "notes": (
                 "Dataproc premium management fee on master/worker node "
                 "vCPUs (VM compute estimated separately)."
+            ),
+        },
+        "filestore": {
+            "kinds": ["google_filestore_instance"],
+            "notes": (
+                "Provisioned capacity billing (per GiB-hour), standard and "
+                "high-scale tiers, basic HDD instance fees."
+            ),
+        },
+        "vertex": {
+            "kinds": ["google_vertex_ai_endpoint"],
+            "notes": (
+                "Dedicated online prediction endpoint node compute hours; "
+                "shared endpoints and traffic-dependent inference costs are unpriced."
+            ),
+        },
+        "artifact": {
+            "kinds": ["google_artifact_registry_repository"],
+            "notes": (
+                "Storage billing with 0.5 GB/month free tier, and "
+                "cross-region egress data transfer; vulnerability scanning is unpriced."
             ),
         },
     },

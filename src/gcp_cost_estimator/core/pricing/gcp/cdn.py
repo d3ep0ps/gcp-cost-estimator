@@ -59,8 +59,7 @@ def map_cloud_cdn_backend(
                 {
                     "resource_id": resource.resource_id,
                     "reason": (
-                        f"No matching Cloud CDN Cache Transfer Out SKU "
-                        f"found for region '{region}'"
+                        f"No matching Cloud CDN Cache Transfer Out SKU found for region '{region}'"
                     ),
                 }
             )
@@ -91,10 +90,7 @@ def map_cloud_cdn_backend(
             unpriced.append(
                 {
                     "resource_id": resource.resource_id,
-                    "reason": (
-                        f"No matching Cloud CDN Cache Fill SKU "
-                        f"found for region '{region}'"
-                    ),
+                    "reason": (f"No matching Cloud CDN Cache Fill SKU found for region '{region}'"),
                 }
             )
 
@@ -132,8 +128,7 @@ def map_cloud_cdn_backend(
                     {
                         "resource_id": resource.resource_id,
                         "reason": (
-                            f"No matching Cloud CDN HTTP Requests SKU "
-                            f"found for region '{region}'"
+                            f"No matching Cloud CDN HTTP Requests SKU found for region '{region}'"
                         ),
                     }
                 )
@@ -164,8 +159,7 @@ def map_cloud_cdn_backend(
                     {
                         "resource_id": resource.resource_id,
                         "reason": (
-                            f"No matching Cloud CDN HTTPS Requests SKU "
-                            f"found for region '{region}'"
+                            f"No matching Cloud CDN HTTPS Requests SKU found for region '{region}'"
                         ),
                     }
                 )

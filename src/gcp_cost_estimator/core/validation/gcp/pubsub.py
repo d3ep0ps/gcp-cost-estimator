@@ -29,11 +29,9 @@ def normalize_pubsub(r: Resource) -> None:
                 r.usage["monthly_message_throughput_gb"] = float(
                     r.usage["monthly_message_throughput_gb"]
                 )
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["monthly_message_throughput_gb"] = 10.0
-                r.assumptions.append(
-                    "Invalid monthly_message_throughput_gb; defaulted to 10.0 GB."
-                )
+                r.assumptions.append("Invalid monthly_message_throughput_gb; defaulted to 10.0 GB.")
         r.assumptions.append("First 10 GiB/month free is not applied.")
     elif r.kind == "pubsub_subscription":
         if "retain_acked_messages" not in r.attributes:
@@ -44,20 +42,14 @@ def normalize_pubsub(r: Resource) -> None:
                     "retain_acked_messages"
                 ].lower() in {"true", "1", "yes"}
             else:
-                r.attributes["retain_acked_messages"] = bool(
-                    r.attributes["retain_acked_messages"]
-                )
+                r.attributes["retain_acked_messages"] = bool(r.attributes["retain_acked_messages"])
 
         if "subscription_storage_gb" not in r.usage:
             r.usage["subscription_storage_gb"] = 0.0
             r.assumptions.append("Defaulted subscription_storage_gb to 0.0 GB.")
         else:
             try:
-                r.usage["subscription_storage_gb"] = float(
-                    r.usage["subscription_storage_gb"]
-                )
-            except (ValueError, TypeError):
+                r.usage["subscription_storage_gb"] = float(r.usage["subscription_storage_gb"])
+            except ValueError, TypeError:
                 r.usage["subscription_storage_gb"] = 0.0
-                r.assumptions.append(
-                    "Invalid subscription_storage_gb; defaulted to 0.0 GB."
-                )
+                r.assumptions.append("Invalid subscription_storage_gb; defaulted to 0.0 GB.")

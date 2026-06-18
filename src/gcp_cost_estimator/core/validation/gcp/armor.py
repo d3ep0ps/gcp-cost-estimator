@@ -20,7 +20,7 @@ def normalize_armor(r: Resource) -> None:
         else:
             try:
                 r.attributes["rule_count"] = int(r.attributes["rule_count"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.attributes["rule_count"] = 0
 
         if "monthly_requests" not in r.usage:
@@ -29,6 +29,6 @@ def normalize_armor(r: Resource) -> None:
         else:
             try:
                 r.usage["monthly_requests"] = int(float(r.usage["monthly_requests"]))
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["monthly_requests"] = 1000000
                 r.assumptions.append("Invalid monthly_requests; defaulted to 1000000.")

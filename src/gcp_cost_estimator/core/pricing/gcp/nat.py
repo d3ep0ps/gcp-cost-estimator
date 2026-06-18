@@ -50,8 +50,7 @@ def map_nat_gateway(
             {
                 "resource_id": resource.resource_id,
                 "reason": (
-                    f"No matching SKU found for Cloud NAT Gateway Uptime "
-                    f"in region {region}"
+                    f"No matching SKU found for Cloud NAT Gateway Uptime in region {region}"
                 ),
             }
         )
@@ -82,8 +81,7 @@ def map_nat_gateway(
             {
                 "resource_id": resource.resource_id,
                 "reason": (
-                    f"No matching SKU found for Cloud NAT Data Processed "
-                    f"in region {region}"
+                    f"No matching SKU found for Cloud NAT Data Processed in region {region}"
                 ),
             }
         )
@@ -115,8 +113,7 @@ def map_nat_gateway(
                 {
                     "resource_id": resource.resource_id,
                     "reason": (
-                        f"No matching SKU found for Cloud NAT IP Address Uptime "
-                        f"in region {region}"
+                        f"No matching SKU found for Cloud NAT IP Address Uptime in region {region}"
                     ),
                 }
             )

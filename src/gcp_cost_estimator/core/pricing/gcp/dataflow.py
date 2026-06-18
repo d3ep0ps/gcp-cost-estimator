@@ -33,10 +33,7 @@ def map_dataflow_job(
         unpriced.append(
             {
                 "resource_id": resource.resource_id,
-                "reason": (
-                    f"Region '{region}' not supported or "
-                    "missing pricing data for Dataflow"
-                ),
+                "reason": (f"Region '{region}' not supported or missing pricing data for Dataflow"),
             }
         )
         return mappings, unpriced
@@ -145,9 +142,7 @@ def map_dataflow_job(
         engine_row = cursor.fetchone()
         if engine_row:
             default_units = max(1.0, num_vcpus / 4.0)
-            num_units = float(
-                resource.usage.get("num_streaming_engine_units", default_units)
-            )
+            num_units = float(resource.usage.get("num_streaming_engine_units", default_units))
             total_engine_hours = num_units * runtime_hours
             mappings.append(
                 {

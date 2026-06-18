@@ -27,9 +27,7 @@ def normalize_run(r: Resource) -> None:
         if "cpu" in r.attributes:
             r.attributes["cpu"] = parse_k8s_quantity(r.attributes["cpu"], is_cpu=True)
         if "memory" in r.attributes:
-            r.attributes["memory"] = parse_k8s_quantity(
-                r.attributes["memory"], is_cpu=False
-            )
+            r.attributes["memory"] = parse_k8s_quantity(r.attributes["memory"], is_cpu=False)
 
         if "cpu_idle" not in r.attributes:
             r.attributes["cpu_idle"] = True
@@ -46,7 +44,7 @@ def normalize_run(r: Resource) -> None:
         else:
             try:
                 r.attributes["min_instance_count"] = int(r.attributes["min_instance_count"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.attributes["min_instance_count"] = 0
 
         if r.attributes["min_instance_count"] > 0:
@@ -70,9 +68,7 @@ def normalize_run(r: Resource) -> None:
         if "cpu" in r.attributes:
             r.attributes["cpu"] = parse_k8s_quantity(r.attributes["cpu"], is_cpu=True)
         if "memory" in r.attributes:
-            r.attributes["memory"] = parse_k8s_quantity(
-                r.attributes["memory"], is_cpu=False
-            )
+            r.attributes["memory"] = parse_k8s_quantity(r.attributes["memory"], is_cpu=False)
 
         if "task_count" not in r.usage:
             r.usage["task_count"] = 1

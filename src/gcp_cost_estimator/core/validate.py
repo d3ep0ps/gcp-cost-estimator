@@ -5,7 +5,6 @@ from typing import Any
 
 from gcp_cost_estimator.core.model import ResourceModel
 from gcp_cost_estimator.core.validation.gcp import NORMALIZERS, VALIDATORS
-from gcp_cost_estimator.core.validation.utils import parse_k8s_quantity
 
 
 def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
@@ -91,9 +90,7 @@ def _propagate_alloydb_regions(model: ResourceModel) -> None:
 
     for res in model.resources:
         is_alloy_inst = (
-            res.provider == "gcp"
-            and res.service == "alloydb"
-            and res.kind == "alloydb_instance"
+            res.provider == "gcp" and res.service == "alloydb" and res.kind == "alloydb_instance"
         )
         if is_alloy_inst and not res.region:
             cluster_ref = res.attributes.get("cluster_ref")

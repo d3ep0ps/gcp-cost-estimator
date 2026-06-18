@@ -1,0 +1,52 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/filestore/pricing Verified: 2026-06-15",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FILESTORE-BASIC-HDD-CAPACITY",
+    "service": "Filestore",
+    "region": "us-central1",
+    "description": "Filestore Basic HDD Capacity",
+    "unit": "GiB-hour",
+    "unit_price": 0.000219178,
+    "sku_group": "FilestoreBasicHddCapacity"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FILESTORE-BASIC-HDD-FEE",
+    "service": "Filestore",
+    "region": "us-central1",
+    "description": "Filestore Basic HDD Instance Fee",
+    "unit": "hour",
+    "unit_price": 0.045205479,
+    "sku_group": "FilestoreBasicHddFee"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FILESTORE-ZONAL-CAPACITY",
+    "service": "Filestore",
+    "region": "us-central1",
+    "description": "Filestore Zonal Capacity",
+    "unit": "GiB-hour",
+    "unit_price": 0.000342466,
+    "sku_group": "FilestoreZonalCapacity"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-FILESTORE-REGIONAL-CAPACITY",
+    "service": "Filestore",
+    "region": "us-central1",
+    "description": "Filestore Regional Capacity",
+    "unit": "GiB-hour",
+    "unit_price": 0.000616438,
+    "sku_group": "FilestoreRegionalCapacity"
+  }
+]

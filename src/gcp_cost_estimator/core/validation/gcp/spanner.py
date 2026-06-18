@@ -19,10 +19,7 @@ def validate_spanner(
         num_nodes = r.attributes.get("num_nodes")
         processing_units = r.attributes.get("processing_units")
         if num_nodes is not None and processing_units is not None:
-            msg = (
-                f"Resource '{r.resource_id}' cannot specify both "
-                "num_nodes and processing_units."
-            )
+            msg = f"Resource '{r.resource_id}' cannot specify both num_nodes and processing_units."
             errors.append(msg)
 
 
@@ -58,13 +55,13 @@ def normalize_spanner(r: Resource) -> None:
                     f"processing_units={r.attributes['processing_units']}."
                 )
                 r.assumptions.append(msg)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.attributes["processing_units"] = 100
                 r.assumptions.append("Invalid num_nodes; defaulted processing_units to 100.")
         elif processing_units is not None:
             try:
                 r.attributes["processing_units"] = int(processing_units)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.attributes["processing_units"] = 100
                 msg = "Invalid processing_units; defaulted processing_units to 100."
                 r.assumptions.append(msg)
@@ -78,7 +75,7 @@ def normalize_spanner(r: Resource) -> None:
         else:
             try:
                 r.usage["storage_gb"] = float(r.usage["storage_gb"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["storage_gb"] = 0
                 r.assumptions.append("Invalid storage_gb; defaulted storage_gb to 0 GB.")
 

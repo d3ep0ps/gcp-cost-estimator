@@ -31,8 +31,7 @@ def map_dataproc_cluster(
             {
                 "resource_id": resource.resource_id,
                 "reason": (
-                    f"Region '{region}' not supported or "
-                    "missing premium pricing data for Dataproc"
+                    f"Region '{region}' not supported or missing premium pricing data for Dataproc"
                 ),
             }
         )

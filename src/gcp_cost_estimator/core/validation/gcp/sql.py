@@ -31,8 +31,7 @@ def validate_sql(
                 or db_ver_str.startswith("SQLSERVER_")
             ):
                 warnings.append(
-                    f"Resource '{r.resource_id}' has unrecognized "
-                    f"database_version '{db_version}'."
+                    f"Resource '{r.resource_id}' has unrecognized database_version '{db_version}'."
                 )
 
             edition = r.attributes.get("edition", "ENTERPRISE")
@@ -55,7 +54,7 @@ def validate_sql(
                         f"Resource '{r.resource_id}' disk size {disk_size} GB "
                         "is below GCP minimum of 10 GB."
                     )
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
         disk_type = r.attributes.get("disk_type")
@@ -78,7 +77,7 @@ def validate_sql(
                         f"Resource '{r.resource_id}' is Enterprise Plus and "
                         f"disk size {disk_size} GB is below recommended 100 GB."
                     )
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
 

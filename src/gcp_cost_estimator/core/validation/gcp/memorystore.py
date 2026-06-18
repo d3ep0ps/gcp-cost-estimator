@@ -12,9 +12,7 @@ def validate_memorystore(
     """Validate GCP Memorystore resources."""
     if r.kind == "redis_instance":
         if "memory_size_gb" not in r.attributes:
-            errors.append(
-                f"Resource '{r.resource_id}' is missing memory_size_gb attribute."
-            )
+            errors.append(f"Resource '{r.resource_id}' is missing memory_size_gb attribute.")
     elif r.kind == "memorystore_instance":
         node_type = r.attributes.get("node_type")
         valid_types = {
@@ -24,9 +22,7 @@ def validate_memorystore(
             "HIGHMEM_XLARGE",
         }
         if node_type and node_type not in valid_types:
-            warnings.append(
-                f"Resource '{r.resource_id}' has unrecognized node_type '{node_type}'."
-            )
+            warnings.append(f"Resource '{r.resource_id}' has unrecognized node_type '{node_type}'.")
 
 
 def normalize_memorystore(r: Resource) -> None:
@@ -39,10 +35,7 @@ def normalize_memorystore(r: Resource) -> None:
             tier_val = str(r.attributes["tier"]).upper()
             if tier_val not in {"BASIC", "STANDARD_HA"}:
                 r.attributes["tier"] = "BASIC"
-                msg = (
-                    "Defaulted tier to BASIC "
-                    f"(unrecognized tier '{tier_val}' was specified)."
-                )
+                msg = f"Defaulted tier to BASIC (unrecognized tier '{tier_val}' was specified)."
                 r.assumptions.append(msg)
             else:
                 r.attributes["tier"] = tier_val
@@ -58,7 +51,7 @@ def normalize_memorystore(r: Resource) -> None:
         else:
             try:
                 r.attributes["shard_count"] = int(r.attributes["shard_count"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.attributes["shard_count"] = 1
                 r.assumptions.append("Invalid shard_count; defaulted to 1.")
 
@@ -70,8 +63,7 @@ def normalize_memorystore(r: Resource) -> None:
             if mode_val not in {"STANDALONE", "CLUSTER"}:
                 r.attributes["mode"] = "STANDALONE"
                 msg = (
-                    "Defaulted mode to STANDALONE "
-                    f"(unrecognized mode '{mode_val}' was specified)."
+                    f"Defaulted mode to STANDALONE (unrecognized mode '{mode_val}' was specified)."
                 )
                 r.assumptions.append(msg)
             else:

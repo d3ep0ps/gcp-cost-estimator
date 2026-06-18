@@ -1,0 +1,32 @@
+[
+  {
+    "provider": "gcp",
+    "sku_id": "METADATA-CITATION",
+    "service": "metadata",
+    "region": "global",
+    "description": "Citations: URL https://cloud.google.com/artifact-registry/pricing Verified: 2026-06-15",
+    "unit": "none",
+    "unit_price": 0.0,
+    "sku_group": "Metadata"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ARTIFACT-REGISTRY-STORAGE",
+    "service": "Artifact Registry",
+    "region": "us-central1",
+    "description": "Artifact Registry Storage",
+    "unit": "GB-month",
+    "unit_price": 0.10,
+    "sku_group": "ArtifactRegistryStorage"
+  },
+  {
+    "provider": "gcp",
+    "sku_id": "SKU-ARTIFACT-REGISTRY-EGRESS",
+    "service": "Artifact Registry",
+    "region": "us-central1",
+    "description": "Artifact Registry Egress",
+    "unit": "GB",
+    "unit_price": 0.01,
+    "sku_group": "ArtifactRegistryEgress"
+  }
+]

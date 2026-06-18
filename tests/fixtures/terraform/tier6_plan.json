@@ -1,0 +1,48 @@
+{
+  "format_version": "1.0",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_filestore_instance.nfs",
+          "type": "google_filestore_instance",
+          "name": "nfs",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "tier": "BASIC_HDD",
+            "location": "us-central1-a",
+            "file_shares": [
+              {
+                "capacity_gb": 1024,
+                "name": "vol1"
+              }
+            ]
+          }
+        },
+        {
+          "address": "google_vertex_ai_endpoint.dedicated",
+          "type": "google_vertex_ai_endpoint",
+          "name": "dedicated",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "display_name": "my-endpoint",
+            "location": "us-central1",
+            "dedicated_endpoint_enabled": true
+          }
+        },
+        {
+          "address": "google_artifact_registry_repository.docker_repo",
+          "type": "google_artifact_registry_repository",
+          "name": "docker_repo",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "values": {
+            "location": "us-central1",
+            "repository_id": "my-docker-repo",
+            "description": "Docker repository",
+            "format": "DOCKER"
+          }
+        }
+      ]
+    }
+  }
+}
