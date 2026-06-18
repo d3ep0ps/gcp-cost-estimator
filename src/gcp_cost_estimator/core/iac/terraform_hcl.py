@@ -93,6 +93,24 @@ class TerraformHclParser(IaCParser):
 
                     provider = "gcp"
 
+                    from gcp_cost_estimator.core.iac.gcp import RESOURCE_TYPE_MAP
+                    from gcp_cost_estimator.core.iac.gcp.context import ParserContext
+
+                    if res_type_clean in RESOURCE_TYPE_MAP:
+                        parser_fn = RESOURCE_TYPE_MAP[res_type_clean]
+                        ctx = ParserContext(
+                            attrs=res_config,
+                            resolve=resolve_value,
+                            is_unresolved=_is_unresolved,
+                            assumptions=[],
+                        )
+                        labels = resolve_value(res_config.get("labels")) or {}
+                        if not isinstance(labels, dict):
+                            labels = {}
+                        res = parser_fn(f"{res_type_clean}.{res_name_clean}", ctx, labels)
+                        resources.append(res)
+                        continue
+
                     if res_type_clean == "google_bigquery_table":
                         has_dataset = False
                         for r_dict in merged_config.get("resource", []):

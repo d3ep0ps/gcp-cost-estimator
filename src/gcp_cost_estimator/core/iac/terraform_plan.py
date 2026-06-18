@@ -44,6 +44,24 @@ class TerraformPlanParser(IaCParser):
             address = raw_res.get("address", "")
             values = raw_res.get("values", {})
 
+            from gcp_cost_estimator.core.iac.gcp import RESOURCE_TYPE_MAP
+            from gcp_cost_estimator.core.iac.gcp.context import ParserContext
+
+            if res_type in RESOURCE_TYPE_MAP:
+                parser_fn = RESOURCE_TYPE_MAP[res_type]
+                ctx = ParserContext(
+                    attrs=values,
+                    resolve=lambda x: x,
+                    is_unresolved=lambda _: False,
+                    assumptions=[],
+                )
+                labels = values.get("labels") or {}
+                if not isinstance(labels, dict):
+                    labels = {}
+                res = parser_fn(address, ctx, labels)
+                resources.append(res)
+                continue
+
             if res_type == "google_bigquery_table":
                 has_dataset = any(r.get("type") == "google_bigquery_dataset" for r in raw_resources)
                 if not has_dataset:
