@@ -41,8 +41,8 @@ def test_validate_vertex_ai_endpoint_shared_adds_unpriced() -> None:
             {
                 "provider": "gcp",
                 "resource_id": "endpoint-shared",
-                "service": "vertex",
-                "kind": "google_vertex_ai_endpoint",
+                "service": "vertex_ai",
+                "kind": "vertex_ai_endpoint",
                 "region": "us-central1",
                 "attributes": {
                     "dedicated_endpoint_enabled": False,
@@ -64,8 +64,8 @@ def test_validate_vertex_ai_endpoint_dedicated_is_valid() -> None:
             {
                 "provider": "gcp",
                 "resource_id": "endpoint-dedicated",
-                "service": "vertex",
-                "kind": "google_vertex_ai_endpoint",
+                "service": "vertex_ai",
+                "kind": "vertex_ai_endpoint",
                 "region": "us-central1",
                 "attributes": {
                     "dedicated_endpoint_enabled": True,
@@ -85,8 +85,8 @@ def test_validate_vertex_ai_endpoint_normalises_location() -> None:
             {
                 "provider": "gcp",
                 "resource_id": "endpoint-norm",
-                "service": "vertex",
-                "kind": "google_vertex_ai_endpoint",
+                "service": "vertex_ai",
+                "kind": "vertex_ai_endpoint",
                 "region": "us-central1",
                 "attributes": {
                     "location": "US-CENTRAL1",
@@ -113,8 +113,8 @@ def test_vertex_ai_dedicated_endpoint_cost(populated_vertex_ai_db: str) -> None:
     res = Resource(
         provider="gcp",
         resource_id="my-endpoint",
-        service="vertex",
-        kind="google_vertex_ai_endpoint",
+        service="vertex_ai",
+        kind="vertex_ai_endpoint",
         region="us-central1",
         attributes={"dedicated_endpoint_enabled": True},
         usage={"runtime_hours_per_month": 730},
@@ -132,8 +132,8 @@ def test_vertex_ai_dedicated_n1_standard_4_cost(populated_vertex_ai_db: str) -> 
     res = Resource(
         provider="gcp",
         resource_id="my-endpoint-large",
-        service="vertex",
-        kind="google_vertex_ai_endpoint",
+        service="vertex_ai",
+        kind="vertex_ai_endpoint",
         region="us-central1",
         attributes={
             "dedicated_endpoint_enabled": True,
@@ -152,8 +152,8 @@ def test_vertex_ai_shared_endpoint_zero_cost_all_unpriced(populated_vertex_ai_db
     res = Resource(
         provider="gcp",
         resource_id="shared-endpoint",
-        service="vertex",
-        kind="google_vertex_ai_endpoint",
+        service="vertex_ai",
+        kind="vertex_ai_endpoint",
         region="us-central1",
         attributes={"dedicated_endpoint_enabled": False},
         usage={"runtime_hours_per_month": 730},
@@ -171,8 +171,8 @@ def test_estimate_vertex_ai_dedicated_e2e(populated_vertex_ai_db: str) -> None:
             {
                 "provider": "gcp",
                 "resource_id": "endpoint-e2e",
-                "service": "vertex",
-                "kind": "google_vertex_ai_endpoint",
+                "service": "vertex_ai",
+                "kind": "vertex_ai_endpoint",
                 "region": "us-central1",
                 "attributes": {
                     "dedicated_endpoint_enabled": True,

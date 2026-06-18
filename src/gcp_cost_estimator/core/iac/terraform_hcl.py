@@ -210,13 +210,13 @@ class TerraformHclParser(IaCParser):
                         kind = "dataproc_serverless_batch"
                     elif res_type_clean == "google_filestore_instance":
                         service = "filestore"
-                        kind = "google_filestore_instance"
+                        kind = "filestore_instance"
                     elif res_type_clean == "google_vertex_ai_endpoint":
-                        service = "vertex"
-                        kind = "google_vertex_ai_endpoint"
+                        service = "vertex_ai"
+                        kind = "vertex_ai_endpoint"
                     elif res_type_clean == "google_artifact_registry_repository":
-                        service = "artifact"
-                        kind = "google_artifact_registry_repository"
+                        service = "artifact_registry"
+                        kind = "artifact_registry_repository"
                     else:
                         parts = res_type_clean.split("_")
                         service = parts[1] if len(parts) > 1 else "other"

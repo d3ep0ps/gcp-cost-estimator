@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
 import math
 import sqlite3
 from typing import Any
 
 from gcp_cost_estimator.core.model import Resource
 from gcp_cost_estimator.core.validation.utils import parse_k8s_quantity
+
+logger = logging.getLogger("gcp_cost_estimator")
 
 
 def map_cloud_run_service(
@@ -309,14 +312,16 @@ def map_cloud_run_job(
             if "active" in desc_lower:
                 cpu_active_sku = row
             elif "idle" in desc_lower:
-                pass
+                logger.debug("Idle CPU SKU ignored for Cloud Run Job: %s", _sku_id)
+                continue
             elif "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower:
                 cpu_alloc_sku = row
         elif sku_group == "RAM":
             if "active" in desc_lower:
                 ram_active_sku = row
             elif "idle" in desc_lower:
-                pass
+                logger.debug("Idle RAM SKU ignored for Cloud Run Job: %s", _sku_id)
+                continue
             elif "alloc" in desc_lower or "always on" in desc_lower or "allocation" in desc_lower:
                 ram_alloc_sku = row
         elif sku_group == "GPU":

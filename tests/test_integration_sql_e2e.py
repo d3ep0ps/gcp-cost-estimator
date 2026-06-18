@@ -12,6 +12,12 @@ from mcp.client.stdio import StdioServerParameters, stdio_client
 pytestmark = pytest.mark.anyio
 
 
+@pytest.fixture(autouse=True)
+def require_gcp_credentials() -> None:
+    if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") or not os.environ.get("GCP_BILLING_PROJECT"):
+        pytest.skip("GCP integration credentials not set.")
+
+
 @pytest.mark.integration
 async def test_mcp_sql_integration_e2e(temp_db_path: str) -> None:
     """E2E integration test that uses the MCP client to call the server.

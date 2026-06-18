@@ -439,15 +439,18 @@ class GcpSkuMapper(SkuMapper):
                 adi_mappings, adi_unpriced = self._map_alloydb_instance(resource, cursor)
                 mappings.extend(adi_mappings)
                 unpriced.extend(adi_unpriced)
-            elif resource.kind == "google_filestore_instance":
+            elif resource.service == "filestore" and resource.kind == "filestore_instance":
                 fs_mappings, fs_unpriced = map_filestore_instance(resource, cursor)
                 mappings.extend(fs_mappings)
                 unpriced.extend(fs_unpriced)
-            elif resource.kind == "google_vertex_ai_endpoint":
+            elif resource.service == "vertex_ai" and resource.kind == "vertex_ai_endpoint":
                 vai_mappings, vai_unpriced = map_vertex_ai_endpoint(resource, cursor)
                 mappings.extend(vai_mappings)
                 unpriced.extend(vai_unpriced)
-            elif resource.kind == "google_artifact_registry_repository":
+            elif (
+                resource.service == "artifact_registry"
+                and resource.kind == "artifact_registry_repository"
+            ):
                 ar_mappings, ar_unpriced = map_artifact_registry_repository(resource, cursor)
                 mappings.extend(ar_mappings)
                 unpriced.extend(ar_unpriced)
