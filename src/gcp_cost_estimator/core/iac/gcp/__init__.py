@@ -12,6 +12,15 @@ from gcp_cost_estimator.core.iac.gcp.container import (
     parse_container_node_pool,
 )
 from gcp_cost_estimator.core.iac.gcp.context import ParserContext
+from gcp_cost_estimator.core.iac.gcp.databases import (
+    parse_alloydb_cluster,
+    parse_alloydb_instance,
+    parse_bigtable_instance,
+    parse_firestore_database,
+    parse_memorystore_instance,
+    parse_redis_instance,
+    parse_spanner_instance,
+)
 from gcp_cost_estimator.core.iac.gcp.serverless import (
     parse_app_engine_application,
     parse_app_engine_flexible_version,
@@ -42,4 +51,11 @@ RESOURCE_TYPE_MAP: dict[str, ParserFunc] = {
     "google_app_engine_standard_app_version": parse_app_engine_standard_version,
     "google_app_engine_flexible_app_version": parse_app_engine_flexible_version,
     "google_app_engine_application": parse_app_engine_application,
+    "google_spanner_instance": parse_spanner_instance,
+    "google_firestore_database": parse_firestore_database,
+    "google_redis_instance": parse_redis_instance,
+    "google_memorystore_instance": parse_memorystore_instance,
+    "google_bigtable_instance": parse_bigtable_instance,
+    "google_alloydb_cluster": parse_alloydb_cluster,
+    "google_alloydb_instance": parse_alloydb_instance,
 }
