@@ -4,8 +4,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-import hcl2  # type: ignore[import-untyped]
-
+from gcp_cost_estimator.core.iac._hcl2_wrapper import load_hcl
 from gcp_cost_estimator.core.iac.base import IaCParser, register_iac_parser
 from gcp_cost_estimator.core.model import Resource, ResourceModel
 
@@ -41,13 +40,12 @@ class TerraformHclParser(IaCParser):
         merged_config: dict[str, Any] = {}
         for fpath in tf_files:
             try:
-                with fpath.open(encoding="utf-8") as f:
-                    config = hcl2.load(f)
-                    for key, val in config.items():
-                        if key not in merged_config:
-                            merged_config[key] = []
-                        if isinstance(val, list):
-                            merged_config[key].extend(val)
+                config = load_hcl(fpath)
+                for key, val in config.items():
+                    if key not in merged_config:
+                        merged_config[key] = []
+                    if isinstance(val, list):
+                        merged_config[key].extend(val)
             except Exception:
                 pass
 
