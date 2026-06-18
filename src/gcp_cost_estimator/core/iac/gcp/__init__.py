@@ -21,6 +21,13 @@ from gcp_cost_estimator.core.iac.gcp.databases import (
     parse_redis_instance,
     parse_spanner_instance,
 )
+from gcp_cost_estimator.core.iac.gcp.networking import (
+    parse_compute_address,
+    parse_compute_backend,
+    parse_compute_security_policy,
+    parse_dns_managed_zone,
+    parse_nat_gateway,
+)
 from gcp_cost_estimator.core.iac.gcp.serverless import (
     parse_app_engine_application,
     parse_app_engine_flexible_version,
@@ -58,4 +65,10 @@ RESOURCE_TYPE_MAP: dict[str, ParserFunc] = {
     "google_bigtable_instance": parse_bigtable_instance,
     "google_alloydb_cluster": parse_alloydb_cluster,
     "google_alloydb_instance": parse_alloydb_instance,
+    "google_dns_managed_zone": parse_dns_managed_zone,
+    "google_compute_router_nat": parse_nat_gateway,
+    "google_compute_address": parse_compute_address,
+    "google_compute_security_policy": parse_compute_security_policy,
+    "google_compute_backend_bucket": parse_compute_backend,
+    "google_compute_backend_service": parse_compute_backend,
 }
