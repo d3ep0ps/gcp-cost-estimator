@@ -41,8 +41,8 @@ def test_validate_artifact_registry_unknown_format_warns() -> None:
             {
                 "provider": "gcp",
                 "resource_id": "repo-warn",
-                "service": "artifact",
-                "kind": "google_artifact_registry_repository",
+                "service": "artifact_registry",
+                "kind": "artifact_registry_repository",
                 "region": "us-central1",
                 "attributes": {
                     "format": "UNKNOWN",
@@ -65,8 +65,8 @@ def test_validate_artifact_registry_normalises_format_and_location() -> None:
             {
                 "provider": "gcp",
                 "resource_id": "repo-norm",
-                "service": "artifact",
-                "kind": "google_artifact_registry_repository",
+                "service": "artifact_registry",
+                "kind": "artifact_registry_repository",
                 "region": "us-central1",
                 "attributes": {
                     "format": "docker",
@@ -94,8 +94,8 @@ def test_artifact_registry_10gb_storage_cost(populated_artifact_registry_db: str
     res = Resource(
         provider="gcp",
         resource_id="repo-10gb",
-        service="artifact",
-        kind="google_artifact_registry_repository",
+        service="artifact_registry",
+        kind="artifact_registry_repository",
         region="us-central1",
         attributes={"storage_gb": 10.0},
     )
@@ -113,8 +113,8 @@ def test_artifact_registry_below_free_tier_zero_cost(populated_artifact_registry
     res = Resource(
         provider="gcp",
         resource_id="repo-free",
-        service="artifact",
-        kind="google_artifact_registry_repository",
+        service="artifact_registry",
+        kind="artifact_registry_repository",
         region="us-central1",
         attributes={"storage_gb": 0.3},
     )
@@ -129,8 +129,8 @@ def test_artifact_registry_egress_included_in_cost(populated_artifact_registry_d
     res = Resource(
         provider="gcp",
         resource_id="repo-egress",
-        service="artifact",
-        kind="google_artifact_registry_repository",
+        service="artifact_registry",
+        kind="artifact_registry_repository",
         region="us-central1",
         attributes={
             "storage_gb": 10.0,
@@ -154,8 +154,8 @@ def test_estimate_artifact_registry_e2e(populated_artifact_registry_db: str) -> 
             {
                 "provider": "gcp",
                 "resource_id": "repo-e2e",
-                "service": "artifact",
-                "kind": "google_artifact_registry_repository",
+                "service": "artifact_registry",
+                "kind": "artifact_registry_repository",
                 "region": "us-central1",
                 "attributes": {
                     "storage_gb": 10.0,
