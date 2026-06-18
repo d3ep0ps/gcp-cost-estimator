@@ -2,8 +2,9 @@
 
 import contextlib
 from typing import Any
-from gcp_cost_estimator.core.model import Resource
+
 from gcp_cost_estimator.core.iac.gcp.context import ParserContext
+from gcp_cost_estimator.core.model import Resource
 
 
 def parse_sql_database_instance(
