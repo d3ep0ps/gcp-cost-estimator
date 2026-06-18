@@ -80,9 +80,8 @@ class ParserContext:
             else:
                 try:
                     quantity = int(raw_count)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     self.add_assumption(
                         f"Invalid count value '{raw_count}': default to quantity 1."
                     )
         return quantity
-

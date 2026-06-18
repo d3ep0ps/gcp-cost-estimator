@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-import contextlib
 import json
-import re
 from pathlib import Path
 from typing import Any
 
@@ -50,6 +48,7 @@ class TerraformPlanParser(IaCParser):
                 has_dataset = any(r.get("type") == "google_bigquery_dataset" for r in raw_resources)
                 if not has_dataset:
                     import logging
+
                     logging.getLogger("gcp_cost_estimator").warning(
                         "Orphan BigQuery table '%s' found. "
                         "BigQuery pricing requires parent dataset location.",

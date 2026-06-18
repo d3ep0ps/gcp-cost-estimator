@@ -42,11 +42,7 @@ def parse_compute_instance(
             if isinstance(init_params_list, list) and init_params_list:
                 ip = init_params_list[0]
                 if isinstance(ip, dict):
-                    dsize = (
-                        ctx.resolve(ip.get("size"))
-                        or ctx.resolve(ip.get("size_gb"))
-                        or 10
-                    )
+                    dsize = ctx.resolve(ip.get("size")) or ctx.resolve(ip.get("size_gb")) or 10
                     dtype = ctx.resolve(ip.get("type")) or "pd-standard"
 
                     disk_kind = (
@@ -59,16 +55,14 @@ def parse_compute_instance(
                         if ctx.is_unresolved(dsize):
                             size_val = 10
                             ctx.add_assumption(
-                                f"Unresolved or invalid boot disk size '{dsize}': "
-                                "default to 10 GB."
+                                f"Unresolved or invalid boot disk size '{dsize}': default to 10 GB."
                             )
                         else:
                             size_val = int(dsize)
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         size_val = 10
                         ctx.add_assumption(
-                            f"Unresolved or invalid boot disk size '{dsize}': "
-                            "default to 10 GB."
+                            f"Unresolved or invalid boot disk size '{dsize}': default to 10 GB."
                         )
 
                     attached.append(

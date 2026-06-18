@@ -256,9 +256,7 @@ def parse_alloydb_instance(
 
     rpconfig = ctx.attrs.get("read_pool_config")
     if rpconfig:
-        rpconfig_blk = (
-            rpconfig[0] if isinstance(rpconfig, list) and rpconfig else rpconfig
-        )
+        rpconfig_blk = rpconfig[0] if isinstance(rpconfig, list) and rpconfig else rpconfig
         if isinstance(rpconfig_blk, dict):
             node_count = ctx.resolve(rpconfig_blk.get("node_count"))
             if node_count is not None:

@@ -227,7 +227,9 @@ def parse_app_engine_standard_version(
                     if resolved_v is not None:
                         attributes[f"{scaling_type}_{k}"] = resolved_v
                         if ctx.is_unresolved(resolved_v):
-                            ctx.add_assumption(f"Unresolved attribute {scaling_type}_{k}: '{resolved_v}'")
+                            ctx.add_assumption(
+                                f"Unresolved attribute {scaling_type}_{k}: '{resolved_v}'"
+                            )
 
     region = ctx.extract_region()
     quantity = ctx.extract_quantity()

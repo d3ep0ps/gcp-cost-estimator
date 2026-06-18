@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from gcp_cost_estimator.core.compare import suggest_cheaper_machine_types
+from gcp_cost_estimator.core.advisory import suggest_cheaper_machine_types
 from gcp_cost_estimator.core.model import Resource
 from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
 

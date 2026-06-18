@@ -11,18 +11,18 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
+from gcp_cost_estimator.core.advisory import (
+    find_unpriced as find_unpriced_core,
+)
+from gcp_cost_estimator.core.advisory import (
+    suggest_cheaper_machine_types as suggest_cheaper_machine_types_core,
+)
 from gcp_cost_estimator.core.catalog import CATALOG_COVERAGE, CATALOG_DEFAULTS
 from gcp_cost_estimator.core.compare import (
     compare_estimates as compare_estimates_core,
 )
 from gcp_cost_estimator.core.compare import (
     compare_regions as compare_regions_core,
-)
-from gcp_cost_estimator.core.compare import (
-    find_unpriced as find_unpriced_core,
-)
-from gcp_cost_estimator.core.compare import (
-    suggest_cheaper_machine_types as suggest_cheaper_machine_types_core,
 )
 from gcp_cost_estimator.core.compare import (
     what_if as what_if_core,
