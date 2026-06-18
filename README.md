@@ -5,6 +5,7 @@
 [![Package Manager](https://img.shields.io/badge/uv-supported-green.svg)](https://github.com/astral-sh/uv)
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-black.svg)](https://github.com/astral-sh/ruff)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](#development--contributing)
+[![CI](https://github.com/d3ep0ps/gcp-cost-estimator/actions/workflows/ci.yml/badge.svg)](https://github.com/d3ep0ps/gcp-cost-estimator/actions/workflows/ci.yml)
 
 A deterministic Model Context Protocol (MCP) server that exposes **Google Cloud Platform (GCP) cost-estimation capabilities** (IaC parsing, SKU pricing, cost calculation, comparison, and reporting) directly to MCP-enabled hosts (e.g., Claude Code, Gemini CLI, Claude Desktop, Cursor).
 
