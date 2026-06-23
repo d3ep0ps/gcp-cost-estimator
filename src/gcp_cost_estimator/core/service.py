@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import re
 from typing import Any
 
 from gcp_cost_estimator.core.calc import calculate_line_items, calculate_totals
@@ -37,16 +38,20 @@ def estimate_infrastructure(
 
     # 2. Process validation errors if invalid
     if not val_res["valid"]:
+        resource_ids = {r.resource_id for r in normalized_model.resources}
         for err in val_res["errors"]:
-            # Check which resource might have caused the error (best-effort match)
-            matched = False
-            for r in normalized_model.resources:
-                if r.resource_id in err or r.kind in err:
-                    unpriced_items.append(UnpricedItem(resource_id=r.resource_id, reason=err))
-                    matched = True
-                    break
-            if not matched:
-                unpriced_items.append(UnpricedItem(resource_id="model", reason=err))
+            # Prefer extracting resource_id from the standard error message format
+            # "Resource '{id}' ..." before falling back to substring scan.
+            match = re.search(r"Resource '([^']+)'", err)
+            if match and match.group(1) in resource_ids:
+                unpriced_items.append(UnpricedItem(resource_id=match.group(1), reason=err))
+            else:
+                rid = next(
+                    (r.resource_id for r in normalized_model.resources
+                     if r.resource_id in err or r.kind in err),
+                    "model",
+                )
+                unpriced_items.append(UnpricedItem(resource_id=rid, reason=err))
     else:
         # 3. Map and calculate valid resources
         # Group resources by provider so each provider gets one shared mapper/connection.
@@ -92,7 +97,9 @@ def estimate_infrastructure(
                         resource_line_items = calculate_line_items(r.resource_id, mappings, r.usage)
                         line_items.extend(resource_line_items)
                     except Exception as e:
-                        unpriced_items.append(UnpricedItem(resource_id=r.resource_id, reason=str(e)))
+                        unpriced_items.append(
+                            UnpricedItem(resource_id=r.resource_id, reason=str(e))
+                        )
             finally:
                 if hasattr(mapper, "close"):
                     mapper.close()
