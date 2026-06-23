@@ -34,6 +34,13 @@ def http_client(monkeypatch):
         del os.environ["GCP_BILLING_BEARER_TOKEN"]
 
 
+def test_create_app_raises_if_no_token_env(monkeypatch):
+    """create_app() must refuse to start when GCP_BILLING_BEARER_TOKEN is not set."""
+    monkeypatch.delenv("GCP_BILLING_BEARER_TOKEN", raising=False)
+    with pytest.raises(RuntimeError, match="GCP_BILLING_BEARER_TOKEN"):
+        create_app()
+
+
 def test_unauthorized_if_token_missing(http_client):
     """Assert that requests without an Authorization header are rejected with 401."""
     response = http_client.get("/sse")
