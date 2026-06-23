@@ -73,6 +73,12 @@ class TerraformHclParser(IaCParser):
                         return var_defaults[var_name]
             return scalar
 
+        declared_resource_types = {
+            res_type.strip("\"'")
+            for res_dict in merged_config.get("resource", [])
+            if isinstance(res_dict, dict)
+            for res_type in res_dict
+        }
         resources: list[Resource] = []
 
         for res_dict in merged_config.get("resource", []):
@@ -94,11 +100,7 @@ class TerraformHclParser(IaCParser):
                     from gcp_cost_estimator.core.iac.gcp.context import ParserContext
 
                     if res_type_clean == "google_bigquery_table":
-                        has_dataset = False
-                        for r_dict in merged_config.get("resource", []):
-                            if isinstance(r_dict, dict) and "google_bigquery_dataset" in r_dict:
-                                has_dataset = True
-                                break
+                        has_dataset = "google_bigquery_dataset" in declared_resource_types
                         if not has_dataset:
                             import logging
 

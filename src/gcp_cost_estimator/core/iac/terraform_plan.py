@@ -32,6 +32,7 @@ class TerraformPlanParser(IaCParser):
 
         extract_resources_from_module(root_module)
 
+        resource_types = {r.get("type") for r in raw_resources}
         resources: list[Resource] = []
         for raw_res in raw_resources:
             res_type = raw_res.get("type", "")
@@ -45,7 +46,7 @@ class TerraformPlanParser(IaCParser):
             from gcp_cost_estimator.core.iac.gcp.context import ParserContext
 
             if res_type == "google_bigquery_table":
-                has_dataset = any(r.get("type") == "google_bigquery_dataset" for r in raw_resources)
+                has_dataset = "google_bigquery_dataset" in resource_types
                 if not has_dataset:
                     import logging
 
