@@ -90,11 +90,13 @@ def parse_terraform(path: str, mode: str = "auto") -> ResourceModel:
     resolved = Path(path).resolve()
     if _PARSE_ALLOWED_DIR:
         allowed = Path(_PARSE_ALLOWED_DIR).resolve()
-        if not str(resolved).startswith(str(allowed) + os.sep):
+        try:
+            resolved.relative_to(allowed)
+        except ValueError as exc:
             raise ValueError(
                 f"Path '{resolved}' is outside the allowed directory '{allowed}'. "
                 "Set GCP_PARSE_ALLOWED_DIR to the workspace root to restrict access."
-            )
+            ) from exc
     return parse_terraform_core(str(resolved), mode=mode)
 
 
