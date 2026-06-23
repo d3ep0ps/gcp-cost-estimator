@@ -60,7 +60,7 @@ def normalize_firestore(r: Resource) -> None:
                 try:
                     is_float = field in ("storage_gb", "monthly_egress_gb")
                     r.usage[field] = float(r.usage[field]) if is_float else int(r.usage[field])
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.usage[field] = val
                     r.assumptions.append(f"Invalid {field}; defaulted to {val}.")
 

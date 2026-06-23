@@ -59,7 +59,7 @@ def parse_compute_instance(
                             )
                         else:
                             size_val = int(dsize)
-                    except ValueError, TypeError:
+                    except (ValueError, TypeError):
                         size_val = 10
                         ctx.add_assumption(
                             f"Unresolved or invalid boot disk size '{dsize}': default to 10 GB."

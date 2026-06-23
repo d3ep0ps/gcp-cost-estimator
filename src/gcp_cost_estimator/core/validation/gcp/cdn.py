@@ -19,7 +19,7 @@ def validate_cdn(
                         f"Resource '{r.resource_id}' https_fraction '{https_frac}' "
                         "is out of valid range [0.0, 1.0]."
                     )
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 errors.append(
                     f"Resource '{r.resource_id}' https_fraction '{https_frac}' must be a float."
                 )
@@ -44,6 +44,6 @@ def normalize_cdn(r: Resource) -> None:
                         if cdn_field == "https_fraction"
                         else int(float(r.usage[cdn_field]))
                     )
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.usage[cdn_field] = cdn_val
                     r.assumptions.append(f"Invalid {cdn_field}; defaulted to {cdn_val}.")

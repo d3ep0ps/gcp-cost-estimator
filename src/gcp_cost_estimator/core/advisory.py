@@ -217,7 +217,7 @@ def suggest_cheaper_machine_types(db_path: str, resource: Resource) -> list[dict
             return []
         try:
             current_cpu = int(cpu_count)
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return []
 
         current_vcpu, current_ram = resolve_alloydb_instance_specs(current_cpu)

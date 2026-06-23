@@ -147,7 +147,7 @@ def test_gke_runtime_defaults_to_730h() -> None:
     res = validate_resource_model(model)
     norm_r = res["normalized_model"].resources[0]
     assert norm_r.usage["runtime_hours_per_month"] == 730
-    assert any("Defaulted runtime to 730 hours/month" in a for a in norm_r.assumptions)
+    assert any("runtime_hours_per_month" in a and "730" in a for a in norm_r.assumptions)
 
 
 def test_gke_autopilot_skips_defaults_and_validation() -> None:

@@ -30,7 +30,7 @@ def normalize_bigquery(r: Resource) -> None:
         else:
             try:
                 r.usage["active_storage_gb"] = float(r.usage["active_storage_gb"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.usage["active_storage_gb"] = 100
                 r.assumptions.append(
                     "Invalid active_storage_gb specified; defaulted active_storage_gb to 100 GB."
@@ -45,7 +45,7 @@ def normalize_bigquery(r: Resource) -> None:
         else:
             try:
                 r.usage["long_term_storage_gb"] = float(r.usage["long_term_storage_gb"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.usage["long_term_storage_gb"] = 0
 
         if "monthly_query_tb" not in r.usage:
@@ -57,7 +57,7 @@ def normalize_bigquery(r: Resource) -> None:
         else:
             try:
                 r.usage["monthly_query_tb"] = float(r.usage["monthly_query_tb"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.usage["monthly_query_tb"] = 1
 
         if "monthly_streaming_gb" not in r.usage:
@@ -69,7 +69,7 @@ def normalize_bigquery(r: Resource) -> None:
         else:
             try:
                 r.usage["monthly_streaming_gb"] = float(r.usage["monthly_streaming_gb"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.usage["monthly_streaming_gb"] = 0
 
         free_tier_assumption = (

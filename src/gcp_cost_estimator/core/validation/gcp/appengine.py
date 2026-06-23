@@ -21,7 +21,7 @@ def validate_appengine(
             if field in r.attributes:
                 try:
                     float(r.attributes[field])
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     errors.append(f"Resource '{r.resource_id}' has invalid '{field}' attribute.")
 
 
@@ -48,7 +48,7 @@ def normalize_appengine(r: Resource) -> None:
         else:
             try:
                 r.attributes["cpu"] = int(r.attributes["cpu"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.attributes["cpu"] = 1
 
         if "memory_gb" not in r.attributes:
@@ -56,7 +56,7 @@ def normalize_appengine(r: Resource) -> None:
         else:
             try:
                 r.attributes["memory_gb"] = float(r.attributes["memory_gb"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.attributes["memory_gb"] = 3.75
 
         if "disk_gb" not in r.attributes:
@@ -66,7 +66,7 @@ def normalize_appengine(r: Resource) -> None:
             try:
                 disk_gb = int(r.attributes["disk_gb"])
                 r.attributes["disk_gb"] = disk_gb
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 disk_gb = 10
                 r.attributes["disk_gb"] = disk_gb
 

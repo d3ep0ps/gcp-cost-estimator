@@ -31,7 +31,7 @@ def normalize_container(r: Resource) -> None:
             else:
                 try:
                     r.attributes["node_count"] = int(r.attributes["node_count"])
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.attributes["node_count"] = 3
                     r.assumptions.append("Invalid node_count; defaulted node_count to 3.")
 
@@ -45,10 +45,14 @@ def normalize_container(r: Resource) -> None:
             else:
                 try:
                     r.attributes["disk_size_gb"] = int(r.attributes["disk_size_gb"])
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.attributes["disk_size_gb"] = 100
                     r.assumptions.append("Invalid disk_size_gb; defaulted disk_size_gb to 100.")
 
             if "disk_type" not in r.attributes:
                 r.attributes["disk_type"] = "pd-standard"
                 r.assumptions.append("Defaulted disk_type to pd-standard.")
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

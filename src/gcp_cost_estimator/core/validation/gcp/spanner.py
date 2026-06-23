@@ -55,13 +55,13 @@ def normalize_spanner(r: Resource) -> None:
                     f"processing_units={r.attributes['processing_units']}."
                 )
                 r.assumptions.append(msg)
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.attributes["processing_units"] = 100
                 r.assumptions.append("Invalid num_nodes; defaulted processing_units to 100.")
         elif processing_units is not None:
             try:
                 r.attributes["processing_units"] = int(processing_units)
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.attributes["processing_units"] = 100
                 msg = "Invalid processing_units; defaulted processing_units to 100."
                 r.assumptions.append(msg)
@@ -75,7 +75,7 @@ def normalize_spanner(r: Resource) -> None:
         else:
             try:
                 r.usage["storage_gb"] = float(r.usage["storage_gb"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.usage["storage_gb"] = 0
                 r.assumptions.append("Invalid storage_gb; defaulted storage_gb to 0 GB.")
 
@@ -94,3 +94,7 @@ def normalize_spanner(r: Resource) -> None:
             r.attributes["config_type"] = config_type
             msg = f"Derived config_type={config_type} with storage multiplier {mult}x."
             r.assumptions.append(msg)
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

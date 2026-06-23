@@ -38,6 +38,10 @@ def normalize_nat(r: Resource) -> None:
             else:
                 try:
                     r.usage[field] = int(float(r.usage[field]))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.usage[field] = val
                     r.assumptions.append(f"Invalid {field}; defaulted to {val}.")
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

@@ -59,14 +59,11 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
                     if "secret" in sub_k.lower() or "password" in sub_k.lower():
                         r.attributes[k][sub_k] = "[REDACTED]"
 
-        # 3. Apply default runtime hours if not present in usage
-        if "runtime_hours_per_month" not in r.usage:
-            r.usage["runtime_hours_per_month"] = 730
-            assumption_msg = "Defaulted runtime to 730 hours/month."
-            if assumption_msg not in r.assumptions:
-                r.assumptions.append(assumption_msg)
-
-        # 4. Delegate normalization to provider-specific normalization logic
+        # 3. Delegate normalization to provider-specific normalization logic
+        # Note: runtime_hours_per_month defaults are applied per-service in each
+        # service's own normalizer (e.g. compute, sql, memorystore) so that
+        # non-compute resources (gcs, pubsub, dns, etc.) do not receive a
+        # meaningless runtime default.
         if r.provider == "gcp":
             normalizer = NORMALIZERS.get(r.service)
             if normalizer:

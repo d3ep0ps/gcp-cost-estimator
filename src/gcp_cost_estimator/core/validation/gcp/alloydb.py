@@ -22,7 +22,7 @@ def validate_alloydb(
                     if cpu_val not in {2, 4, 8, 16, 32, 64, 96, 128}:
                         msg = f"Resource '{r.resource_id}' has unsupported vcpu count '{cpu_val}'."
                         warnings.append(msg)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     errors.append(f"Resource '{r.resource_id}' cpu_count must be an integer.")
 
 
@@ -35,7 +35,7 @@ def normalize_alloydb(r: Resource) -> None:
         else:
             try:
                 r.usage["storage_gb"] = float(r.usage["storage_gb"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.usage["storage_gb"] = 100
                 r.assumptions.append("Invalid storage_gb; defaulted to 100.")
 
@@ -71,6 +71,11 @@ def normalize_alloydb(r: Resource) -> None:
             else:
                 try:
                     r.attributes["node_count"] = int(r.attributes["node_count"])
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.attributes["node_count"] = 1
                     r.assumptions.append("Invalid node_count; defaulted to 1.")
+
+    # Both cluster and instance resources have runtime billed by the hour
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

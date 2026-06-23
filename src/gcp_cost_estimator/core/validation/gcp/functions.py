@@ -21,7 +21,7 @@ def validate_functions(
                         f"Resource '{r.resource_id}' has non-standard "
                         f"memory allocation '{memory_mb_raw}' for 1st-gen function."
                     )
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 errors.append(
                     f"Resource '{r.resource_id}' has non-standard "
                     f"memory allocation '{memory_mb_raw}' for 1st-gen function."
@@ -50,7 +50,7 @@ def normalize_functions(r: Resource) -> None:
             else:
                 try:
                     r.attributes["available_memory_mb"] = int(r.attributes["available_memory_mb"])
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.attributes["available_memory_mb"] = 256
 
             memory_mb = r.attributes["available_memory_mb"]
@@ -64,7 +64,7 @@ def normalize_functions(r: Resource) -> None:
             else:
                 try:
                     r.attributes["min_instances"] = int(r.attributes["min_instances"])
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.attributes["min_instances"] = 0
 
             if r.attributes["min_instances"] > 0:
@@ -102,12 +102,12 @@ def normalize_functions(r: Resource) -> None:
             if "min_instance_count" not in r.attributes:
                 try:
                     r.attributes["min_instance_count"] = int(r.attributes.get("min_instances", 0))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.attributes["min_instance_count"] = 0
             else:
                 try:
                     r.attributes["min_instance_count"] = int(r.attributes["min_instance_count"])
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     r.attributes["min_instance_count"] = 0
 
             if r.attributes["min_instance_count"] > 0:

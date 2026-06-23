@@ -54,7 +54,7 @@ def validate_sql(
                         f"Resource '{r.resource_id}' disk size {disk_size} GB "
                         "is below GCP minimum of 10 GB."
                     )
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 pass
 
         disk_type = r.attributes.get("disk_type")
@@ -77,7 +77,7 @@ def validate_sql(
                         f"Resource '{r.resource_id}' is Enterprise Plus and "
                         f"disk size {disk_size} GB is below recommended 100 GB."
                     )
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 pass
 
 
@@ -95,3 +95,7 @@ def normalize_sql(r: Resource) -> None:
         if "backup_enabled" not in r.attributes:
             r.attributes["backup_enabled"] = False
             r.assumptions.append("Defaulted backup_enabled to false.")
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

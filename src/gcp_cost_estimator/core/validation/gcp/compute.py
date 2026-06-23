@@ -33,7 +33,7 @@ def normalize_compute(r: Resource) -> None:
         else:
             try:
                 r.usage["runtime_hours_per_month"] = float(r.usage["runtime_hours_per_month"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.usage["runtime_hours_per_month"] = 730
                 r.assumptions.append("Invalid runtime_hours_per_month; defaulted to 730.")
 

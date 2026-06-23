@@ -412,7 +412,7 @@ def map_cloud_function(
     try:
         memory_gb = float(resource.attributes.get("memory_gb", float(memory_mb) / 1024.0))
         cpu_ghz = float(resource.attributes.get("cpu_ghz", 0.4))
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         unpriced.append(
             {
                 "resource_id": resource.resource_id,

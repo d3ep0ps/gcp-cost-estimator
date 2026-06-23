@@ -51,7 +51,7 @@ def normalize_memorystore(r: Resource) -> None:
         else:
             try:
                 r.attributes["shard_count"] = int(r.attributes["shard_count"])
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 r.attributes["shard_count"] = 1
                 r.assumptions.append("Invalid shard_count; defaulted to 1.")
 
@@ -68,3 +68,7 @@ def normalize_memorystore(r: Resource) -> None:
                 r.assumptions.append(msg)
             else:
                 r.attributes["mode"] = mode_val
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")
