@@ -74,3 +74,8 @@ def normalize_alloydb(r: Resource) -> None:
                 except ValueError, TypeError:
                     r.attributes["node_count"] = 1
                     r.assumptions.append("Invalid node_count; defaulted to 1.")
+
+    # Both cluster and instance resources have runtime billed by the hour
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

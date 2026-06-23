@@ -80,11 +80,22 @@ def get_default_db_path() -> str:
 # --- Tools ---
 
 
+_PARSE_ALLOWED_DIR = os.environ.get("GCP_PARSE_ALLOWED_DIR")
+
+
 @mcp.tool()
 @timed_tool
 def parse_terraform(path: str, mode: str = "auto") -> ResourceModel:
     """Parse static HCL files or a Terraform plan JSON to extract ResourceModel."""
-    return parse_terraform_core(path, mode=mode)
+    resolved = Path(path).resolve()
+    if _PARSE_ALLOWED_DIR:
+        allowed = Path(_PARSE_ALLOWED_DIR).resolve()
+        if not str(resolved).startswith(str(allowed) + os.sep):
+            raise ValueError(
+                f"Path '{resolved}' is outside the allowed directory '{allowed}'. "
+                "Set GCP_PARSE_ALLOWED_DIR to the workspace root to restrict access."
+            )
+    return parse_terraform_core(str(resolved), mode=mode)
 
 
 @mcp.tool()

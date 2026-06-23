@@ -94,3 +94,7 @@ def normalize_spanner(r: Resource) -> None:
             r.attributes["config_type"] = config_type
             msg = f"Derived config_type={config_type} with storage multiplier {mult}x."
             r.assumptions.append(msg)
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

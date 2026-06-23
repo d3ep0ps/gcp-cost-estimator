@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import sqlite3
-from typing import Any
+from collections.abc import Callable
+from typing import Any, ClassVar
 
 from gcp_cost_estimator.core.model import Resource
 
@@ -44,9 +45,143 @@ from gcp_cost_estimator.core.pricing.gcp.vertex_ai import map_vertex_ai_endpoint
 from gcp_cost_estimator.core.pricing.gcp.vpc import map_compute_address
 from gcp_cost_estimator.core.registries import SkuMapper, register_sku_mapper
 
+# Type alias for mapper functions
+_MapperFn = Callable[[Resource, sqlite3.Cursor], tuple[list[dict[str, Any]], list[dict[str, Any]]]]
+
+
+def _map_gce_instance_with_attached(
+    resource: Resource, cursor: sqlite3.Cursor
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Handle GCE instance mapping including any attached disk resources."""
+    mappings: list[dict[str, Any]] = []
+    unpriced: list[dict[str, Any]] = []
+    region = resource.region or ""
+
+    vm_mappings, vm_unpriced = map_gce_compute(
+        region=region,
+        machine_type=resource.attributes.get("machine_type", ""),
+        node_count=1,
+        disk_size_gb=0,
+        disk_type="",
+        resource_quantity=resource.quantity,
+        resource_id=resource.resource_id,
+        cursor=cursor,
+    )
+    mappings.extend(vm_mappings)
+    unpriced.extend(vm_unpriced)
+
+    for attached in resource.attached:
+        if "disk" in attached.kind.lower():
+            sku_group = "SSD" if "ssd" in attached.kind.lower() else "PDStandard"
+            cursor.execute(
+                """
+                SELECT sku_id, unit, unit_price, description
+                FROM pricing_cache
+                WHERE provider = 'gcp' AND region = ? AND sku_group = ?
+                """,
+                (region, sku_group),
+            )
+            disk_rows = cursor.fetchall()
+            if disk_rows:
+                disk_match = disk_rows[0]
+                size_gb = float(attached.attributes.get("size_gb", 0))
+                mappings.append(
+                    {
+                        "sku_id": disk_match[0],
+                        "component": "storage",
+                        "unit": disk_match[1],
+                        "unit_price": disk_match[2],
+                        "qty": size_gb * attached.quantity * resource.quantity,
+                    }
+                )
+            else:
+                unpriced.append(
+                    {
+                        "resource_id": f"{resource.resource_id}/{attached.kind}",
+                        "reason": (
+                            f"No matching storage SKU found for '{attached.kind}' "
+                            f"in region {region}"
+                        ),
+                    }
+                )
+        else:
+            unpriced.append(
+                {
+                    "resource_id": f"{resource.resource_id}/{attached.kind}",
+                    "reason": f"Unsupported attached resource kind '{attached.kind}'",
+                }
+            )
+
+    return mappings, unpriced
+
+
+def _map_gke_cluster_with_autopilot(
+    resource: Resource, cursor: sqlite3.Cursor
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Handle GKE cluster mapping, surfacing Autopilot as unpriced."""
+    if resource.attributes.get("enable_autopilot", False):
+        return [], [
+            {
+                "resource_id": resource.resource_id,
+                "reason": "Autopilot uses per-pod pricing; not yet modelled",
+            }
+        ]
+    return map_gke_cluster(resource, cursor)
+
 
 class GcpSkuMapper(SkuMapper):
     """GCP-specific SKU mapper implementing the SkuMapper interface."""
+
+    # Dispatch table: (service, kind) -> mapping function.
+    # To add a new GCP resource: import its mapper and add one entry here.
+    _DISPATCH: ClassVar[dict[tuple[str, str], _MapperFn]] = {
+        ("compute", "gce_instance"): _map_gce_instance_with_attached,
+        ("container", "gke_cluster"): _map_gke_cluster_with_autopilot,
+        ("container", "gke_node_pool"): map_gke_node_pool,
+        ("sql", "cloud_sql_instance"): map_cloud_sql,
+        ("storage", "gcs_bucket"): map_gcs_bucket,
+        ("cdn", "cloud_cdn_backend"): map_cloud_cdn_backend,
+        ("dns", "dns_managed_zone"): map_dns_managed_zone,
+        ("nat", "nat_gateway"): map_nat_gateway,
+        ("vpc", "compute_address"): map_compute_address,
+        ("armor", "compute_security_policy"): map_compute_security_policy,
+        ("pubsub", "pubsub_topic"): map_pubsub_topic,
+        ("pubsub", "pubsub_subscription"): map_pubsub_subscription,
+        ("dataflow", "dataflow_job"): map_dataflow_job,
+        ("dataproc", "dataproc_cluster"): map_dataproc_cluster,
+        ("bigquery", "bigquery_dataset"): map_bigquery_dataset,
+        ("run", "cloud_run_service"): map_cloud_run_service,
+        ("run", "cloud_run_job"): map_cloud_run_job,
+        ("functions", "cloud_function"): map_cloud_function,
+        ("appengine", "app_engine_standard_version"): map_app_engine_standard_version,
+        ("appengine", "app_engine_flexible_version"): map_app_engine_flexible_version,
+        ("spanner", "spanner_instance"): map_spanner_instance,
+        ("firestore", "firestore_database"): map_firestore_database,
+        ("memorystore", "redis_instance"): map_redis_instance,
+        ("memorystore", "memorystore_instance"): map_memorystore_instance,
+        ("bigtable", "bigtable_instance"): map_bigtable_instance,
+        ("alloydb", "alloydb_cluster"): map_alloydb_cluster,
+        ("alloydb", "alloydb_instance"): map_alloydb_instance,
+        ("filestore", "filestore_instance"): map_filestore_instance,
+        ("vertex_ai", "vertex_ai_endpoint"): map_vertex_ai_endpoint,
+        ("artifact_registry", "artifact_registry_repository"): map_artifact_registry_repository,
+    }
+
+    def __init__(self, db_path: str) -> None:
+        super().__init__(db_path)
+        self._conn: sqlite3.Connection | None = None
+
+    def _get_cursor(self) -> sqlite3.Cursor:
+        """Return a cursor, opening the shared connection on first call."""
+        if self._conn is None:
+            self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        return self._conn.cursor()
+
+    def close(self) -> None:
+        """Close the shared SQLite connection if open."""
+        if self._conn is not None:
+            self._conn.close()
+            self._conn = None
 
     @classmethod
     def get_supported_billing_services(cls) -> list[str]:
@@ -83,388 +218,36 @@ class GcpSkuMapper(SkuMapper):
             "Artifact Registry",
         ]
 
-    def _map_gce_compute(
-        self,
-        region: str,
-        machine_type: str,
-        node_count: int,
-        disk_size_gb: float,
-        disk_type: str,
-        resource_quantity: int,
-        resource_id: str,
-        cursor: sqlite3.Cursor,
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_gce_compute(
-            region=region,
-            machine_type=machine_type,
-            node_count=node_count,
-            disk_size_gb=disk_size_gb,
-            disk_type=disk_type,
-            resource_quantity=resource_quantity,
-            resource_id=resource_id,
-            cursor=cursor,
-        )
-
-    def _map_gke_cluster(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_gke_cluster(resource, cursor)
-
-    def _map_gke_node_pool(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_gke_node_pool(resource, cursor)
-
-    def _map_cloud_sql(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_cloud_sql(resource, cursor)
-
-    def _map_gcs_bucket(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_gcs_bucket(resource, cursor)
-
-    def _map_cloud_cdn_backend(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_cloud_cdn_backend(resource, cursor)
-
-    def _map_dns_managed_zone(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_dns_managed_zone(resource, cursor)
-
-    def _map_nat_gateway(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_nat_gateway(resource, cursor)
-
-    def _map_compute_address(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_compute_address(resource, cursor)
-
-    def _map_compute_security_policy(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_compute_security_policy(resource, cursor)
-
-    def _map_pubsub_topic(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_pubsub_topic(resource, cursor)
-
-    def _map_pubsub_subscription(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_pubsub_subscription(resource, cursor)
-
-    def _map_dataflow_job(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_dataflow_job(resource, cursor)
-
-    def _map_dataproc_cluster(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_dataproc_cluster(resource, cursor)
-
-    def _map_bigquery_dataset(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_bigquery_dataset(resource, cursor)
-
-    def _map_cloud_run_service(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_cloud_run_service(resource, cursor)
-
-    def _map_cloud_run_job(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_cloud_run_job(resource, cursor)
-
-    def _map_cloud_function(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_cloud_function(resource, cursor)
-
-    def _map_app_engine_standard_version(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_app_engine_standard_version(resource, cursor)
-
-    def _map_app_engine_flexible_version(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_app_engine_flexible_version(resource, cursor)
-
-    def _map_spanner_instance(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_spanner_instance(resource, cursor)
-
-    def _map_firestore_database(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_firestore_database(resource, cursor)
-
-    def _map_redis_instance(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_redis_instance(resource, cursor)
-
-    def _map_memorystore_instance(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_memorystore_instance(resource, cursor)
-
-    def _map_bigtable_instance(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_bigtable_instance(resource, cursor)
-
-    def _map_alloydb_cluster(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_alloydb_cluster(resource, cursor)
-
-    def _map_alloydb_instance(
-        self, resource: Resource, cursor: sqlite3.Cursor
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        return map_alloydb_instance(resource, cursor)
-
     def map_resource_to_skus(
         self, resource: Resource
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        """Decompose a GCP resource (like a VM or PD) into cached billable SKU rates."""
-        mappings: list[dict[str, Any]] = []
-        unpriced: list[dict[str, Any]] = []
-
+        """Decompose a GCP resource into cached billable SKU rates via the dispatch table."""
         if resource.provider != "gcp":
-            unpriced.append(
+            return [], [
                 {
                     "resource_id": resource.resource_id,
                     "reason": f"GcpSkuMapper cannot process provider '{resource.provider}'",
                 }
-            )
-            return mappings, unpriced
+            ]
 
-        region = resource.region
-        if not region:
-            unpriced.append(
+        if not resource.region:
+            return [], [
                 {
                     "resource_id": resource.resource_id,
                     "reason": "No region specified for GCE resource.",
                 }
-            )
-            return mappings, unpriced
+            ]
 
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
+        fn = self._DISPATCH.get((resource.service, resource.kind))
+        if fn is None:
+            return [], [
+                {
+                    "resource_id": resource.resource_id,
+                    "reason": f"Unsupported resource kind '{resource.kind}'",
+                }
+            ]
 
-        try:
-            # 1. Compute Instance (GCE VM)
-            if resource.service == "compute" and resource.kind == "gce_instance":
-                mtype = resource.attributes.get("machine_type", "")
-                vm_mappings, vm_unpriced = self._map_gce_compute(
-                    region=region,
-                    machine_type=mtype,
-                    node_count=1,
-                    disk_size_gb=0,
-                    disk_type="",
-                    resource_quantity=resource.quantity,
-                    resource_id=resource.resource_id,
-                    cursor=cursor,
-                )
-                mappings.extend(vm_mappings)
-                unpriced.extend(vm_unpriced)
-
-                # Process attached resources (like disks)
-                for attached in resource.attached:
-                    if "disk" in attached.kind.lower():
-                        sku_group = "SSD" if "ssd" in attached.kind.lower() else "PDStandard"
-                        cursor.execute(
-                            """
-                            SELECT sku_id, unit, unit_price, description
-                            FROM pricing_cache
-                            WHERE provider = 'gcp' AND region = ? AND sku_group = ?
-                            """,
-                            (region, sku_group),
-                        )
-                        disk_rows = cursor.fetchall()
-                        if disk_rows:
-                            disk_match = disk_rows[0]
-                            size_gb = float(attached.attributes.get("size_gb", 0))
-                            mappings.append(
-                                {
-                                    "sku_id": disk_match[0],
-                                    "component": "storage",
-                                    "unit": disk_match[1],
-                                    "unit_price": disk_match[2],
-                                    "qty": size_gb * attached.quantity * resource.quantity,
-                                }
-                            )
-                        else:
-                            unpriced.append(
-                                {
-                                    "resource_id": f"{resource.resource_id}/{attached.kind}",
-                                    "reason": (
-                                        f"No matching storage SKU found for '{attached.kind}' "
-                                        f"in region {region}"
-                                    ),
-                                }
-                            )
-                    else:
-                        unpriced.append(
-                            {
-                                "resource_id": f"{resource.resource_id}/{attached.kind}",
-                                "reason": f"Unsupported attached resource kind '{attached.kind}'",
-                            }
-                        )
-
-            elif resource.service == "container" and resource.kind == "gke_cluster":
-                is_autopilot = resource.attributes.get("enable_autopilot", False)
-                if is_autopilot:
-                    unpriced.append(
-                        {
-                            "resource_id": resource.resource_id,
-                            "reason": "Autopilot uses per-pod pricing; not yet modelled",
-                        }
-                    )
-                else:
-                    gke_mappings, gke_unpriced = self._map_gke_cluster(resource, cursor)
-                    mappings.extend(gke_mappings)
-                    unpriced.extend(gke_unpriced)
-
-            elif resource.service == "container" and resource.kind == "gke_node_pool":
-                pool_mappings, pool_unpriced = self._map_gke_node_pool(resource, cursor)
-                mappings.extend(pool_mappings)
-                unpriced.extend(pool_unpriced)
-
-            elif resource.service == "sql" and resource.kind == "cloud_sql_instance":
-                sql_mappings, sql_unpriced = self._map_cloud_sql(resource, cursor)
-                mappings.extend(sql_mappings)
-                unpriced.extend(sql_unpriced)
-            elif resource.service == "storage" and resource.kind == "gcs_bucket":
-                gcs_mappings, gcs_unpriced = self._map_gcs_bucket(resource, cursor)
-                mappings.extend(gcs_mappings)
-                unpriced.extend(gcs_unpriced)
-            elif resource.service == "cdn" and resource.kind == "cloud_cdn_backend":
-                cdn_mappings, cdn_unpriced = self._map_cloud_cdn_backend(resource, cursor)
-                mappings.extend(cdn_mappings)
-                unpriced.extend(cdn_unpriced)
-            elif resource.service == "dns" and resource.kind == "dns_managed_zone":
-                dns_mappings, dns_unpriced = self._map_dns_managed_zone(resource, cursor)
-                mappings.extend(dns_mappings)
-                unpriced.extend(dns_unpriced)
-            elif resource.service == "nat" and resource.kind == "nat_gateway":
-                nat_mappings, nat_unpriced = self._map_nat_gateway(resource, cursor)
-                mappings.extend(nat_mappings)
-                unpriced.extend(nat_unpriced)
-            elif resource.service == "vpc" and resource.kind == "compute_address":
-                vpc_mappings, vpc_unpriced = self._map_compute_address(resource, cursor)
-                mappings.extend(vpc_mappings)
-                unpriced.extend(vpc_unpriced)
-            elif resource.service == "armor" and resource.kind == "compute_security_policy":
-                armor_mappings, armor_unpriced = self._map_compute_security_policy(resource, cursor)
-                mappings.extend(armor_mappings)
-                unpriced.extend(armor_unpriced)
-            elif resource.service == "pubsub" and resource.kind == "pubsub_topic":
-                ps_mappings, ps_unpriced = self._map_pubsub_topic(resource, cursor)
-                mappings.extend(ps_mappings)
-                unpriced.extend(ps_unpriced)
-            elif resource.service == "pubsub" and resource.kind == "pubsub_subscription":
-                ps_mappings, ps_unpriced = self._map_pubsub_subscription(resource, cursor)
-                mappings.extend(ps_mappings)
-                unpriced.extend(ps_unpriced)
-            elif resource.service == "dataflow" and resource.kind == "dataflow_job":
-                df_mappings, df_unpriced = self._map_dataflow_job(resource, cursor)
-                mappings.extend(df_mappings)
-                unpriced.extend(df_unpriced)
-            elif resource.service == "dataproc" and resource.kind == "dataproc_cluster":
-                dp_mappings, dp_unpriced = self._map_dataproc_cluster(resource, cursor)
-                mappings.extend(dp_mappings)
-                unpriced.extend(dp_unpriced)
-            elif resource.service == "bigquery" and resource.kind == "bigquery_dataset":
-                bq_mappings, bq_unpriced = self._map_bigquery_dataset(resource, cursor)
-                mappings.extend(bq_mappings)
-                unpriced.extend(bq_unpriced)
-            elif resource.service == "run" and resource.kind == "cloud_run_service":
-                run_mappings, run_unpriced = self._map_cloud_run_service(resource, cursor)
-                mappings.extend(run_mappings)
-                unpriced.extend(run_unpriced)
-            elif resource.service == "run" and resource.kind == "cloud_run_job":
-                run_mappings, run_unpriced = self._map_cloud_run_job(resource, cursor)
-                mappings.extend(run_mappings)
-                unpriced.extend(run_unpriced)
-            elif resource.service == "functions" and resource.kind == "cloud_function":
-                fn_mappings, fn_unpriced = self._map_cloud_function(resource, cursor)
-                mappings.extend(fn_mappings)
-                unpriced.extend(fn_unpriced)
-            elif resource.service == "appengine" and resource.kind == "app_engine_standard_version":
-                ae_mappings, ae_unpriced = self._map_app_engine_standard_version(resource, cursor)
-                mappings.extend(ae_mappings)
-                unpriced.extend(ae_unpriced)
-            elif resource.service == "appengine" and resource.kind == "app_engine_flexible_version":
-                ae_mappings, ae_unpriced = self._map_app_engine_flexible_version(resource, cursor)
-                mappings.extend(ae_mappings)
-                unpriced.extend(ae_unpriced)
-            elif resource.service == "spanner" and resource.kind == "spanner_instance":
-                sp_mappings, sp_unpriced = self._map_spanner_instance(resource, cursor)
-                mappings.extend(sp_mappings)
-                unpriced.extend(sp_unpriced)
-            elif resource.service == "firestore" and resource.kind == "firestore_database":
-                fs_mappings, fs_unpriced = self._map_firestore_database(resource, cursor)
-                mappings.extend(fs_mappings)
-                unpriced.extend(fs_unpriced)
-            elif resource.service == "memorystore" and resource.kind == "redis_instance":
-                redis_mappings, redis_unpriced = self._map_redis_instance(resource, cursor)
-                mappings.extend(redis_mappings)
-                unpriced.extend(redis_unpriced)
-            elif resource.service == "memorystore" and resource.kind == "memorystore_instance":
-                ms_mappings, ms_unpriced = self._map_memorystore_instance(resource, cursor)
-                mappings.extend(ms_mappings)
-                unpriced.extend(ms_unpriced)
-            elif resource.service == "bigtable" and resource.kind == "bigtable_instance":
-                bt_mappings, bt_unpriced = self._map_bigtable_instance(resource, cursor)
-                mappings.extend(bt_mappings)
-                unpriced.extend(bt_unpriced)
-            elif resource.service == "alloydb" and resource.kind == "alloydb_cluster":
-                ad_mappings, ad_unpriced = self._map_alloydb_cluster(resource, cursor)
-                mappings.extend(ad_mappings)
-                unpriced.extend(ad_unpriced)
-            elif resource.service == "alloydb" and resource.kind == "alloydb_instance":
-                adi_mappings, adi_unpriced = self._map_alloydb_instance(resource, cursor)
-                mappings.extend(adi_mappings)
-                unpriced.extend(adi_unpriced)
-            elif resource.service == "filestore" and resource.kind == "filestore_instance":
-                fs_mappings, fs_unpriced = map_filestore_instance(resource, cursor)
-                mappings.extend(fs_mappings)
-                unpriced.extend(fs_unpriced)
-            elif resource.service == "vertex_ai" and resource.kind == "vertex_ai_endpoint":
-                vai_mappings, vai_unpriced = map_vertex_ai_endpoint(resource, cursor)
-                mappings.extend(vai_mappings)
-                unpriced.extend(vai_unpriced)
-            elif (
-                resource.service == "artifact_registry"
-                and resource.kind == "artifact_registry_repository"
-            ):
-                ar_mappings, ar_unpriced = map_artifact_registry_repository(resource, cursor)
-                mappings.extend(ar_mappings)
-                unpriced.extend(ar_unpriced)
-            else:
-                unpriced.append(
-                    {
-                        "resource_id": resource.resource_id,
-                        "reason": f"Unsupported resource kind '{resource.kind}'",
-                    }
-                )
-        finally:
-            conn.close()
-
-        return mappings, unpriced
+        return fn(resource, self._get_cursor())
 
 
 # Register the SKU mapper in global registry

@@ -117,3 +117,7 @@ def normalize_bigtable(r: Resource) -> None:
             except ValueError, TypeError:
                 r.usage["storage_gb_per_cluster"] = 0
                 r.assumptions.append("Invalid storage_gb_per_cluster; defaulted to 0.")
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

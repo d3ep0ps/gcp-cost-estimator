@@ -396,3 +396,22 @@ def test_plan_json_preemptible_vm(tmp_path) -> None:
     model = parse_terraform(str(plan_file), mode="plan")
     assert len(model.resources) == 1
     assert model.resources[0].attributes.get("preemptible") is True
+
+
+def test_terraform_hcl_parse_failure_is_surfaced(tmp_path) -> None:
+    """A malformed .tf file is skipped but logged; valid sibling files are still parsed."""
+    from gcp_cost_estimator.core.iac.terraform_hcl import TerraformHclParser
+
+    (tmp_path / "bad.tf").write_text("NOT { VALID HCL !!!")
+    (tmp_path / "good.tf").write_text(
+        'resource "google_compute_instance" "vm" {\n  machine_type = "n1-standard-1"\n  region = "us-central1"\n}\n'
+    )
+
+    parser = TerraformHclParser()
+    model = parser.parse(str(tmp_path))
+
+    # Valid file is still parsed — at least one resource returned
+    assert len(model.resources) >= 1
+    # Parse warning is recorded in assumptions on the parsed resources
+    all_assumptions = [a for r in model.resources for a in r.assumptions]
+    assert any("bad.tf" in a for a in all_assumptions)

@@ -95,3 +95,7 @@ def normalize_sql(r: Resource) -> None:
         if "backup_enabled" not in r.attributes:
             r.attributes["backup_enabled"] = False
             r.assumptions.append("Defaulted backup_enabled to false.")
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

@@ -52,3 +52,7 @@ def normalize_container(r: Resource) -> None:
             if "disk_type" not in r.attributes:
                 r.attributes["disk_type"] = "pd-standard"
                 r.assumptions.append("Defaulted disk_type to pd-standard.")
+
+    if "runtime_hours_per_month" not in r.usage:
+        r.usage["runtime_hours_per_month"] = 730
+        r.assumptions.append("Defaulted runtime_hours_per_month to 730.")

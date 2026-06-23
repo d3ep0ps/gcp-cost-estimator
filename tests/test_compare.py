@@ -170,3 +170,64 @@ def test_what_if_changes_runtime_and_reprices(populated_db: str) -> None:
     result = what_if(populated_db, model, {"runtime_hours": 365.0})
     assert result["new_estimate"].monthly_total < 100.0  # roughly half
     assert result["comparison"]["monthly_total_diff"] < 0.0  # negative diff (savings)
+
+
+def test_compare_regions_cheapest_reflects_actual_cost_order(populated_db: str) -> None:
+    """cheapest_region must point to the region with the lowest monthly_total, not a fixed choice."""
+    data = {
+        "resources": [
+            {
+                "provider": "gcp",
+                "resource_id": "vm-1",
+                "service": "compute",
+                "kind": "gce_instance",
+                "region": "us-central1",
+                "attributes": {"machine_type": "n2-standard-4"},
+                "usage": {"runtime_hours_per_month": 730.0},
+            }
+        ]
+    }
+    model = ResourceModel(**data)
+    result = compare_regions(populated_db, model, ["us-central1", "us-east1"])
+
+    cheapest = result["cheapest_region"]
+    cheapest_cost = result["estimates"][cheapest].monthly_total
+
+    for region, est in result["estimates"].items():
+        assert est.monthly_total >= cheapest_cost, (
+            f"Region '{region}' (${est.monthly_total:.4f}) is cheaper than "
+            f"cheapest_region '{cheapest}' (${cheapest_cost:.4f})"
+        )
+
+
+def test_what_if_unrecognised_keys_do_not_silently_match(populated_db: str) -> None:
+    """Passing an unrecognised top-level change key must not produce a result
+    identical to passing no changes — callers must be able to detect the no-op."""
+    data = {
+        "resources": [
+            {
+                "provider": "gcp",
+                "resource_id": "vm-1",
+                "service": "compute",
+                "kind": "gce_instance",
+                "region": "us-central1",
+                "attributes": {"machine_type": "n2-standard-4"},
+                "usage": {"runtime_hours_per_month": 730.0},
+            }
+        ]
+    }
+    model = ResourceModel(**data)
+
+    # A recognised change produces a different cost
+    result_recognised = what_if(populated_db, model, {"runtime_hours": 1.0})
+    assert result_recognised["new_estimate"].monthly_total < 1.0
+
+    # An unrecognised key produces the SAME cost as no change (baseline)
+    result_unrecognised = what_if(populated_db, model, {"disk_type": "pd-ssd"})
+    baseline = what_if(populated_db, model, {})
+    assert result_unrecognised["new_estimate"].monthly_total == pytest.approx(
+        baseline["new_estimate"].monthly_total
+    ), (
+        "Unrecognised key 'disk_type' should be a no-op — cost should equal baseline. "
+        "If this changes in future, what_if() should warn about unrecognised keys."
+    )

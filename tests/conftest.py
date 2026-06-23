@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-import contextlib
 import socket
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -38,14 +38,6 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
 
 
 @pytest.fixture
-def temp_db_path() -> Any:
-    """Create a temporary database path inside the workspace for SQLite testing."""
-    from pathlib import Path
-
-    path = Path(__file__).parent / "temp_test_db.sqlite"
-    if path.exists():
-        path.unlink()
-    yield str(path)
-    if path.exists():
-        with contextlib.suppress(OSError):
-            path.unlink()
+def temp_db_path(tmp_path: Path) -> str:
+    """Temporary SQLite DB path — cleaned up automatically by pytest even on crash."""
+    return str(tmp_path / "test.sqlite")

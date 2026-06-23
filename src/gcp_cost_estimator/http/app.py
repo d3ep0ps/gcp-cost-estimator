@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import hmac
 import os
 import urllib.parse
 
@@ -28,7 +29,10 @@ class BearerAuthMiddleware:
             token_val = auth_header[len("Bearer ") :].strip()
 
         if not token_val:
-            # Fallback to query parameter (specifically useful for SSE clients)
+            # WARNING: ?token= appears in server access logs and browser history.
+            # Prefer the Authorization header whenever the client supports it.
+            # This fallback exists for SSE clients that cannot set custom headers;
+            # for production SSE deployments consider a short-lived ticket system.
             query_string = scope.get("query_string", b"").decode("utf-8")
             params = urllib.parse.parse_qs(query_string)
             if "token" in params:
@@ -38,7 +42,7 @@ class BearerAuthMiddleware:
             await self.unauthorized(send, "Missing bearer token")
             return
 
-        if token_val != self.token:
+        if not hmac.compare_digest(token_val, self.token):
             await self.unauthorized(send, "Invalid bearer token")
             return
 
@@ -78,8 +82,13 @@ def create_app() -> ASGIApp:
     # Get the raw FastMCP SSE Starlette app
     mcp_sse_app = mcp.sse_app()
 
-    # Retrieve expected token from env, default to 'test-token' for dev/tests
-    token = os.environ.get("GCP_BILLING_BEARER_TOKEN", "test-token")
+    # Retrieve expected token from env — must be set; no insecure default.
+    token = os.environ.get("GCP_BILLING_BEARER_TOKEN")
+    if not token:
+        raise RuntimeError(
+            "GCP_BILLING_BEARER_TOKEN must be set before starting the HTTP adapter. "
+            "Generate a strong random token and export it as this environment variable."
+        )
 
     # Wrap the app in the authentication middleware
     return BearerAuthMiddleware(mcp_sse_app, token)

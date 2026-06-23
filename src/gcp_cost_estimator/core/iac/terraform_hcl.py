@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
 import re
 from pathlib import Path
 from typing import Any
@@ -7,6 +8,8 @@ from typing import Any
 from gcp_cost_estimator.core.iac._hcl2_wrapper import load_hcl
 from gcp_cost_estimator.core.iac.base import IaCParser, register_iac_parser
 from gcp_cost_estimator.core.model import Resource, ResourceModel
+
+_logger = logging.getLogger("gcp_cost_estimator")
 
 
 def _extract_scalar(val: Any) -> Any:
@@ -38,6 +41,7 @@ class TerraformHclParser(IaCParser):
         tf_files = [f for f in path_obj.iterdir() if f.is_file() and f.suffix == ".tf"]
 
         merged_config: dict[str, Any] = {}
+        parse_warnings: list[str] = []
         for fpath in tf_files:
             try:
                 config = load_hcl(fpath)
@@ -46,8 +50,10 @@ class TerraformHclParser(IaCParser):
                         merged_config[key] = []
                     if isinstance(val, list):
                         merged_config[key].extend(val)
-            except Exception:
-                pass
+            except Exception as exc:
+                msg = f"Skipped '{fpath.name}': failed to parse HCL: {exc}"
+                _logger.warning(msg)
+                parse_warnings.append(msg)
 
         var_defaults: dict[str, Any] = {}
         for var_dict in merged_config.get("variable", []):
@@ -160,6 +166,14 @@ class TerraformHclParser(IaCParser):
             for res in resources:
                 if res.service == "appengine" and not res.region:
                     res.region = app_engine_region
+
+        # Propagate any parse warnings as assumptions on every parsed resource so
+        # they survive serialization and are visible in the estimate output.
+        if parse_warnings:
+            for r in resources:
+                for w in parse_warnings:
+                    if w not in r.assumptions:
+                        r.assumptions.append(w)
 
         return ResourceModel(resources=resources)
 
