@@ -165,7 +165,7 @@ def refresh_pricing_cache(
                     try:
                         units = int(unit_price_data.get("units", 0))
                         nanos = int(unit_price_data.get("nanos", 0))
-                    except ValueError, TypeError:
+                    except (ValueError, TypeError):
                         units = 0
                         nanos = 0
 

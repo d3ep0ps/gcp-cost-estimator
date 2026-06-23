@@ -169,6 +169,43 @@ def test_refresh_populates_cache_from_fixtured_api(temp_db_path: str) -> None:
     assert price2["unit_price"] == 0.0118
 
 
+def test_malformed_unit_price_skipped_gracefully(temp_db_path: str) -> None:
+    """When unitPrice contains non-numeric values, the SKU is skipped without crashing."""
+    conn = sqlite3.connect(temp_db_path)
+    init_db(conn)
+    conn.close()
+
+    bad_sku_resp = {
+        "skus": [
+            {
+                "skuId": "BAD-001",
+                "description": "Bad price SKU",
+                "category": {
+                    "serviceDisplayName": "Compute Engine",
+                    "resourceFamily": "Compute",
+                    "resourceGroup": "CPU",
+                    "usageType": "OnDemand",
+                },
+                "serviceRegions": ["us-central1"],
+                "pricingInfo": [
+                    {
+                        "pricingExpression": {
+                            "usageUnit": "h",
+                            "tieredRates": [
+                                {"unitPrice": {"units": "N/A", "nanos": "N/A"}}
+                            ],
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    client = MockClient([MockResponse(bad_sku_resp)])
+    result = refresh_pricing_cache(temp_db_path, force=True, client=client)
+    assert result["status"] == "refreshed"
+    assert result["sku_count"] == 1  # SKU is inserted with 0.0 price (graceful fallback)
+
+
 def test_refresh_failure_keeps_previous_snapshot(temp_db_path: str) -> None:
     """Verify that a network failure aborts the transaction and keeps existing cache intact."""
     conn = sqlite3.connect(temp_db_path)
