@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import hmac
 import os
 import urllib.parse
 
@@ -28,7 +29,10 @@ class BearerAuthMiddleware:
             token_val = auth_header[len("Bearer ") :].strip()
 
         if not token_val:
-            # Fallback to query parameter (specifically useful for SSE clients)
+            # WARNING: ?token= appears in server access logs and browser history.
+            # Prefer the Authorization header whenever the client supports it.
+            # This fallback exists for SSE clients that cannot set custom headers;
+            # for production SSE deployments consider a short-lived ticket system.
             query_string = scope.get("query_string", b"").decode("utf-8")
             params = urllib.parse.parse_qs(query_string)
             if "token" in params:
@@ -38,7 +42,7 @@ class BearerAuthMiddleware:
             await self.unauthorized(send, "Missing bearer token")
             return
 
-        if token_val != self.token:
+        if not hmac.compare_digest(token_val, self.token):
             await self.unauthorized(send, "Invalid bearer token")
             return
 
