@@ -49,39 +49,53 @@ def estimate_infrastructure(
                 unpriced_items.append(UnpricedItem(resource_id="model", reason=err))
     else:
         # 3. Map and calculate valid resources
+        # Group resources by provider so each provider gets one shared mapper/connection.
+        resources_by_provider: dict[str, list] = {}
         for r in normalized_model.resources:
-            # Gather resource-level assumptions (e.g. defaulted runtime)
-            all_assumptions.extend(r.assumptions)
+            resources_by_provider.setdefault(r.provider, []).append(r)
 
-            # Check if this resource has a specific validation-level unpriced reason
-            val_unpriced_reason = None
-            for item in val_res.get("unpriced", []):
-                if item["resource_id"] == r.resource_id:
-                    val_unpriced_reason = item["reason"]
-                    break
-
-            if val_unpriced_reason:
-                unpriced_items.append(
-                    UnpricedItem(resource_id=r.resource_id, reason=val_unpriced_reason)
-                )
-                continue
-
+        for provider, provider_resources in resources_by_provider.items():
             try:
-                # Resolve mapper for the resource provider
-                mapper = get_sku_mapper(r.provider, db_path)
-                mappings, unpriced = mapper.map_resource_to_skus(r)
-
-                # Capture unpriced components
-                for up in unpriced:
-                    unpriced_items.append(
-                        UnpricedItem(resource_id=r.resource_id, reason=up["reason"])
-                    )
-
-                # Perform cost calculations
-                resource_line_items = calculate_line_items(r.resource_id, mappings, r.usage)
-                line_items.extend(resource_line_items)
+                mapper = get_sku_mapper(provider, db_path)
             except Exception as e:
-                unpriced_items.append(UnpricedItem(resource_id=r.resource_id, reason=str(e)))
+                for r in provider_resources:
+                    unpriced_items.append(UnpricedItem(resource_id=r.resource_id, reason=str(e)))
+                continue
+            try:
+                for r in provider_resources:
+                    # Gather resource-level assumptions (e.g. defaulted runtime)
+                    all_assumptions.extend(r.assumptions)
+
+                    # Check if this resource has a specific validation-level unpriced reason
+                    val_unpriced_reason = None
+                    for item in val_res.get("unpriced", []):
+                        if item["resource_id"] == r.resource_id:
+                            val_unpriced_reason = item["reason"]
+                            break
+
+                    if val_unpriced_reason:
+                        unpriced_items.append(
+                            UnpricedItem(resource_id=r.resource_id, reason=val_unpriced_reason)
+                        )
+                        continue
+
+                    try:
+                        mappings, unpriced = mapper.map_resource_to_skus(r)
+
+                        # Capture unpriced components
+                        for up in unpriced:
+                            unpriced_items.append(
+                                UnpricedItem(resource_id=r.resource_id, reason=up["reason"])
+                            )
+
+                        # Perform cost calculations
+                        resource_line_items = calculate_line_items(r.resource_id, mappings, r.usage)
+                        line_items.extend(resource_line_items)
+                    except Exception as e:
+                        unpriced_items.append(UnpricedItem(resource_id=r.resource_id, reason=str(e)))
+            finally:
+                if hasattr(mapper, "close"):
+                    mapper.close()
 
     # 4. Resolve snapshot timestamp from cache metadata
     try:
