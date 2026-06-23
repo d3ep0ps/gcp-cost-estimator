@@ -77,6 +77,22 @@ async def test_mcp_prompts_are_registered() -> None:
     assert expected_prompts.issubset(prompt_names)
 
 
+def test_parse_terraform_rejects_path_outside_allowed_dir(tmp_path, monkeypatch) -> None:
+    """parse_terraform raises ValueError for paths outside GCP_PARSE_ALLOWED_DIR."""
+    safe_dir = tmp_path / "safe"
+    safe_dir.mkdir()
+    monkeypatch.setenv("GCP_PARSE_ALLOWED_DIR", str(safe_dir))
+    # Reload the module-level constant so monkeypatch takes effect
+    import gcp_cost_estimator.mcp.server as srv
+    srv._PARSE_ALLOWED_DIR = str(safe_dir)
+
+    with pytest.raises(ValueError, match="outside the allowed directory"):
+        srv.parse_terraform(path="/etc")
+
+    # Restore
+    srv._PARSE_ALLOWED_DIR = None
+
+
 @patch("gcp_cost_estimator.mcp.server.parse_terraform_core")
 async def test_tool_parse_terraform(mock_parse) -> None:
     """Verifies that the parse_terraform tool delegates correctly to core."""
