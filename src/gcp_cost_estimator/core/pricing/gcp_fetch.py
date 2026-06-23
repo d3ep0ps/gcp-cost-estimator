@@ -57,7 +57,7 @@ def refresh_pricing_cache(
         headers: dict[str, str] = {}
 
         if api_key:
-            params["key"] = api_key
+            headers["X-Goog-Api-Key"] = api_key
         elif access_token:
             headers["Authorization"] = f"Bearer {access_token}"
         else:

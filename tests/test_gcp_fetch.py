@@ -169,6 +169,38 @@ def test_refresh_populates_cache_from_fixtured_api(temp_db_path: str) -> None:
     assert price2["unit_price"] == 0.0118
 
 
+def test_api_key_sent_as_header_not_query_param(temp_db_path: str, monkeypatch: Any) -> None:
+    """GCP_API_KEY must be sent as X-Goog-Api-Key header, never as a URL query param."""
+    conn = sqlite3.connect(temp_db_path)
+    init_db(conn)
+    conn.close()
+
+    monkeypatch.setenv("GCP_API_KEY", "my-secret-key")
+    monkeypatch.delenv("GCP_ACCESS_TOKEN", raising=False)
+
+    captured_params: dict[str, Any] = {}
+    captured_headers: dict[str, Any] = {}
+
+    class CapturingClient:
+        def get(self, url: str, params: Any = None, headers: Any = None, **_: Any) -> MockResponse:
+            captured_params.update(params or {})
+            captured_headers.update(headers or {})
+            if url == "https://cloudbilling.googleapis.com/v1/services":
+                return MockResponse(
+                    {"services": [{"displayName": "Compute Engine", "serviceId": "6F81-5844-456A"}]}
+                )
+            return MockResponse({"skus": []})
+
+        def close(self) -> None:
+            pass
+
+    client = CapturingClient()
+    refresh_pricing_cache(temp_db_path, force=True, client=client)
+
+    assert "key" not in captured_params, "API key must NOT appear in URL query params"
+    assert captured_headers.get("X-Goog-Api-Key") == "my-secret-key"
+
+
 def test_malformed_unit_price_skipped_gracefully(temp_db_path: str) -> None:
     """When unitPrice contains non-numeric values, the SKU is skipped without crashing."""
     conn = sqlite3.connect(temp_db_path)
