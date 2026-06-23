@@ -202,8 +202,9 @@ def get_pricing_snapshot_resource() -> str:
     try:
         status = get_cache_status_core(get_default_db_path(), "gcp")
         return json.dumps(status)
-    except Exception as e:
-        return json.dumps({"error": f"Failed to retrieve pricing cache status: {e}"})
+    except Exception:
+        logger.exception("Failed to retrieve pricing cache status")
+        return json.dumps({"error": "Failed to retrieve pricing cache status. Check server logs."})
 
 
 @mcp.resource("docs://disclaimer")
