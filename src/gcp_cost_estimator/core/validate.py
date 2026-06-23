@@ -6,9 +6,7 @@ from typing import Any
 from gcp_cost_estimator.core.model import ResourceModel
 from gcp_cost_estimator.core.validation.gcp import NORMALIZERS, VALIDATORS
 
-_SECRET_KEYWORDS = frozenset(
-    {"secret", "password", "private_key", "token", "credential", "cert"}
-)
+_SECRET_KEYWORDS = frozenset({"secret", "password", "private_key", "token", "credential", "cert"})
 
 
 def validate_resource_model(model: ResourceModel) -> dict[str, Any]:

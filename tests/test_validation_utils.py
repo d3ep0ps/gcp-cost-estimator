@@ -31,14 +31,14 @@ def test_parse_k8s_quantity_cpu(val: object, expected: str) -> None:
     "val, expected",
     [
         # Binary suffixes (IEC)
-        ("1Ki", "0"),           # 1024 bytes ≈ 0.000000953 GiB → rounds to "0" at 4dp
+        ("1Ki", "0"),  # 1024 bytes ≈ 0.000000953 GiB → rounds to "0" at 4dp
         ("512Mi", "0.5"),
         ("1Gi", "1.0"),
         ("2Gi", "2.0"),
         ("4Ti", "4096.0"),
         # Decimal suffixes (SI)
-        ("1G", "0.9313"),       # 1e9 / 2^30 ≈ 0.9313
-        ("1T", "931.3226"),     # 1e12 / 2^30 ≈ 931.32
+        ("1G", "0.9313"),  # 1e9 / 2^30 ≈ 0.9313
+        ("1T", "931.3226"),  # 1e12 / 2^30 ≈ 931.32
         # Plain numeric (no suffix) — interpreted as bytes-like float GiB
         ("2", "2.0"),
         # Unknown suffix — returned as-is
