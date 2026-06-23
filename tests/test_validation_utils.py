@@ -15,9 +15,9 @@ from gcp_cost_estimator.core.validation.utils import parse_k8s_quantity
         # CPU: plain numeric
         ("2", "2"),
         ("1.5", "1.5"),
-        # CPU: unknown suffix — returned as-is
+        # unknown suffix — returned as-is
         ("4cpus", "4cpus"),
-        # CPU: None / empty
+        # None and empty strings
         (None, ""),
         ("", ""),
         ("  ", ""),
