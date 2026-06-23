@@ -44,7 +44,7 @@ def normalize_run(r: Resource) -> None:
         else:
             try:
                 r.attributes["min_instance_count"] = int(r.attributes["min_instance_count"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.attributes["min_instance_count"] = 0
 
         if r.attributes["min_instance_count"] > 0:

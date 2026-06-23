@@ -51,7 +51,7 @@ def normalize_memorystore(r: Resource) -> None:
         else:
             try:
                 r.attributes["shard_count"] = int(r.attributes["shard_count"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.attributes["shard_count"] = 1
                 r.assumptions.append("Invalid shard_count; defaulted to 1.")
 

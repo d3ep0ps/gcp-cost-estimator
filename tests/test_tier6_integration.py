@@ -61,4 +61,6 @@ def test_tier6_combined_estimate(populated_tier6_db: str) -> None:
     assert len(est.assumptions) > 0
     # Make sure defaults/assumptions are recorded
     # Pricing snapshot assumption is always present
-    assert any("snapshot" in a.lower() or "Defaulted" in a or "Pricing cache" in a for a in est.assumptions)
+    assert any(
+        "snapshot" in a.lower() or "Defaulted" in a or "Pricing cache" in a for a in est.assumptions
+    )

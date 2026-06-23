@@ -50,7 +50,7 @@ def normalize_storage(r: Resource) -> None:
         else:
             try:
                 r.usage["size_gb"] = float(r.usage["size_gb"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["size_gb"] = 100
                 r.assumptions.append("Invalid size_gb specified; defaulted size_gb to 100 GB.")
 
@@ -63,7 +63,7 @@ def normalize_storage(r: Resource) -> None:
         else:
             try:
                 r.usage["monthly_class_a_ops"] = int(r.usage["monthly_class_a_ops"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["monthly_class_a_ops"] = 10_000
 
         if "monthly_class_b_ops" not in r.usage:
@@ -75,7 +75,7 @@ def normalize_storage(r: Resource) -> None:
         else:
             try:
                 r.usage["monthly_class_b_ops"] = int(r.usage["monthly_class_b_ops"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["monthly_class_b_ops"] = 100_000
 
         if "monthly_egress_gb" not in r.usage:
@@ -87,7 +87,7 @@ def normalize_storage(r: Resource) -> None:
         else:
             try:
                 r.usage["monthly_egress_gb"] = float(r.usage["monthly_egress_gb"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["monthly_egress_gb"] = 10
 
         if "monthly_retrieval_gb" not in r.usage:
@@ -95,5 +95,5 @@ def normalize_storage(r: Resource) -> None:
         else:
             try:
                 r.usage["monthly_retrieval_gb"] = float(r.usage["monthly_retrieval_gb"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["monthly_retrieval_gb"] = 0

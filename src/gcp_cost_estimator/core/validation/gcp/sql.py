@@ -54,7 +54,7 @@ def validate_sql(
                         f"Resource '{r.resource_id}' disk size {disk_size} GB "
                         "is below GCP minimum of 10 GB."
                     )
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
         disk_type = r.attributes.get("disk_type")
@@ -77,7 +77,7 @@ def validate_sql(
                         f"Resource '{r.resource_id}' is Enterprise Plus and "
                         f"disk size {disk_size} GB is below recommended 100 GB."
                     )
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
 

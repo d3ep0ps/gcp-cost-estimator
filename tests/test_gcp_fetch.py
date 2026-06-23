@@ -223,9 +223,7 @@ def test_malformed_unit_price_skipped_gracefully(temp_db_path: str) -> None:
                     {
                         "pricingExpression": {
                             "usageUnit": "h",
-                            "tieredRates": [
-                                {"unitPrice": {"units": "N/A", "nanos": "N/A"}}
-                            ],
+                            "tieredRates": [{"unitPrice": {"units": "N/A", "nanos": "N/A"}}],
                         }
                     }
                 ],

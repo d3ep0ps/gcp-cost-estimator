@@ -47,8 +47,11 @@ def estimate_infrastructure(
                 unpriced_items.append(UnpricedItem(resource_id=match.group(1), reason=err))
             else:
                 rid = next(
-                    (r.resource_id for r in normalized_model.resources
-                     if r.resource_id in err or r.kind in err),
+                    (
+                        r.resource_id
+                        for r in normalized_model.resources
+                        if r.resource_id in err or r.kind in err
+                    ),
                     "model",
                 )
                 unpriced_items.append(UnpricedItem(resource_id=rid, reason=err))

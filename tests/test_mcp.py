@@ -84,6 +84,7 @@ def test_parse_terraform_rejects_path_outside_allowed_dir(tmp_path, monkeypatch)
     monkeypatch.setenv("GCP_PARSE_ALLOWED_DIR", str(safe_dir))
     # Reload the module-level constant so monkeypatch takes effect
     import gcp_cost_estimator.mcp.server as srv
+
     srv._PARSE_ALLOWED_DIR = str(safe_dir)
 
     with pytest.raises(ValueError, match="outside the allowed directory"):

@@ -59,7 +59,7 @@ def normalize_dataflow(r: Resource) -> None:
         else:
             try:
                 r.attributes["max_workers"] = int(r.attributes["max_workers"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.attributes["max_workers"] = 1
                 r.assumptions.append("Invalid max_workers; defaulted to 1.")
 
@@ -75,6 +75,6 @@ def normalize_dataflow(r: Resource) -> None:
         else:
             try:
                 r.usage["shuffle_data_gb"] = float(r.usage["shuffle_data_gb"])
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 r.usage["shuffle_data_gb"] = 50.0
                 r.assumptions.append("Invalid shuffle_data_gb; defaulted to 50.0 GB.")

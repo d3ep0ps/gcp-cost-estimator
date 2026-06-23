@@ -101,7 +101,7 @@ def map_alloydb_instance(
 
     try:
         cpu_val = int(cpu_count)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         unpriced.append(
             {
                 "resource_id": resource.resource_id,
