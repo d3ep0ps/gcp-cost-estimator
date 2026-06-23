@@ -77,18 +77,36 @@ async def test_mcp_prompts_are_registered() -> None:
     assert expected_prompts.issubset(prompt_names)
 
 
-def test_parse_terraform_rejects_path_outside_allowed_dir(tmp_path, monkeypatch) -> None:
+def test_parse_terraform_rejects_path_outside_allowed_dir(tmp_path) -> None:
     """parse_terraform raises ValueError for paths outside GCP_PARSE_ALLOWED_DIR."""
     safe_dir = tmp_path / "safe"
     safe_dir.mkdir()
-    monkeypatch.setenv("GCP_PARSE_ALLOWED_DIR", str(safe_dir))
-    # Reload the module-level constant so monkeypatch takes effect
     import gcp_cost_estimator.mcp.server as srv
 
     srv._PARSE_ALLOWED_DIR = str(safe_dir)
 
     with pytest.raises(ValueError, match="outside the allowed directory"):
         srv.parse_terraform(path="/etc")
+
+    # Restore
+    srv._PARSE_ALLOWED_DIR = None
+
+
+def test_parse_terraform_allows_allowed_dir_itself(tmp_path) -> None:
+    """parse_terraform must not reject the allowed directory itself (startswith + os.sep bug)."""
+    from unittest.mock import patch
+
+    import gcp_cost_estimator.mcp.server as srv
+
+    safe_dir = tmp_path / "workspace"
+    safe_dir.mkdir()
+
+    srv._PARSE_ALLOWED_DIR = str(safe_dir)
+    # parse_terraform_core will fail (dir has no TF files) but the path guard must NOT raise.
+    # We patch core to isolate the guard logic.
+    with patch("gcp_cost_estimator.mcp.server.parse_terraform_core", return_value=None):
+        result = srv.parse_terraform(path=str(safe_dir))
+    assert result is None  # guard passed, core was called
 
     # Restore
     srv._PARSE_ALLOWED_DIR = None

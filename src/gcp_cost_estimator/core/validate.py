@@ -6,6 +6,8 @@ from typing import Any
 from gcp_cost_estimator.core.model import ResourceModel
 from gcp_cost_estimator.core.validation.gcp import NORMALIZERS, VALIDATORS
 
+_SECRET_KEYWORDS = frozenset({"secret", "password", "private_key", "token", "credential", "cert"})
+
 
 def validate_resource_model(model: ResourceModel) -> dict[str, Any]:
     """Validate the canonical resource model, checking for correctness.
@@ -50,13 +52,13 @@ def normalize_resource_model(model: ResourceModel) -> ResourceModel:
         if r.region:
             r.region = re.sub(r"-(\d+)$", r"\1", r.region.strip()).lower()
 
-        # 2. Redact sensitive attributes (secret, password)
+        # 2. Redact sensitive attributes
         for k in list(r.attributes.keys()):
-            if "secret" in k.lower() or "password" in k.lower():
+            if any(word in k.lower() for word in _SECRET_KEYWORDS):
                 r.attributes[k] = "[REDACTED]"
             elif isinstance(r.attributes[k], dict):
                 for sub_k in list(r.attributes[k].keys()):
-                    if "secret" in sub_k.lower() or "password" in sub_k.lower():
+                    if any(word in sub_k.lower() for word in _SECRET_KEYWORDS):
                         r.attributes[k][sub_k] = "[REDACTED]"
 
         # 3. Delegate normalization to provider-specific normalization logic
