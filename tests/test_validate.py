@@ -84,7 +84,7 @@ def test_defaults_applied_are_recorded_in_assumptions() -> None:
 
 
 def test_secret_flagged_attributes_redacted() -> None:
-    """Verify that attributes with keys containing 'secret' or 'password' are redacted."""
+    """Verify that attributes with credential-like key names are redacted."""
     data = {
         "resources": [
             {
@@ -97,15 +97,25 @@ def test_secret_flagged_attributes_redacted() -> None:
                     "tier": "db-custom-1-3840",
                     "admin_password": "super-secret-password-123",
                     "db_secret_key": "somekey",
+                    # Extended keywords that must also be redacted
+                    "private_key": "-----BEGIN RSA PRIVATE KEY-----",
+                    "auth_token": "ya29.example",
+                    "service_account_credentials": '{"type":"service_account"}',
+                    "ssl_certificate": "-----BEGIN CERTIFICATE-----",
                 },
             }
         ]
     }
     model = ResourceModel(**data)
     normalized = normalize_resource_model(model)
-    assert normalized.resources[0].attributes["admin_password"] == "[REDACTED]"
-    assert normalized.resources[0].attributes["db_secret_key"] == "[REDACTED]"
-    assert normalized.resources[0].attributes["tier"] == "db-custom-1-3840"
+    attrs = normalized.resources[0].attributes
+    assert attrs["admin_password"] == "[REDACTED]"
+    assert attrs["db_secret_key"] == "[REDACTED]"
+    assert attrs["private_key"] == "[REDACTED]"
+    assert attrs["auth_token"] == "[REDACTED]"
+    assert attrs["service_account_credentials"] == "[REDACTED]"
+    assert attrs["ssl_certificate"] == "[REDACTED]"
+    assert attrs["tier"] == "db-custom-1-3840"  # non-sensitive field preserved
 
 
 def test_cloud_sql_instance_valid_enterprise_mysql() -> None:
