@@ -10,15 +10,105 @@ pytestmark = pytest.mark.anyio
 
 
 @pytest.mark.integration
-async def test_mcp_server_e2e() -> None:
+async def test_mcp_server_e2e(temp_db_path: str) -> None:
     """End-to-End integration test for the GCP Cost Estimator MCP Server.
 
     Launches the server via stdio client, connects to it, and runs
     real pricing estimates and queries against the local database cache.
     """
+    import os
+    import sqlite3
+
+    from gcp_cost_estimator.core.pricing.cache import init_db, update_cache
+
+    # Initialize and populate the temp DB with standard GCP billing SKUs
+    conn = sqlite3.connect(temp_db_path)
+    init_db(conn)
+    conn.close()
+
+    mock_skus = [
+        # N2 vCPU in us-central1
+        {
+            "sku_id": "SKU-N2-CPU-USC1",
+            "service": "compute engine",
+            "region": "us-central1",
+            "unit": "h",
+            "unit_price": 0.0475,
+            "sku_group": "CPU",
+            "description": "N2 Instance Core running in Americas",
+        },
+        # N2 RAM in us-central1
+        {
+            "sku_id": "SKU-N2-RAM-USC1",
+            "service": "compute engine",
+            "region": "us-central1",
+            "unit": "GiBy.mo",
+            "unit_price": 0.0063,
+            "sku_group": "RAM",
+            "description": "N2 Instance Ram running in Americas",
+        },
+        # N2 vCPU in europe-west1 (region check)
+        {
+            "sku_id": "SKU-N2-CPU-EUW1",
+            "service": "compute engine",
+            "region": "europe-west1",
+            "unit": "h",
+            "unit_price": 0.0520,
+            "sku_group": "CPU",
+            "description": "N2 Instance Core running in Europe",
+        },
+        # SSD Persistent Disk in us-central1
+        {
+            "sku_id": "SKU-SSD-USC1",
+            "service": "compute engine",
+            "region": "us-central1",
+            "unit": "GiBy.mo",
+            "unit_price": 0.1700,
+            "sku_group": "SSD",
+            "description": "SSDBacked PD Capacity",
+        },
+        # Standard Persistent Disk in us-central1
+        {
+            "sku_id": "SKU-PD-USC1",
+            "service": "compute engine",
+            "region": "us-central1",
+            "unit": "GiBy.mo",
+            "unit_price": 0.0400,
+            "sku_group": "PDStandard",
+            "description": "Storage PD Capacity",
+        },
+        # E2 vCPU in us-central1 (cheaper candidate family)
+        {
+            "sku_id": "SKU-E2-CPU-USC1",
+            "service": "compute engine",
+            "region": "us-central1",
+            "unit": "h",
+            "unit_price": 0.0210,
+            "sku_group": "CPU",
+            "description": "E2 Instance Core running in Americas",
+        },
+        # E2 RAM in us-central1 (cheaper candidate family)
+        {
+            "sku_id": "SKU-E2-RAM-USC1",
+            "service": "compute engine",
+            "region": "us-central1",
+            "unit": "GiBy.mo",
+            "unit_price": 0.0028,
+            "sku_group": "RAM",
+            "description": "E2 Instance Ram running in Americas",
+        },
+    ]
+    from datetime import UTC, datetime
+
+    update_cache(temp_db_path, "gcp", mock_skus, datetime.now(UTC).isoformat())
+
+    env = os.environ.copy()
+    env["GCP_BILLING_DB_PATH"] = temp_db_path
+
     server_params = StdioServerParameters(
         command="uv",
         args=["run", "python", "-m", "gcp_cost_estimator.mcp.server"],
+        env=env,
     )
 
     async with (

@@ -5,7 +5,7 @@ from typing import Any
 
 from gcp_cost_estimator.core.calc import calculate_line_items, calculate_totals
 from gcp_cost_estimator.core.estimate import Estimate, PricedLineItem, UnpricedItem
-from gcp_cost_estimator.core.model import ResourceModel
+from gcp_cost_estimator.core.model import Resource, ResourceModel
 from gcp_cost_estimator.core.pricing.cache import get_cache_status
 from gcp_cost_estimator.core.registries import get_sku_mapper
 from gcp_cost_estimator.core.validate import normalize_resource_model, validate_resource_model
@@ -58,7 +58,7 @@ def estimate_infrastructure(
     else:
         # 3. Map and calculate valid resources
         # Group resources by provider so each provider gets one shared mapper/connection.
-        resources_by_provider: dict[str, list] = {}
+        resources_by_provider: dict[str, list[Resource]] = {}
         for r in normalized_model.resources:
             resources_by_provider.setdefault(r.provider, []).append(r)
 
